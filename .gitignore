@@ -1,0 +1,14 @@
+# Node.js
+/react-app/node_modules
+
+# .NET Core
+/dotnet-core-api/bin/
+/dotnet-core-api/obj/
+
+# Flutter
+/flutter-app/build/
+/flutter-app/.dart_tool/
+/flutter-app/.packages
+
+# General
+.DS_Store
