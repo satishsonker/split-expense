@@ -12,3 +12,12 @@
 
 # General
 .DS_Store
+/dotnet-core-api/SplitExpense/bin/Debug/net6.0
+/dotnet-core-api/SplitExpense/.vs/SplitExpense/DesignTimeBuild
+/dotnet-core-api/SplitExpense/.vs/SplitExpense/FileContentIndex
+/dotnet-core-api/SplitExpense/.vs/SplitExpense/v17
+/dotnet-core-api/SplitExpense/.vs
+/dotnet-core-api/SplitExpense/obj
+/dotnet-core-api/SplitExpense.Data/obj
+/dotnet-core-api/SplitExpense.Logger/obj
+/dotnet-core-api/SplitExpense.Models/obj
