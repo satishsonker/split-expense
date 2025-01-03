@@ -1,5 +1,6 @@
 
 
+using Microsoft.EntityFrameworkCore;
 using NLog.Web;
 using SplitExpense.Data;
 using SplitExpense.Middleware;
@@ -27,9 +28,16 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Add database context or other services if needed
+// Add DbContext to services
 builder.Services.AddDbContext<SplitExpenseDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Register factory
+builder.Services.AddSingleton<IDbContextFactory, DbContextFactory>(sp =>
+{
+    var options = sp.GetRequiredService<DbContextOptions<SplitExpenseDbContext>>();
+    return new DbContextFactory(options);
+});
 
 var app = builder.Build();
 

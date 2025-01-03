@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>60a5abf2-afe1-45c7-8bd3-1a12f12af97a</UserSecretsId>
@@ -20,7 +20,14 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
+    <Folder Include="Data\" />
     <Folder Include="Infrastructure\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SplitExpense.Data\SplitExpense.Data.csproj" />
+    <ProjectReference Include="..\SplitExpense.Logger\SplitExpense.Logger.csproj" />
+    <ProjectReference Include="..\SplitExpense.Models\SplitExpense.Models.csproj" />
   </ItemGroup>
 
 </Project>
