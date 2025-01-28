@@ -25,3 +25,5 @@
 /dotnet-core-api/SplitExpense.Data/bin/Debug/net8.0
 /dotnet-core-api/SplitExpense.Logger/bin/Debug/net8.0
 /dotnet-core-api/SplitExpense.Models/bin/Debug/net8.0
+/dotnet-core-api/SplitExpense.Middlewares/obj
+/dotnet-core-api/SplitExpense.Logic/obj

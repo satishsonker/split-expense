@@ -3,13 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense", "SplitExpense.csproj", "{B7B52379-7248-4218-890E-25AA042BE276}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense", "SplitExpense.csproj", "{B7B52379-7248-4218-890E-25AA042BE276}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.Logger", "..\SplitExpense.Logger\SplitExpense.Logger.csproj", "{A69A55CB-EB8E-4F37-817B-3C68028116CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense.Logger", "..\SplitExpense.Logger\SplitExpense.Logger.csproj", "{A69A55CB-EB8E-4F37-817B-3C68028116CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.Data", "..\SplitExpense.Data\SplitExpense.Data.csproj", "{64478554-8F60-4EDB-B39F-FCD410483EA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense.Data", "..\SplitExpense.Data\SplitExpense.Data.csproj", "{64478554-8F60-4EDB-B39F-FCD410483EA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.Models", "..\SplitExpense.Models\SplitExpense.Models.csproj", "{A87E4032-169E-4B7F-B61B-CE98CE7E1F3D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense.Models", "..\SplitExpense.Models\SplitExpense.Models.csproj", "{A87E4032-169E-4B7F-B61B-CE98CE7E1F3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.Logic", "..\SplitExpense.Logic\SplitExpense.Logic.csproj", "{96E5039A-9F30-4264-86F5-4A071E29502E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.Middlewares", "..\SplitExpense.Middlewares\SplitExpense.Middlewares.csproj", "{10973404-B103-4973-A80B-E01BF2D34049}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{A87E4032-169E-4B7F-B61B-CE98CE7E1F3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A87E4032-169E-4B7F-B61B-CE98CE7E1F3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A87E4032-169E-4B7F-B61B-CE98CE7E1F3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96E5039A-9F30-4264-86F5-4A071E29502E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96E5039A-9F30-4264-86F5-4A071E29502E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96E5039A-9F30-4264-86F5-4A071E29502E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96E5039A-9F30-4264-86F5-4A071E29502E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10973404-B103-4973-A80B-E01BF2D34049}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10973404-B103-4973-A80B-E01BF2D34049}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10973404-B103-4973-A80B-E01BF2D34049}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10973404-B103-4973-A80B-E01BF2D34049}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
