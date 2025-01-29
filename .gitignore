@@ -31,3 +31,5 @@
 /dotnet-core-api/SplitExpense.Middlewares/bin/Debug/net8.0
 /dotnet-core-api/SplitExpense.Validator/bin/Debug/net8.0
 /dotnet-core-api/SplitExpense.Validator/obj
+/dotnet-core-api/SplitExpense.SharedResource/bin/Debug/net8.0
+/dotnet-core-api/SplitExpense.SharedResource/obj

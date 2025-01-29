@@ -1,4 +1,4 @@
-﻿namespace SplitExpense.Constants
+﻿namespace SplitExpense.SharedResource
 {
     public static class ApiPaths
     {

@@ -1,13 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using SplitExpense.Constants;
+﻿using Microsoft.AspNetCore.Mvc;
 using SplitExpense.Logic;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
+using SplitExpense.SharedResource;
 
 namespace SplitExpense.Controllers
 {
-    
+
     [ApiController]
     public class GroupController(IGroupLogic groupLogic) : ControllerBase
     {

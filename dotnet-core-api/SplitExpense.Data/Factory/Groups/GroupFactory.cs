@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SplitExpense.Data.DbModels;
+using SplitExpense.Middleware.Exceptions;
 using SplitExpense.Models;
+using SplitExpense.SharedResource;
 
 namespace SplitExpense.Data.Factory
 {
@@ -13,11 +15,21 @@ namespace SplitExpense.Data.Factory
             try
             {
                 ArgumentNullException.ThrowIfNull(request);
-
+                var trans =await _context.Database.BeginTransactionAsync();
                 var entity =await _context.Groups.AddAsync(request);
                 if (await _context.SaveChangesAsync()>0)
                 {
-                    return entity.Entity;
+                    var userGroupMap = new UserGroupMapping()
+                    {
+                        GroupId = entity.Entity.Id
+                    };
+                    _context.UserGroupMappings.Add(userGroupMap);
+                    if (await _context.SaveChangesAsync() > 0)
+                    {
+                        await trans.CommitAsync();
+                        return entity.Entity;
+                    }
+                   //throw new BusinessRuleViolationException(ErrorCodes.UnableToAddRecord);
                 }
                 throw new DbUpdateException();
             }

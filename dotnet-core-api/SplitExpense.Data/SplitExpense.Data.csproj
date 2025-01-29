@@ -27,6 +27,13 @@
   <ItemGroup>
     <ProjectReference Include="..\SplitExpense.Logger\SplitExpense.Logger.csproj" />
     <ProjectReference Include="..\SplitExpense.Models\SplitExpense.Models.csproj" />
+    <ProjectReference Include="..\SplitExpense.SharedResource\SplitExpense.SharedResource.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="SplitExpense.Middlewares">
+      <HintPath>..\SplitExpense.Middlewares\bin\Debug\net8.0\SplitExpense.Middlewares.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using SplitExpense.Data.DbModels;
 
 namespace SplitExpense.Data
@@ -13,6 +14,7 @@ namespace SplitExpense.Data
             _httpContextAccessor = httpContextAccessor;
         }
         public DbSet<Group> Groups { get; set; }
+        public DbSet<UserGroupMapping> UserGroupMappings { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<ErrorLog> ErrorLogs { get; set; }
 
@@ -61,6 +63,11 @@ namespace SplitExpense.Data
                 {
                     baseModel.CreatedBy = userId;
                     baseModel.CreatedAt = now;
+                    var userIdProperty = entityEntry.Entity.GetType().GetProperty("UserId");
+                    if (userIdProperty != null && userIdProperty.PropertyType == typeof(int))
+                    {
+                        userIdProperty.SetValue(entityEntry.Entity, userId);
+                    }
                 }
                 else
                 {

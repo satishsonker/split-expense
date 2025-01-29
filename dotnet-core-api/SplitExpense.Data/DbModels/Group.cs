@@ -9,6 +9,6 @@ namespace SplitExpense.Data.DbModels
         public string Name { get; set; }
 
         [ForeignKey("UserId")]
-        public User User { get; set; }
+        public User? User { get; set; }
     }
 }

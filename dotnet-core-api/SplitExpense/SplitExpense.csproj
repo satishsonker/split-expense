@@ -34,6 +34,7 @@
     <ProjectReference Include="..\SplitExpense.Logic\SplitExpense.Logic.csproj" />
     <ProjectReference Include="..\SplitExpense.Middlewares\SplitExpense.Middlewares.csproj" />
     <ProjectReference Include="..\SplitExpense.Models\SplitExpense.Models.csproj" />
+    <ProjectReference Include="..\SplitExpense.SharedResource\SplitExpense.SharedResource.csproj" />
     <ProjectReference Include="..\SplitExpense.Validator\SplitExpense.Validator.csproj" />
   </ItemGroup>
 
