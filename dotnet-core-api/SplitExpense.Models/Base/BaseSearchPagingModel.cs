@@ -1,6 +1,6 @@
 ﻿namespace SplitExpense.Models
 {
-    public class SearchPagingBaseModel:PagingBaseModel
+    public class BaseSearchPagingModel:BasePagingModel
     {
         public virtual string? SearchTerm { get; set; }
         public virtual DateOnly? FromDate { get; set; }

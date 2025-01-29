@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SplitExpense.Data\SplitExpense.Data.csproj" />
     <ProjectReference Include="..\SplitExpense.Logger\SplitExpense.Logger.csproj" />
     <ProjectReference Include="..\SplitExpense.Models\SplitExpense.Models.csproj" />

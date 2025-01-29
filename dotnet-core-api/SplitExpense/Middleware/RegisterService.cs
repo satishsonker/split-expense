@@ -1,4 +1,6 @@
-﻿using SplitExpense.Logger;
+﻿using SplitExpense.Data.Factory;
+using SplitExpense.Logger;
+using SplitExpense.Logic;
 
 namespace SplitExpense.Middleware
 {
@@ -6,7 +8,10 @@ namespace SplitExpense.Middleware
     {
         public static IServiceCollection RegisterService(this IServiceCollection services)
         {
-            return services.AddScoped<ISplitExpenseLogger,SplitExpenseLogger>();
+            return services.AddScoped<ISplitExpenseLogger,SplitExpenseLogger>()
+                .AddScoped<IGroupFactory,GroupFactory>()
+                .AddScoped<IGroupLogic,GroupsLogic>()
+                .AddScoped<IErrorLogFactory,ErrorLogFactory>();
         }
     }
 }

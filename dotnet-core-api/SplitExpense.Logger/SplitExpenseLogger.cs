@@ -1,4 +1,6 @@
-﻿using NLog;
+﻿using Microsoft.AspNetCore.Mvc;
+using NLog;
+using SplitExpense.Logging;
 using System.Runtime.CompilerServices;
 
 namespace SplitExpense.Logger
@@ -32,6 +34,21 @@ namespace SplitExpense.Logger
         public void LogDebug(Exception ex, string message, string actionName = null, string controllerName = null)
         {
             _logger.Debug($"Controller: {FormatControllerName(controllerName)}, Action: {actionName}, Message: {message}, Exception: {ex}");
+        }
+
+        public void LogError(Exception ex)
+        {
+            _logger.Error($"{ex}");
+        }
+
+        public void LogError(Exception ex, string message)
+        {
+            _logger.Error($"Message: {message},ExceptionL {ex}");
+        }
+
+        public void LogError(Exception ex, string message,string errorCode)
+        {
+            _logger.Error($"Message: {message}, ErrorCode: {errorCode},ExceptionL {ex}");
         }
     }
 }

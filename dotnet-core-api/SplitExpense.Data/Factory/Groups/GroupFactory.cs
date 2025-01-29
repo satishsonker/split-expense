@@ -1,4 +1,5 @@
-﻿using SplitExpense.Data.DbModels;
+﻿using Microsoft.EntityFrameworkCore;
+using SplitExpense.Data.DbModels;
 using SplitExpense.Models;
 
 namespace SplitExpense.Data.Factory
@@ -7,20 +8,22 @@ namespace SplitExpense.Data.Factory
     {
         private SplitExpenseDbContext _context = context;
 
-        public Task<Group> CreateAsync(Group request)
+        public async Task<Group> CreateAsync(Group request)
         {
             try
             {
-                if(request == null)
-                    throw new ArgumentNullException(nameof(request));
+                ArgumentNullException.ThrowIfNull(request);
+
+                var entity =await _context.Groups.AddAsync(request);
+                if (await _context.SaveChangesAsync()>0)
+                {
+                    return entity.Entity;
+                }
+                throw new DbUpdateException();
             }
             catch(Exception ex)
             {
-
-            }
-            finally
-            {
-
+                throw new DbUpdateException(ex.Message);
             }
         }
 

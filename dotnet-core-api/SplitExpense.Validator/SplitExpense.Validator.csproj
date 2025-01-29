@@ -7,13 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.3.0" />
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SplitExpense.Data\SplitExpense.Data.csproj" />
-    <ProjectReference Include="..\SplitExpense.Logger\SplitExpense.Logger.csproj" />
-    <ProjectReference Include="..\SplitExpense.Logic\SplitExpense.Logic.csproj" />
     <ProjectReference Include="..\SplitExpense.Models\SplitExpense.Models.csproj" />
   </ItemGroup>
 

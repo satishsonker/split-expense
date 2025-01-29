@@ -1,12 +1,15 @@
-
-
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using NLog.Web;
+using SplitExpense.AutoMapperMapping;
 using SplitExpense.Data;
 using SplitExpense.Middleware;
+using SplitExpense.Middleware.Exceptions;
+using SplitExpense.Validator;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,28 +18,59 @@ builder.Logging.ClearProviders();
 builder.Logging.SetMinimumLevel(LogLevel.Trace);
 builder.Host.UseNLog();
 
-// Add services to the container.
-builder.Services.RegisterService();
-
 builder.Services.AddControllers();
+
+// Add services to the container.
+builder.Services
+    .RegisterService()
+    .AddDbContext<SplitExpenseDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var environment = builder.Environment.EnvironmentName;
 builder.Configuration.RegisterConfiguration(environment);
-  
+
+// Add FluentValidation
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<GroupRequestValidator>();
+
+// Add AutoMapper AddAutoMapper(cfg => cfg.AddProfile<SplitExpense.AutoMapperMapping.Mapping>());
+builder.Services.AddAutoMapper(cfg => cfg.AddProfile<Mapping>());
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "My API",
+        Version = "v1"
+    });
 
-// Add database context or other services if needed
-// Add DbContext to services
-builder.Services.AddDbContext<SplitExpenseDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    // Add a custom header parameter for `userId`
+    options.AddSecurityDefinition("userId", new OpenApiSecurityScheme
+    {
+        Name = "userId",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Description = "Custom header for UserId"
+    });
 
-// Configure Identity
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<SplitExpenseDbContext>()
-    .AddDefaultTokenProviders();
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "userId"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
 
 // Add authentication and external login providers
 builder.Services.AddAuthentication(options =>
@@ -46,7 +80,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
  {
-     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+     options.TokenValidationParameters = new TokenValidationParameters
      {
          ValidateIssuer = true,
          ValidateAudience = true,
@@ -57,24 +91,17 @@ builder.Services.AddAuthentication(options =>
          IssuerSigningKey = new SymmetricSecurityKey(
              System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
      };
- })
-.AddGoogle(options =>
-{
-    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-})
-.AddFacebook(options =>
-{
-    options.AppId = builder.Configuration["Authentication:Facebook:AppId"];
-    options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
-});
-
-// Register factory
-builder.Services.AddSingleton<IDbContextFactory, DbContextFactory>(sp =>
-{
-    var options = sp.GetRequiredService<DbContextOptions<SplitExpenseDbContext>>();
-    return new DbContextFactory(options);
-});
+ });
+//.AddGoogle(options =>
+//{
+//    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+//    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+//})
+//.AddFacebook(options =>
+//{
+//    options.AppId = builder.Configuration["Authentication:Facebook:AppId"];
+//    options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
+//});
 
 var app = builder.Build();
 
@@ -84,7 +111,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseMiddleware<LoggingMiddleware>();
+app.UseCustomExceptionHandler();
 app.UseAuthorization();
 
 app.MapControllers();

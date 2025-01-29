@@ -1,6 +1,6 @@
 ﻿namespace SplitExpense.Models
 {
-    public class SearchRequest:SearchPagingBaseModel
+    public class SearchRequest:BaseSearchPagingModel
     {
     }
 }
