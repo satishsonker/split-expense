@@ -1,4 +1,5 @@
 ﻿using SplitExpense.Models;
+using SplitExpense.Models.Common;
 
 namespace SplitExpense.Data.Factory
 {
@@ -6,9 +7,9 @@ namespace SplitExpense.Data.Factory
     {
         Task<T> CreateAsync(T request);
         Task<int> UpdateAsync(T request);
-        Task<T> GetAsync(int id);
+        Task<T?> GetAsync(int id);
         Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<T>> GetAllAsync(PagingRequest request);
-        Task<IEnumerable<T>> SearchAsync(SearchRequest request);
+        Task<PagingResponse<T>> GetAllAsync(PagingRequest request);
+        Task<PagingResponse<T>> SearchAsync(SearchRequest request);
     }
 }

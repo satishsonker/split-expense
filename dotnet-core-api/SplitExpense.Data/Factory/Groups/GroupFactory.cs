@@ -1,14 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SplitExpense.Data.DbModels;
+using SplitExpense.Middleware;
 using SplitExpense.Middleware.Exceptions;
 using SplitExpense.Models;
+using SplitExpense.Models.Common;
 using SplitExpense.SharedResource;
 
 namespace SplitExpense.Data.Factory
 {
-    public class GroupFactory(SplitExpenseDbContext context) : IGroupFactory
+    public class GroupFactory(SplitExpenseDbContext context, IUserContextService userContextService) : IGroupFactory
     {
-        private SplitExpenseDbContext _context = context;
+        private readonly SplitExpenseDbContext _context = context;
+        private int userId = userContextService.GetUserId();
 
         public async Task<Group> CreateAsync(Group request)
         {
@@ -29,7 +32,7 @@ namespace SplitExpense.Data.Factory
                         await trans.CommitAsync();
                         return entity.Entity;
                     }
-                   //throw new BusinessRuleViolationException(ErrorCodes.UnableToAddRecord);
+                   throw new BusinessRuleViolationException(ErrorCodes.UnableToAddRecord);
                 }
                 throw new DbUpdateException();
             }
@@ -39,29 +42,71 @@ namespace SplitExpense.Data.Factory
             }
         }
 
-        public Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            var oldData = await _context.Groups
+                .Where(x => !x.IsDeleted && x.Id == id && x.CreatedBy==userId)
+                .FirstOrDefaultAsync() ??throw new Middleware.Exceptions.BusinessRuleViolationException(ErrorCodes.RecordNotFound);
+
+            oldData.IsDeleted=true;
+            _context.Groups.Update(oldData);
+            return await _context.SaveChangesAsync()>0;
+
         }
 
-        public Task<IEnumerable<Group>> GetAllAsync(PagingRequest request)
+        public async Task<PagingResponse<UserGroupMapping>> GetAllAsync(PagingRequest request)
         {
-            throw new NotImplementedException();
+            var query = _context.UserGroupMappings
+                .Include(x=>x.Group)
+                .ThenInclude(x => x.User)
+                .Include(x=>x.User)
+                .Where(x => !x.IsDeleted && x.CreatedBy == userId)
+                .AsQueryable();
+            return new PagingResponse<UserGroupMapping>()
+            {
+                Data = await query.Skip((request.PageNo - 1) * request.PageSize).Take(request.PageSize).ToListAsync(),
+                RecordCounts = await query.CountAsync(),
+                PageSize = request.PageSize,
+                PageNo = request.PageNo
+            };
         }
 
-        public Task<Group> GetAsync(int id)
+        public async Task<Group?> GetAsync(int id)
         {
-            throw new NotImplementedException();
+           return await _context.Groups
+                .Where(x => !x.IsDeleted && x.Id== id && x.CreatedBy == userId)
+                .FirstOrDefaultAsync();
         }
 
-        public Task<IEnumerable<Group>> SearchAsync(SearchRequest request)
+        public async Task<PagingResponse<UserGroupMapping>> SearchAsync(SearchRequest request)
         {
-            throw new NotImplementedException();
+
+            var query = _context.UserGroupMappings
+                .Include(x => x.Group)
+                .Include(x => x.User)
+                .Where(x => !x.IsDeleted && x.CreatedBy == userId && (string.IsNullOrEmpty(request.SearchTerm) || x.Group.Name.Contains(request.SearchTerm)))
+                .AsQueryable();
+
+            return new PagingResponse<UserGroupMapping>()
+            {
+                Data = await query.Skip((request.PageNo - 1) * request.PageSize).Take(request.PageSize).ToListAsync(),
+                RecordCounts = await query.CountAsync(),
+                PageSize = request.PageSize,
+                PageNo = request.PageNo
+            };
         }
 
-        public Task<int> UpdateAsync(Group request)
+        public async Task<int> UpdateAsync(Group request)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(request);
+
+            var oldData = await _context.Groups
+               .Where(x => !x.IsDeleted && x.Id == request.Id && x.CreatedBy == userId)
+               .FirstOrDefaultAsync() ?? throw new Middleware.Exceptions.BusinessRuleViolationException(ErrorCodes.RecordNotFound);
+
+            oldData.Name = request.Name;
+            _context.Groups.Update(oldData);
+            return await _context.SaveChangesAsync();
         }
     }
 }

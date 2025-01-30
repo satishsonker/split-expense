@@ -4,7 +4,7 @@ namespace SplitExpense.Middleware.Exceptions
 {
     public class BusinessRuleViolationException : Exception
     {
-        public BusinessRuleViolationException(ErrorCodes errorCode, string message) : base(message)
+        public BusinessRuleViolationException(ErrorCodes errorCode)
         {
             ErrorResponseType = errorCode.ToString();
             Errors = errorCode.GetDescription();

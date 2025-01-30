@@ -10,5 +10,6 @@ namespace SplitExpense.Data.BaseModels
         public DateTime CreatedAt { get; set; }
         public int? UpdatedBy { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }

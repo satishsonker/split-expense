@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.3.0" />
   </ItemGroup>
 
@@ -16,6 +17,7 @@
     <ProjectReference Include="..\SplitExpense.Logic\SplitExpense.Logic.csproj" />
     <ProjectReference Include="..\SplitExpense.Models\SplitExpense.Models.csproj" />
     <ProjectReference Include="..\SplitExpense.SharedResource\SplitExpense.SharedResource.csproj" />
+    <ProjectReference Include="..\SplitExpense.Validator\SplitExpense.Validator.csproj" />
   </ItemGroup>
 
 </Project>

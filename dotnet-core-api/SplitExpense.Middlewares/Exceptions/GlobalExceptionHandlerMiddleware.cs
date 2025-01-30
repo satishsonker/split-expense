@@ -35,15 +35,15 @@ namespace SplitExpense.Middleware.Exceptions
             catch (Exception ex)
             {
                 _logger.LogError(ex);
-               await _errorLogRepository.LogErrorAsync(new ErrorLog()
-                {
-                    Exception = ex.ToString(),
-                    InnerException = ex.InnerException?.ToString(),
-                    InnerMessage = ex.InnerException?.Message,
-                    Message = ex.Message,
-                    Stacks = ex.StackTrace,
-                    Resolved = false
-                });
+               //await _errorLogRepository.LogErrorAsync(new ErrorLog()
+               // {
+               //     Exception = ex.ToString(),
+               //     InnerException = ex.InnerException?.ToString(),
+               //     InnerMessage = ex.InnerException?.Message,
+               //     Message = ex.Message,
+               //     Stacks = ex.StackTrace,
+               //     Resolved = false
+               // });
                 await HandleExecptionAsync(context, ex);
             }
         }

@@ -16,6 +16,7 @@ namespace SplitExpense.Data
         public DbSet<Group> Groups { get; set; }
         public DbSet<UserGroupMapping> UserGroupMappings { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Friend> Friends { get; set; }
         public DbSet<ErrorLog> ErrorLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

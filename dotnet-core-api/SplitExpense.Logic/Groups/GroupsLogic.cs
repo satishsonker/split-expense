@@ -2,6 +2,8 @@
 using SplitExpense.Data.DbModels;
 using SplitExpense.Data.Factory;
 using SplitExpense.Models;
+using SplitExpense.Models.Common;
+using SplitExpense.Models.DTO;
 
 namespace SplitExpense.Logic
 {
@@ -16,29 +18,30 @@ namespace SplitExpense.Logic
             return _mapper.Map<GroupResponse>(await _factory.CreateAsync(mappedRequest));
         }
 
-        public Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _factory.DeleteAsync(id);
         }
 
-        public Task<IEnumerable<GroupResponse>> GetAllAsync(PagingRequest request)
+        public async Task<PagingResponse<UserGroupMappingResponse>> GetAllAsync(PagingRequest request)
         {
-            throw new NotImplementedException();
+            return _mapper.Map<PagingResponse<UserGroupMappingResponse>>(await  _factory.GetAllAsync(request));
         }
 
-        public Task<GroupResponse> GetAsync(int id)
+        public async Task<GroupResponse> GetAsync(int id)
         {
-            throw new NotImplementedException();
+            return _mapper.Map<GroupResponse>(await _factory.GetAsync(id));
         }
 
-        public Task<IEnumerable<GroupResponse>> SearchAsync(SearchRequest request)
+        public async Task<PagingResponse<UserGroupMappingResponse>> SearchAsync(SearchRequest request)
         {
-            throw new NotImplementedException();
+            return _mapper.Map<PagingResponse<UserGroupMappingResponse>>(await _factory.SearchAsync(request));
         }
 
-        public Task<int> UpdateAsync(GroupRequest request)
+        public async Task<int> UpdateAsync(GroupRequest request)
         {
-            throw new NotImplementedException();
+            var mappedRequest = _mapper.Map<Group>(request);
+            return await _factory.UpdateAsync(mappedRequest);
         }
     }
 }

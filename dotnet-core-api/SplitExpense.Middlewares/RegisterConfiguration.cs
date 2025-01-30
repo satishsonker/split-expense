@@ -1,4 +1,6 @@
-﻿namespace SplitExpense.Middleware
+﻿using Microsoft.Extensions.Configuration;
+
+namespace SplitExpense.Middleware
 {
     public static class RegisterConfigurations
     {

@@ -9,6 +9,7 @@ using SplitExpense.AutoMapperMapping;
 using SplitExpense.Data;
 using SplitExpense.Middleware;
 using SplitExpense.Middleware.Exceptions;
+using SplitExpense.Middlewares;
 using SplitExpense.Validator;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,7 +32,7 @@ builder.Configuration.RegisterConfiguration(environment);
 
 // Add FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<GroupRequestValidator>();
+builder.Services.RegisterValidator();
 
 // Add AutoMapper AddAutoMapper(cfg => cfg.AddProfile<SplitExpense.AutoMapperMapping.Mapping>());
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<Mapping>());

@@ -6,7 +6,9 @@ namespace SplitExpense.SharedResource
     {
         #region Crud Related Codes
         [Description("Unable to add record in database")]
-        UnableToAddRecord = 10000
+        UnableToAddRecord = 10000,
+        [Description("Unable to find the record")]
+        RecordNotFound = 10001
         #endregion
     }
 }
