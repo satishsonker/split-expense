@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SplitExpense.Data.Factory;
+using SplitExpense.EmailManagement.Service;
 using SplitExpense.Logger;
 using SplitExpense.Logic;
 
@@ -13,6 +14,8 @@ namespace SplitExpense.Middleware
                 .AddSingleton<IUserContextService, UserContextService>()
                 .AddScoped<IGroupFactory,GroupFactory>()
                 .AddScoped<IGroupLogic,GroupsLogic>()
+                .AddScoped<IEmailQueueService, EmailQueueService>()
+                .AddScoped<IEmailTemplateService, EmailTemplateService>()
                 .AddScoped<IErrorLogFactory,ErrorLogFactory>();
         }
     }

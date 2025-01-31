@@ -33,3 +33,5 @@
 /dotnet-core-api/SplitExpense.Validator/obj
 /dotnet-core-api/SplitExpense.SharedResource/bin/Debug/net8.0
 /dotnet-core-api/SplitExpense.SharedResource/obj
+/dotnet-core-api/SplitExpense.EmailManagement/obj
+/dotnet-core-api/SplitExpense.UnitTest/obj

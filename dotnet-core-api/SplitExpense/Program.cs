@@ -1,4 +1,3 @@
-using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +9,6 @@ using SplitExpense.Data;
 using SplitExpense.Middleware;
 using SplitExpense.Middleware.Exceptions;
 using SplitExpense.Middlewares;
-using SplitExpense.Validator;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +22,7 @@ builder.Services.AddControllers();
 // Add services to the container.
 builder.Services
     .RegisterService()
+    .RegisterBackgroundService()
     .AddDbContext<SplitExpenseDbContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 

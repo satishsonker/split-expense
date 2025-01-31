@@ -19,6 +19,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense.Validator", ".
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.SharedResource", "..\SplitExpense.SharedResource\SplitExpense.SharedResource.csproj", "{0282DFC4-EAB6-487E-ADC0-A39824F7BB1C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.EmailManagement", "..\SplitExpense.EmailManagement\SplitExpense.EmailManagement.csproj", "{B0E910B0-CDF6-4F10-9889-296CE3C66C08}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.UnitTest", "..\SplitExpense.UnitTest\SplitExpense.UnitTest.csproj", "{50112FA2-C66B-4C52-BBA2-978DE899230B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +61,14 @@ Global
 		{0282DFC4-EAB6-487E-ADC0-A39824F7BB1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0282DFC4-EAB6-487E-ADC0-A39824F7BB1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0282DFC4-EAB6-487E-ADC0-A39824F7BB1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0E910B0-CDF6-4F10-9889-296CE3C66C08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0E910B0-CDF6-4F10-9889-296CE3C66C08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0E910B0-CDF6-4F10-9889-296CE3C66C08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0E910B0-CDF6-4F10-9889-296CE3C66C08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50112FA2-C66B-4C52-BBA2-978DE899230B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50112FA2-C66B-4C52-BBA2-978DE899230B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50112FA2-C66B-4C52-BBA2-978DE899230B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50112FA2-C66B-4C52-BBA2-978DE899230B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

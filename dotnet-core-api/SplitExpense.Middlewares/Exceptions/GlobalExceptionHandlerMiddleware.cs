@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using SplitExpense.Data.DbModels;
 using SplitExpense.Data.Factory;
 using SplitExpense.Logger;
@@ -17,6 +18,8 @@ namespace SplitExpense.Middleware.Exceptions
         private readonly RequestDelegate _next;
         private ISplitExpenseLogger _logger;
         private IErrorLogFactory _errorLogRepository;
+        private IConfiguration _configuration;
+
         public GlobalExceptionHandlerMiddleware(RequestDelegate next,
             Func<Exception, ExceptionResponse>? localExceptionHandlerFunc = null)
         {
@@ -24,26 +27,32 @@ namespace SplitExpense.Middleware.Exceptions
             _localExceptionHandlerFunc = localExceptionHandlerFunc;
         }
 
-        public async Task InvokeAsync(HttpContext context,IErrorLogFactory errorLogRepository, ISplitExpenseLogger logger)
+        public async Task InvokeAsync(HttpContext context,IErrorLogFactory errorLogRepository, ISplitExpenseLogger logger,IConfiguration configuration)
         {
+            bool enableLogInDb=false;
             try
             {
                 _errorLogRepository = errorLogRepository;
                 _logger=logger;
+                _configuration=configuration;
+                enableLogInDb = _configuration.GetValue<bool>("Logger:enableLogInDb");
                 await _next(context);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex);
-               //await _errorLogRepository.LogErrorAsync(new ErrorLog()
-               // {
-               //     Exception = ex.ToString(),
-               //     InnerException = ex.InnerException?.ToString(),
-               //     InnerMessage = ex.InnerException?.Message,
-               //     Message = ex.Message,
-               //     Stacks = ex.StackTrace,
-               //     Resolved = false
-               // });
+                if (enableLogInDb)
+                {
+                    await _errorLogRepository.LogErrorAsync(new ErrorLog()
+                    {
+                        Exception = ex.ToString(),
+                        InnerException = ex.InnerException?.ToString(),
+                        InnerMessage = ex.InnerException?.Message,
+                        Message = ex.Message,
+                        Stacks = ex.StackTrace,
+                        Resolved = false
+                    });
+                }
                 await HandleExecptionAsync(context, ex);
             }
         }

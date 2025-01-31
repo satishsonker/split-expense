@@ -1,6 +1,7 @@
 ﻿using SplitExpense.Data.DbModels;
 using SplitExpense.Models.Common;
 using SplitExpense.Models;
+using SplitExpense.Models.DTO;
 namespace SplitExpense.Data.Factory
 {
     public interface IGroupFactory
@@ -10,7 +11,7 @@ namespace SplitExpense.Data.Factory
         Task<int> UpdateAsync(Group request);
         Task<Group?> GetAsync(int id);
         Task<bool> DeleteAsync(int id);
-        Task<bool> AddFriendInGroup(int id);
+        Task<bool> AddFriendInGroup(AddFriendInGroupRequest request);
         Task<PagingResponse<UserGroupMapping>> SearchAsync(SearchRequest request);
     }
 }
