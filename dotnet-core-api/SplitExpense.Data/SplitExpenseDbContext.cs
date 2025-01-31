@@ -3,21 +3,24 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using SplitExpense.Data.DbModels;
+using SplitExpense.EmailManagement.Models;
 
 namespace SplitExpense.Data
 {
-    public class SplitExpenseDbContext : DbContext
+    public class SplitExpenseDbContext(DbContextOptions<SplitExpenseDbContext> options, IHttpContextAccessor httpContextAccessor) : DbContext(options)
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        public SplitExpenseDbContext(DbContextOptions<SplitExpenseDbContext> options, IHttpContextAccessor httpContextAccessor) : base(options)
-        {
-            _httpContextAccessor = httpContextAccessor;
-        }
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+
         public DbSet<Group> Groups { get; set; }
         public DbSet<UserGroupMapping> UserGroupMappings { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Friend> Friends { get; set; }
         public DbSet<ErrorLog> ErrorLogs { get; set; }
+        public DbSet<SmtpSettings> SmtpSettings { get; set; }
+        public DbSet<EmailQueue> EmailQueues { get; set; }
+        public DbSet<EmailTemplate> EmailTemplates { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

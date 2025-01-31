@@ -35,3 +35,9 @@
 /dotnet-core-api/SplitExpense.SharedResource/obj
 /dotnet-core-api/SplitExpense.EmailManagement/obj
 /dotnet-core-api/SplitExpense.UnitTest/obj
+/dotnet-core-api/SplitExpense.EmailManagement/bin/Debug/net8.0
+/dotnet-core-api/SplitExpense.ExceptionManagement/bin/Debug/net8.0
+/dotnet-core-api/SplitExpense.ExceptionManagement/obj
+/dotnet-core-api/SplitExpense.Middleware/bin/Debug/net8.0
+/dotnet-core-api/SplitExpense.Middleware/obj
+/dotnet-core-api/SplitExpense.UnitTest/bin/Debug/net8.0

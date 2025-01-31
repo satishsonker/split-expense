@@ -11,29 +11,15 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SplitExpense.EmailManagement\SplitExpense.EmailManagement.csproj" />
+    <ProjectReference Include="..\SplitExpense.ExceptionManagement\SplitExpense.ExceptionManagement.csproj" />
     <ProjectReference Include="..\SplitExpense.Logger\SplitExpense.Logger.csproj" />
     <ProjectReference Include="..\SplitExpense.Models\SplitExpense.Models.csproj" />
     <ProjectReference Include="..\SplitExpense.SharedResource\SplitExpense.SharedResource.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="SplitExpense.Middlewares">
-      <HintPath>..\SplitExpense.Middlewares\bin\Debug\net8.0\SplitExpense.Middlewares.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

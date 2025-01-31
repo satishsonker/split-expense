@@ -13,15 +13,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense.Models", "..\S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense.Logic", "..\SplitExpense.Logic\SplitExpense.Logic.csproj", "{96E5039A-9F30-4264-86F5-4A071E29502E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense.Middlewares", "..\SplitExpense.Middlewares\SplitExpense.Middlewares.csproj", "{10973404-B103-4973-A80B-E01BF2D34049}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense.Validator", "..\SplitExpense.Validator\SplitExpense.Validator.csproj", "{10280EF9-5622-406B-B644-1BEEFCC3EF78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.SharedResource", "..\SplitExpense.SharedResource\SplitExpense.SharedResource.csproj", "{0282DFC4-EAB6-487E-ADC0-A39824F7BB1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense.SharedResource", "..\SplitExpense.SharedResource\SplitExpense.SharedResource.csproj", "{0282DFC4-EAB6-487E-ADC0-A39824F7BB1C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.EmailManagement", "..\SplitExpense.EmailManagement\SplitExpense.EmailManagement.csproj", "{B0E910B0-CDF6-4F10-9889-296CE3C66C08}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense.EmailManagement", "..\SplitExpense.EmailManagement\SplitExpense.EmailManagement.csproj", "{B0E910B0-CDF6-4F10-9889-296CE3C66C08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.UnitTest", "..\SplitExpense.UnitTest\SplitExpense.UnitTest.csproj", "{50112FA2-C66B-4C52-BBA2-978DE899230B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense.UnitTest", "..\SplitExpense.UnitTest\SplitExpense.UnitTest.csproj", "{50112FA2-C66B-4C52-BBA2-978DE899230B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.Middleware", "..\SplitExpense.Middleware\SplitExpense.Middleware.csproj", "{FC0577DB-C7BD-4CC8-B137-006CCCCD4031}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.ExceptionManagement", "..\SplitExpense.ExceptionManagement\SplitExpense.ExceptionManagement.csproj", "{4068E4B4-4E7A-41EC-96B2-23741DAEDCA6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,10 +51,6 @@ Global
 		{96E5039A-9F30-4264-86F5-4A071E29502E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96E5039A-9F30-4264-86F5-4A071E29502E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96E5039A-9F30-4264-86F5-4A071E29502E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{10973404-B103-4973-A80B-E01BF2D34049}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{10973404-B103-4973-A80B-E01BF2D34049}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{10973404-B103-4973-A80B-E01BF2D34049}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{10973404-B103-4973-A80B-E01BF2D34049}.Release|Any CPU.Build.0 = Release|Any CPU
 		{10280EF9-5622-406B-B644-1BEEFCC3EF78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{10280EF9-5622-406B-B644-1BEEFCC3EF78}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10280EF9-5622-406B-B644-1BEEFCC3EF78}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -69,6 +67,14 @@ Global
 		{50112FA2-C66B-4C52-BBA2-978DE899230B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50112FA2-C66B-4C52-BBA2-978DE899230B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50112FA2-C66B-4C52-BBA2-978DE899230B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC0577DB-C7BD-4CC8-B137-006CCCCD4031}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC0577DB-C7BD-4CC8-B137-006CCCCD4031}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC0577DB-C7BD-4CC8-B137-006CCCCD4031}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC0577DB-C7BD-4CC8-B137-006CCCCD4031}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4068E4B4-4E7A-41EC-96B2-23741DAEDCA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4068E4B4-4E7A-41EC-96B2-23741DAEDCA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4068E4B4-4E7A-41EC-96B2-23741DAEDCA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4068E4B4-4E7A-41EC-96B2-23741DAEDCA6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

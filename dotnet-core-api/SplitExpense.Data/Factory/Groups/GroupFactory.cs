@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SplitExpense.Data.DbModels;
 using SplitExpense.Logger;
-using SplitExpense.Middleware;
-using SplitExpense.Middleware.Exceptions;
+//using SplitExpense.Middleware;
+//using SplitExpense.Middleware.Exceptions;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
 using SplitExpense.Models.DTO;
@@ -10,10 +10,10 @@ using SplitExpense.SharedResource;
 
 namespace SplitExpense.Data.Factory
 {
-    public class GroupFactory(SplitExpenseDbContext context, IUserContextService userContextService,ISplitExpenseLogger logger) : IGroupFactory
+    public class GroupFactory(SplitExpenseDbContext context, ISplitExpenseLogger logger) : IGroupFactory
     {
         private readonly SplitExpenseDbContext _context = context;
-        private int userId = userContextService.GetUserId();
+        private int userId = 0;// userContextService.GetUserId(); IUserContextService userContextService,
         private readonly ISplitExpenseLogger _logger = logger;
 
         public async Task<bool> AddFriendInGroup(AddFriendInGroupRequest request)
@@ -32,7 +32,8 @@ namespace SplitExpense.Data.Factory
             catch (Exception ex)
             {
                 _logger.LogError(ex,ex.Message, "AddFriendInGroup");
-                throw new BusinessRuleViolationException(ErrorCodes.UnableToAddRecord);
+                //throw new BusinessRuleViolationException(ErrorCodes.UnableToAddRecord);
+                return false;
             }
         }
 
@@ -55,7 +56,8 @@ namespace SplitExpense.Data.Factory
                         await trans.CommitAsync();
                         return entity.Entity;
                     }
-                    throw new BusinessRuleViolationException(ErrorCodes.UnableToAddRecord);
+                    //throw new BusinessRuleViolationException(ErrorCodes.UnableToAddRecord);
+                    return default;
                 }
                 throw new DbUpdateException();
             }
@@ -72,7 +74,7 @@ namespace SplitExpense.Data.Factory
             {
                 var oldData = await _context.Groups
                         .Where(x => !x.IsDeleted && x.Id == id && x.CreatedBy == userId)
-                        .FirstOrDefaultAsync() ?? throw new Middleware.Exceptions.BusinessRuleViolationException(ErrorCodes.RecordNotFound);
+                        .FirstOrDefaultAsync();// ?? throw new Middleware.Exceptions.BusinessRuleViolationException(ErrorCodes.RecordNotFound);
 
                 oldData.IsDeleted = true;
                 _context.Groups.Update(oldData);
@@ -136,7 +138,7 @@ namespace SplitExpense.Data.Factory
             {
                 var oldData = await _context.Groups
                       .Where(x => !x.IsDeleted && x.Id == request.Id && x.CreatedBy == userId)
-                      .FirstOrDefaultAsync() ?? throw new Middleware.Exceptions.BusinessRuleViolationException(ErrorCodes.RecordNotFound);
+                      .FirstOrDefaultAsync();// ?? throw new Middleware.Exceptions.BusinessRuleViolationException(ErrorCodes.RecordNotFound);
 
                 oldData.Name = request.Name;
                 _context.Groups.Update(oldData);

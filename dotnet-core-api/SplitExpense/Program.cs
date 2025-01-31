@@ -3,12 +3,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using NLog.Web;
 using SplitExpense.AutoMapperMapping;
 using SplitExpense.Data;
 using SplitExpense.Middleware;
-using SplitExpense.Middleware.Exceptions;
-using SplitExpense.Middlewares;
+using SplitExpense.ExceptionManagement.Exceptions;
+using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
