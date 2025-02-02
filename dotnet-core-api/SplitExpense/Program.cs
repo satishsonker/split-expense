@@ -21,9 +21,9 @@ builder.Services.AddControllers();
 // Add services to the container.
 builder.Services
     .RegisterService()
-    .RegisterBackgroundService()
     .AddDbContext<SplitExpenseDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")))
+    .RegisterBackgroundService();
 
 var environment = builder.Environment.EnvironmentName;
 builder.Configuration.RegisterConfiguration(environment);

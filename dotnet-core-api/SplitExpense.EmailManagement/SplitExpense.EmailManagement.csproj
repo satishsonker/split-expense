@@ -11,4 +11,9 @@
     <PackageReference Include="Quartz" Version="3.13.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SplitExpense.Data\SplitExpense.Data.csproj" />
+    <ProjectReference Include="..\SplitExpense.ExceptionManagement\SplitExpense.ExceptionManagement.csproj" />
+  </ItemGroup>
+
 </Project>

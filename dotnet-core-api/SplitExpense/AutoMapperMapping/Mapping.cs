@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using SplitExpense.Data.DbModels;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
 using SplitExpense.Models.DTO;

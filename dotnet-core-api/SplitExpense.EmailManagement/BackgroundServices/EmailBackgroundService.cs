@@ -1,20 +1,21 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Quartz;
 using Quartz.Impl.Triggers;
+using SplitExpense.Data;
 using SplitExpense.EmailManagement.Service;
 
 namespace SplitExpense.EmailManagement.BackgroundServices
 {
     public class EmailBackgroundService : BackgroundService
     {
-        private readonly IEmailQueueService _emailQueueService;
+        private readonly IServiceProvider _serviceProvider;
         private readonly string _cronExpression;
         private readonly bool _isEnabled;
 
-        public EmailBackgroundService(IEmailQueueService emailQueueService, IConfiguration configuration)
+        public EmailBackgroundService(IServiceProvider serviceProvider, IConfiguration configuration)
         {
-            _emailQueueService = emailQueueService;
+            _serviceProvider = serviceProvider;
             _cronExpression = configuration.GetSection("EmailSettings:CronExpression").Value ?? string.Empty;
             _ = Boolean.TryParse(configuration.GetSection("EmailSettings:Enabled").Value, out _isEnabled);
         }
@@ -32,6 +33,9 @@ namespace SplitExpense.EmailManagement.BackgroundServices
 
             while (!stoppingToken.IsCancellationRequested)
             {
+                using var scope = _serviceProvider.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<SplitExpenseDbContext>();
+                var _emailQueueService = scope.ServiceProvider.GetRequiredService<IEmailQueueService>();
                 if (DateTimeOffset.UtcNow >= nextRun)
                 {
                     await _emailQueueService.ProcessQueue();

@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using SplitExpense.Data.DbModels;
-using SplitExpense.EmailManagement.Models;
+using SplitExpense.Models;
 
 namespace SplitExpense.Data
 {
@@ -46,7 +43,7 @@ namespace SplitExpense.Data
                 var hasChange = entityEntry.State == EntityState.Added || entityEntry.State == EntityState.Modified;
                 if (!hasChange) continue;
 
-                if (entityEntry.Entity is not BaseModels.BaseDbModels baseModel) continue;
+                if (entityEntry.Entity is not BaseDbModels baseModel) continue;
 
                 var now = DateTime.Now;
                 int userId = 0;

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SplitExpense.Data.DbModels;
+using SplitExpense.Models;
 using SplitExpense.Logger;
 
 namespace SplitExpense.Data.Factory
@@ -9,11 +9,11 @@ namespace SplitExpense.Data.Factory
         private readonly SplitExpenseDbContext _context=context;
         private readonly ISplitExpenseLogger _logger=logger;
 
-        public int LogError(ErrorLog errorLog)
+        public int LogError(ErrorLog error)
         {
             try
             {
-                _context.ErrorLogs.Add(errorLog);
+                _context.ErrorLogs.Add(error);
                 return _context.SaveChanges();
             }
             catch (Exception ex)

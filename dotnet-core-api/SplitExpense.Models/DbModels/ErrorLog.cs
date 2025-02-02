@@ -1,8 +1,6 @@
-﻿using SplitExpense.Data.BaseModels;
-
-namespace SplitExpense.Data.DbModels
+﻿namespace SplitExpense.Models
 {
-    public class ErrorLog:BaseDbModels
+    public class ErrorLog : BaseDbModels
     {
         public string? Stacks { get; set; }
         public string? Message { get; set; }

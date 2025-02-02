@@ -1,4 +1,4 @@
-﻿namespace SplitExpense.EmailManagement.Models
+﻿namespace SplitExpense.SharedResource
 {
     public enum EmailStatus
     {

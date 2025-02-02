@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SplitExpense.EmailManagement.Models
+namespace SplitExpense.Models
 {
-    public class BaseDbModel
+    public class BaseDbModels
     {
-
         [Key]
         public int Id { get; set; }
         public int? CreatedBy { get; set; }

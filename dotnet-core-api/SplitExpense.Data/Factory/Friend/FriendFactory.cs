@@ -1,11 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SplitExpense.Data.DbModels;
-using SplitExpense.Logger;
+using SplitExpense.Data.Services;
 using SplitExpense.ExceptionManagement.Exceptions;
+using SplitExpense.Logger;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
 using SplitExpense.SharedResource;
-using SplitExpense.Data.Services;
 
 namespace SplitExpense.Data.Factory
 {

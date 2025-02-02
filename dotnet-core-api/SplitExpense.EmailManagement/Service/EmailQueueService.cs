@@ -1,9 +1,18 @@
-﻿using SplitExpense.EmailManagement.Models;
+﻿using Microsoft.Extensions.Logging;
+using SplitExpense.Data;
+using SplitExpense.Models;
+using SplitExpense.Logger;
+using System;
+using SplitExpense.SharedResource;
+using Microsoft.EntityFrameworkCore;
 
 namespace SplitExpense.EmailManagement.Service
 {
-    public class EmailQueueService : IEmailQueueService
+    public class EmailQueueService(SplitExpenseDbContext context, ISplitExpenseLogger logger) : IEmailQueueService
     {
+        private readonly SplitExpenseDbContext _context = context;
+        private readonly ISplitExpenseLogger _logger = logger;
+
         public Task AddEmailToQueue(string toEmail, string subject, string body, int smtpSettingsId)
         {
             throw new NotImplementedException();
@@ -29,9 +38,29 @@ namespace SplitExpense.EmailManagement.Service
             throw new NotImplementedException();
         }
 
-        public Task ProcessQueue()
+        public async Task ProcessQueue()
         {
-            throw new NotImplementedException();
+            var pendingEmails = await _context.EmailQueues
+                .Include(e => e.SmtpSettings)
+                .Where(e => e.Status == EmailStatus.Pending)
+                .ToListAsync();
+
+            foreach (var email in pendingEmails)
+            {
+                try
+                {
+                   // await SendEmail(email);
+                    email.Status = EmailStatus.Sent;
+                    email.SentAt = DateTime.UtcNow;
+                }
+                catch (Exception ex)
+                {
+                    email.RetryCount++;
+                    if (email.RetryCount >= 3) email.Status = EmailStatus.Failed;
+                    _logger.LogError(ex, $"Failed to send email {email.Id}");
+                }
+                await _context.SaveChangesAsync();
+            }
         }
 
         public Task RetryFailedEmails(int maxRetries)

@@ -1,16 +1,27 @@
 ﻿using AutoMapper;
-using SplitExpense.Data.DbModels;
 using SplitExpense.Data.Factory;
+using SplitExpense.EmailManagement.Service;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
 using SplitExpense.Models.DTO;
 
 namespace SplitExpense.Logic
 {
-    public class GroupsLogic(IMapper mapper,IGroupFactory factory) : IGroupLogic
+    public class GroupsLogic(IMapper mapper, IGroupFactory factory, IEmailQueueService emailQueueService) : IGroupLogic
     {
         private readonly IMapper _mapper = mapper;
         private readonly IGroupFactory _factory=factory;
+        private readonly IEmailQueueService _emailQueueService=emailQueueService;
+
+        public async Task<bool> AddFriendInGroupAsync(AddFriendInGroupRequest request)
+        {
+            var res=await _factory.AddFriendInGroupAsync(request);
+            if(res)
+            {
+               // _emailQueueService.
+            }
+            return res;
+        }
 
         public async Task<GroupResponse> CreateAsync(GroupRequest request)
         {

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SplitExpense.Data;
 
@@ -11,9 +12,11 @@ using SplitExpense.Data;
 namespace SplitExpense.Data.Migrations
 {
     [DbContext(typeof(SplitExpenseDbContext))]
-    partial class SplitExpenseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250202035414_AddEmailQueueTable")]
+    partial class AddEmailQueueTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -97,14 +100,7 @@ namespace SplitExpense.Data.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsHtml")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TemplateCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

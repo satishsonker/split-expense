@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SplitExpense.Data.DbModels
+namespace SplitExpense.Models
 {
     public class User
     {

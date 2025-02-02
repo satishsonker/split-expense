@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SplitExpense.Data.DbModels
+namespace SplitExpense.Models
 {
-    public class UserGroupMapping : BaseModels.BaseDbModels
+    public class UserGroupMapping : BaseDbModels
     {
         public int UserId { get; set; }
         public int GroupId { get; set; }

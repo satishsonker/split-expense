@@ -1,7 +1,6 @@
-﻿using SplitExpense.Data.BaseModels;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SplitExpense.Data.DbModels
+namespace SplitExpense.Models
 {
     public class Group : BaseDbModels
     {

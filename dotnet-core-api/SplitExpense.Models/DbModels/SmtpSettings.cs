@@ -1,6 +1,6 @@
-﻿namespace SplitExpense.EmailManagement.Models
+﻿namespace SplitExpense.Models
 {
-    public class SmtpSettings : BaseDbModel
+    public class SmtpSettings : BaseDbModels
     {
         public string Host { get; set; }
         public int Port { get; set; }

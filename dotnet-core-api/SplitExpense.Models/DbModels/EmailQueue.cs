@@ -1,6 +1,8 @@
-﻿namespace SplitExpense.EmailManagement.Models
+﻿using SplitExpense.SharedResource;
+
+namespace SplitExpense.Models
 {
-    public class EmailQueue : BaseDbModel
+    public class EmailQueue : BaseDbModels
     {
         public string ToEmail { get; set; }
         public string Subject { get; set; }

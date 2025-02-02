@@ -1,22 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SplitExpense.Data.DbModels;
+using SplitExpense.Data.Services;
 using SplitExpense.Logger;
-//using SplitExpense.Middleware;
-//using SplitExpense.Middleware.Exceptions;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
 using SplitExpense.Models.DTO;
-using SplitExpense.SharedResource;
 
 namespace SplitExpense.Data.Factory
 {
-    public class GroupFactory(SplitExpenseDbContext context, ISplitExpenseLogger logger) : IGroupFactory
+    public class GroupFactory(SplitExpenseDbContext context, ISplitExpenseLogger logger, IUserContextService userContextService) : IGroupFactory
     {
         private readonly SplitExpenseDbContext _context = context;
-        private int userId = 0;// userContextService.GetUserId(); IUserContextService userContextService,
+        private int userId = userContextService.GetUserId();
         private readonly ISplitExpenseLogger _logger = logger;
 
-        public async Task<bool> AddFriendInGroup(AddFriendInGroupRequest request)
+        public async Task<bool> AddFriendInGroupAsync(AddFriendInGroupRequest request)
         {
             ArgumentNullException.ThrowIfNull(nameof(request));
 

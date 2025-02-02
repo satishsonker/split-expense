@@ -1,4 +1,4 @@
-﻿using SplitExpense.Data.DbModels;
+﻿using SplitExpense.Models;
 
 namespace SplitExpense.Data.Factory
 {
