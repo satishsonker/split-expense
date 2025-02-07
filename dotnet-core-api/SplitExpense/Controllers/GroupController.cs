@@ -22,6 +22,16 @@ namespace SplitExpense.Controllers
         {
             return await _groupLogic.CreateAsync(request);
         }
+        
+        [ProducesResponseType(typeof(bool), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status503ServiceUnavailable)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+        [HttpPost(ApiPaths.GroupAddUser)]
+        public async Task<bool> AddFriendInGroupAsync([FromBody] AddFriendInGroupRequest request)
+        {
+            return await _groupLogic.AddFriendInGroupAsync(request);
+        }
 
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status503ServiceUnavailable)]

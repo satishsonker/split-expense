@@ -4,6 +4,7 @@ using SplitExpense.Data.Services;
 using SplitExpense.EmailManagement.Service;
 using SplitExpense.Logger;
 using SplitExpense.Logic;
+using SplitExpense.Logic.Email;
 
 namespace SplitExpense.Middleware
 {
@@ -11,13 +12,20 @@ namespace SplitExpense.Middleware
     {
         public static IServiceCollection RegisterService(this IServiceCollection services)
         {
-            return services.AddScoped<ISplitExpenseLogger,SplitExpenseLogger>()
+            services.AddHttpClient<EmailApiService>();
+            return services.AddScoped<ISplitExpenseLogger, SplitExpenseLogger>()
                 .AddSingleton<IUserContextService, UserContextService>()
-                .AddScoped<IGroupFactory,GroupFactory>()
-                .AddScoped<IGroupLogic,GroupsLogic>()
-                .AddScoped<IEmailQueueService, EmailQueueService>()
-                .AddScoped<IEmailTemplateService, EmailTemplateService>()
-                .AddScoped<IErrorLogFactory,ErrorLogFactory>();
+                .AddScoped<IGroupFactory, GroupFactory>()
+                .AddScoped<IGroupLogic, GroupsLogic>()
+                #region Email Service
+                 .AddScoped<IEmailLogic, EmailLogic>()
+                 .AddScoped<IEmailQueueService, EmailQueueService>()
+                 .AddScoped<IEmailTemplateService, EmailTemplateService>()
+                 .AddScoped<EmailSmtpService>()
+                 .AddScoped<EmailApiService>()
+                 .AddScoped<EmailServiceFactory>()
+                #endregion
+                .AddScoped<IErrorLogFactory, ErrorLogFactory>();
         }
     }
 }

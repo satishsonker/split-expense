@@ -13,7 +13,6 @@ namespace SplitExpense.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Friend> Friends { get; set; }
         public DbSet<ErrorLog> ErrorLogs { get; set; }
-        public DbSet<SmtpSettings> SmtpSettings { get; set; }
         public DbSet<EmailQueue> EmailQueues { get; set; }
         public DbSet<EmailTemplate> EmailTemplates { get; set; }
 

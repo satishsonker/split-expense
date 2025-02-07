@@ -4,11 +4,14 @@ namespace SplitExpense.Models
 {
     public class UserGroupMapping : BaseDbModels
     {
-        public int UserId { get; set; }
+        public int FriendId { get; set; }
         public int GroupId { get; set; }
 
-        [ForeignKey(nameof(UserId))]
+        [ForeignKey(nameof(FriendId))]
         public User? User { get; set; }
+
+        [ForeignKey(nameof(CreatedBy))]
+        public User? AddedByUser { get; set; }
 
         [ForeignKey(nameof(GroupId))]
         public Group? Group { get; set; }

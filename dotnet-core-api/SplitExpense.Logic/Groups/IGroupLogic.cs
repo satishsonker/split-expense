@@ -14,5 +14,6 @@ namespace SplitExpense.Logic
         Task<PagingResponse<UserGroupMappingResponse>> SearchAsync(SearchRequest request);
         Task<int> UpdateAsync(GroupRequest request);
         Task<bool> AddFriendInGroupAsync(AddFriendInGroupRequest request);
+        Task<UserGroupMappingResponse?> GetUserGroupMappingAsync(int id);
     }
 }

@@ -9,8 +9,6 @@ namespace SplitExpense.Models
         public string Body { get; set; }
         public EmailStatus Status { get; set; } = EmailStatus.Pending;
         public int RetryCount { get; set; } = 0;
-        public int SmtpSettingsId { get; set; }
-        public SmtpSettings SmtpSettings { get; set; }
         public DateTime? SentAt { get; set; }
     }
 }

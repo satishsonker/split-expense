@@ -8,6 +8,7 @@ using SplitExpense.Data;
 using SplitExpense.Middleware;
 using SplitExpense.ExceptionManagement.Exceptions;
 using NLog.Web;
+using SplitExpense.Models.ConfigModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,7 @@ builder.Services
 
 var environment = builder.Environment.EnvironmentName;
 builder.Configuration.RegisterConfiguration(environment);
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 // Add FluentValidation
 builder.Services.AddFluentValidationAutoValidation();

@@ -8,13 +8,11 @@ namespace SplitExpense.Validator
     {
         public AddFriendInGroupValidator()
         {
-            RuleFor(x => x.FriendId)
-               .LessThan(1).WithMessage("FriendId is required.")
-               .NotNull().WithMessage("FriendId is required.");
-
             RuleFor(x => x.GroupId)
-               .LessThan(1).WithMessage("GroupId is required.")
-               .NotNull().WithMessage("GroupId is required.");
+            .GreaterThan(0).WithMessage("GroupId must be greater than zero.");
+
+            RuleFor(x => x.FriendId)
+                .GreaterThan(0).WithMessage("FriendId must be greater than zero.");
         }
     }
 }

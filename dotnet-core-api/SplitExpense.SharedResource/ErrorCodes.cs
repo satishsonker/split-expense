@@ -40,6 +40,9 @@ namespace SplitExpense.SharedResource
         QueryExecutionError = 3003,
         [Description("Unable to add record in database")]
         UnableToAddRecord = 3004,
+        [Description("Record already exist")]
+        RecordAlreadyExist = 3005,
+
 
         // External Service Errors
         [Description("External service unavailable")]

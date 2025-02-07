@@ -1,15 +1,16 @@
 ﻿using SplitExpense.Models;
+using SplitExpense.Models.Common;
 using SplitExpense.SharedResource;
 
 namespace SplitExpense.EmailManagement.Service
 {
     public interface IEmailQueueService
     {
-        Task AddEmailToQueue(string toEmail, string subject, string body, int smtpSettingsId);
+        Task<bool> AddEmailToQueue(string toEmail, string subject, string body);
         Task ProcessQueue();
         Task RetryFailedEmails(int maxRetries);
-        Task<List<EmailQueue>> GetQueueByStatus(EmailStatus status);
-        Task<List<EmailQueue>> FilterEmails(DateTime startDate, DateTime endDate);
+        Task<PagingResponse<EmailQueue>> GetQueueByStatus(PagingRequest request, EmailStatus status);
+        Task<PagingResponse<EmailQueue>> FilterEmails(PagingRequest request);
         Task ManualTrigger();
         Task ManualSendEmail(int emailId);
     }

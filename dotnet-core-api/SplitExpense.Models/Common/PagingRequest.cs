@@ -1,6 +1,6 @@
 ﻿namespace SplitExpense.Models
 {
-    public class PagingRequest:BasePagingModel
+    public class PagingRequest:BasePagingRequestModel
     {
     }
 }

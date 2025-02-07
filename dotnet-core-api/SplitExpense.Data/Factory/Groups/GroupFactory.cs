@@ -1,9 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure.Core;
+using Microsoft.EntityFrameworkCore;
 using SplitExpense.Data.Services;
+using SplitExpense.ExceptionManagement.Exceptions;
 using SplitExpense.Logger;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
 using SplitExpense.Models.DTO;
+using SplitExpense.SharedResource;
 
 namespace SplitExpense.Data.Factory
 {
@@ -13,24 +16,32 @@ namespace SplitExpense.Data.Factory
         private int userId = userContextService.GetUserId();
         private readonly ISplitExpenseLogger _logger = logger;
 
-        public async Task<bool> AddFriendInGroupAsync(AddFriendInGroupRequest request)
+        public async Task<UserGroupMapping?> AddFriendInGroupAsync(AddFriendInGroupRequest request)
         {
             ArgumentNullException.ThrowIfNull(nameof(request));
+            var oldData = await _context.UserGroupMappings
+                .Where(x => !x.IsDeleted && x.GroupId == request.GroupId && x.FriendId == request.FriendId)
+                .FirstOrDefaultAsync();
+            if(oldData!=null)
+            {
+                _logger.LogError(null, LogMessage.UserAlreadyAddedInGroup, "AddFriendInGroupAsync");
+                throw new BusinessRuleViolationException(ErrorCodes.RecordAlreadyExist);
+            }
 
             try
             {
-                await _context.UserGroupMappings.AddAsync(new()
+                var entity = await _context.UserGroupMappings.AddAsync(new()
                 {
                     GroupId = request.GroupId,
-                    UserId = request.FriendId
+                    FriendId = request.FriendId
                 });
-                return await _context.SaveChangesAsync() > 0;
+
+                return await _context.SaveChangesAsync() > 0 ? entity.Entity : null;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,ex.Message, "AddFriendInGroup");
-                //throw new BusinessRuleViolationException(ErrorCodes.UnableToAddRecord);
-                return false;
+                _logger.LogError(ex, ex.Message, "AddFriendInGroup");
+                throw new BusinessRuleViolationException(ErrorCodes.UnableToAddRecord);
             }
         }
 
@@ -45,7 +56,8 @@ namespace SplitExpense.Data.Factory
                 {
                     var userGroupMap = new UserGroupMapping()
                     {
-                        GroupId = entity.Entity.Id
+                        GroupId = entity.Entity.Id,
+                        FriendId=userId
                     };
                     _context.UserGroupMappings.Add(userGroupMap);
                     if (await _context.SaveChangesAsync() > 0)
@@ -53,14 +65,13 @@ namespace SplitExpense.Data.Factory
                         await trans.CommitAsync();
                         return entity.Entity;
                     }
-                    //throw new BusinessRuleViolationException(ErrorCodes.UnableToAddRecord);
-                    return default;
+                    throw new BusinessRuleViolationException(ErrorCodes.UnableToAddRecord);
                 }
                 throw new DbUpdateException();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message,"Group-CreateAsync");
+                _logger.LogError(ex, ex.Message, "Group-CreateAsync");
                 throw new DbUpdateException(ex.Message);
             }
         }
@@ -71,7 +82,7 @@ namespace SplitExpense.Data.Factory
             {
                 var oldData = await _context.Groups
                         .Where(x => !x.IsDeleted && x.Id == id && x.CreatedBy == userId)
-                        .FirstOrDefaultAsync();// ?? throw new Middleware.Exceptions.BusinessRuleViolationException(ErrorCodes.RecordNotFound);
+                        .FirstOrDefaultAsync() ?? throw new BusinessRuleViolationException(ErrorCodes.RecordNotFound);
 
                 oldData.IsDeleted = true;
                 _context.Groups.Update(oldData);
@@ -111,7 +122,6 @@ namespace SplitExpense.Data.Factory
 
         public async Task<PagingResponse<UserGroupMapping>> SearchAsync(SearchRequest request)
         {
-
             var query = _context.UserGroupMappings
                 .Include(x => x.Group)
                 .Include(x => x.User)
@@ -135,7 +145,7 @@ namespace SplitExpense.Data.Factory
             {
                 var oldData = await _context.Groups
                       .Where(x => !x.IsDeleted && x.Id == request.Id && x.CreatedBy == userId)
-                      .FirstOrDefaultAsync();// ?? throw new Middleware.Exceptions.BusinessRuleViolationException(ErrorCodes.RecordNotFound);
+                      .FirstOrDefaultAsync() ?? throw new BusinessRuleViolationException(ErrorCodes.RecordNotFound);
 
                 oldData.Name = request.Name;
                 _context.Groups.Update(oldData);
@@ -146,6 +156,15 @@ namespace SplitExpense.Data.Factory
                 _logger.LogError(ex, ex.Message, "Group-UpdateAsync");
                 throw new DbUpdateException(ex.Message);
             }
+        }
+
+        public async Task<UserGroupMapping> GetUserGroupMappingAsync(int id)
+        {
+            return await _context.UserGroupMappings
+                .Include(x => x.Group)
+                .Include(x => x.User)
+                .Where(x => !x.IsDeleted && x.Id == id)
+               .FirstOrDefaultAsync();
         }
     }
 }

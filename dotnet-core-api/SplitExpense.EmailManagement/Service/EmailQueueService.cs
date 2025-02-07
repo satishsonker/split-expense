@@ -1,29 +1,61 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
 using SplitExpense.Data;
-using SplitExpense.Models;
 using SplitExpense.Logger;
-using System;
+using SplitExpense.Models;
 using SplitExpense.SharedResource;
-using Microsoft.EntityFrameworkCore;
+using SplitExpense.ExceptionManagement.Exceptions;
+using Microsoft.Extensions.Configuration;
+using SplitExpense.Models.Common;
 
 namespace SplitExpense.EmailManagement.Service
 {
-    public class EmailQueueService(SplitExpenseDbContext context, ISplitExpenseLogger logger) : IEmailQueueService
+    public class EmailQueueService(SplitExpenseDbContext context, ISplitExpenseLogger logger, IConfiguration configuration, EmailServiceFactory emailServiceFactory) : IEmailQueueService
     {
         private readonly SplitExpenseDbContext _context = context;
         private readonly ISplitExpenseLogger _logger = logger;
+        private readonly IConfiguration _configuration = configuration;
+        private readonly IEmailService _emailService=emailServiceFactory.GetEmailService();
 
-        public Task AddEmailToQueue(string toEmail, string subject, string body, int smtpSettingsId)
+        public async Task<bool> AddEmailToQueue(string toEmail, string subject, string body)
+        {
+            if (string.IsNullOrEmpty(toEmail) || string.IsNullOrWhiteSpace(toEmail))
+            {
+                _logger.LogError(null, LogMessage.InvalidToEmailAddress.ToFormattedString(), "EmailQueueService-AddEmailToQueue");
+                throw new BusinessRuleViolationException(ErrorCodes.InvalidFieldFormat.ToString(), UserMessage.InvalidEmailAddress);
+            }
+            if (string.IsNullOrEmpty(subject) || string.IsNullOrWhiteSpace(subject))
+            {
+                _logger.LogError(null, LogMessage.InvalidEmailSubject.ToFormattedString(), "EmailQueueService-AddEmailToQueue");
+                throw new BusinessRuleViolationException(ErrorCodes.InvalidFieldFormat.ToString(), UserMessage.InvalidEmailSubject);
+            }
+            if (string.IsNullOrEmpty(body) || string.IsNullOrWhiteSpace(body))
+            {
+                _logger.LogError(null, LogMessage.InvalidEmailBody.ToFormattedString(), "EmailQueueService-AddEmailToQueue");
+                throw new BusinessRuleViolationException(ErrorCodes.InvalidFieldFormat.ToString(), UserMessage.InvalidEmailBody);
+            }
+
+            int retryCount = _configuration.GetSection("EmailSettings:SendEmailRetryCount").Get<int>();
+            
+            var newEmailQueue = new EmailQueue()
+            {
+                Body = body,
+                CreatedAt = DateTime.Now,
+                RetryCount = retryCount <= 0 ? 3 : retryCount,
+                Status=EmailStatus.Pending,
+                ToEmail = toEmail,
+                Subject = subject                
+            };
+
+            await _context.EmailQueues.AddAsync(newEmailQueue);
+            return await _context.SaveChangesAsync()>0;
+        }
+
+        public Task<PagingResponse<EmailQueue>> FilterEmails(PagingRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<EmailQueue>> FilterEmails(DateTime startDate, DateTime endDate)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<EmailQueue>> GetQueueByStatus(EmailStatus status)
+        public Task<PagingResponse<EmailQueue>> GetQueueByStatus(PagingRequest request, EmailStatus status)
         {
             throw new NotImplementedException();
         }
@@ -41,7 +73,6 @@ namespace SplitExpense.EmailManagement.Service
         public async Task ProcessQueue()
         {
             var pendingEmails = await _context.EmailQueues
-                .Include(e => e.SmtpSettings)
                 .Where(e => e.Status == EmailStatus.Pending)
                 .ToListAsync();
 
@@ -49,9 +80,12 @@ namespace SplitExpense.EmailManagement.Service
             {
                 try
                 {
-                   // await SendEmail(email);
-                    email.Status = EmailStatus.Sent;
-                    email.SentAt = DateTime.UtcNow;
+                    if (await _emailService.SendEmailAsync(email.ToEmail,email.Subject,email.Body))
+                    {
+                        email.Status = EmailStatus.Sent;
+                        email.SentAt = DateTime.UtcNow;
+                        email.Status=EmailStatus.Sent;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -67,5 +101,6 @@ namespace SplitExpense.EmailManagement.Service
         {
             throw new NotImplementedException();
         }
+
     }
 }

@@ -12,7 +12,7 @@ namespace SplitExpense.Data.Factory
     {
         private readonly SplitExpenseDbContext _context = context;
         private readonly ISplitExpenseLogger _logger = logger;
-        private int userId = 0;// userContext.GetUserId(); ,
+        private int userId = userContext.GetUserId();
 
         public async Task<Friend> AddFriend(Friend request)
         {
@@ -54,7 +54,7 @@ namespace SplitExpense.Data.Factory
                     {
                         await trans.RollbackAsync();
                         _logger.LogError($"SaveChange return 0 while adding user", null, "AddFriend(User request)");
-                       // throw new BusinessRuleViolationException(ErrorCodes.UnableToAddRecord);
+                        throw new BusinessRuleViolationException(ErrorCodes.UnableToAddRecord);
                     }
                 }
                 friend.FriendId = oldData.UserId;
@@ -76,7 +76,7 @@ namespace SplitExpense.Data.Factory
         {
             var oldData = await _context.Friends
                 .Where(x => !x.IsDeleted && x.UserId == userId && x.FriendId == friendId)
-                .FirstOrDefaultAsync();// ?? throw new BusinessRuleViolationException(ErrorCodes.RecordNotFound);
+                .FirstOrDefaultAsync() ?? throw new BusinessRuleViolationException(ErrorCodes.RecordNotFound);
 
             oldData.IsDeleted = true;
             _context.Friends.Update(oldData);

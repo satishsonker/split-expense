@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SplitExpense.Data;
 
@@ -11,9 +12,11 @@ using SplitExpense.Data;
 namespace SplitExpense.Data.Migrations
 {
     [DbContext(typeof(SplitExpenseDbContext))]
-    partial class SplitExpenseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250204121200_UpdateUserGroupMapping")]
+    partial class UpdateUserGroupMapping
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,6 +52,9 @@ namespace SplitExpense.Data.Migrations
                     b.Property<DateTime?>("SentAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("SmtpSettingsId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -67,6 +73,8 @@ namespace SplitExpense.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SmtpSettingsId");
 
                     b.ToTable("EmailQueues");
                 });
@@ -238,6 +246,55 @@ namespace SplitExpense.Data.Migrations
                     b.ToTable("Groups");
                 });
 
+            modelBuilder.Entity("SplitExpense.Models.SmtpSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("EnableSsl")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Host")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Port")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SmtpSettings");
+                });
+
             modelBuilder.Entity("SplitExpense.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -331,6 +388,17 @@ namespace SplitExpense.Data.Migrations
                     b.HasIndex("GroupId");
 
                     b.ToTable("UserGroupMappings");
+                });
+
+            modelBuilder.Entity("SplitExpense.Models.EmailQueue", b =>
+                {
+                    b.HasOne("SplitExpense.Models.SmtpSettings", "SmtpSettings")
+                        .WithMany()
+                        .HasForeignKey("SmtpSettingsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SmtpSettings");
                 });
 
             modelBuilder.Entity("SplitExpense.Models.Friend", b =>
