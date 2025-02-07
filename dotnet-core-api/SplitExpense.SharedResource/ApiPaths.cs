@@ -13,6 +13,16 @@
         public const string GroupAddUser = ApiPrefix + "add/friend";
         #endregion
 
+        #region SplitType APIs
+        public const string SplitTypeCreate = ApiPrefix + "create";
+        public const string SplitTypeGetAll = ApiPrefix + "get/all";
+        public const string SplitTypeGetById = ApiPrefix + "get/{id}";
+        public const string SplitTypeUpdate = ApiPrefix + "update";
+        public const string SplitTypeDelete = ApiPrefix + "delete/{id}";
+        public const string SplitTypeSearch = ApiPrefix + "search";
+        #endregion
+
+
         #region Email APIs
         public const string EmailGetQueue = ApiPrefix + "get/queue";
         #endregion

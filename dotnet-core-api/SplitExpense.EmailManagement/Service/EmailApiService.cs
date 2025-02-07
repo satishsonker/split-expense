@@ -35,7 +35,8 @@ namespace SplitExpense.EmailManagement.Service
 
             try
             {
-                var response = await _httpClient.PostAsync($"{apiConfig.BaseUrl}/send?api_key={apiConfig.ApiKey}", content);
+                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiConfig.ApiKey}");
+                var response = await _httpClient.PostAsync($"{apiConfig.BaseUrl}/send", content);
                 var responseBody = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)

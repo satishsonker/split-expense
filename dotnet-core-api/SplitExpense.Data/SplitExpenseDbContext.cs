@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SplitExpense.Models;
+using SplitExpense.Models.DbModels;
 
 namespace SplitExpense.Data
 {
@@ -15,6 +16,7 @@ namespace SplitExpense.Data
         public DbSet<ErrorLog> ErrorLogs { get; set; }
         public DbSet<EmailQueue> EmailQueues { get; set; }
         public DbSet<EmailTemplate> EmailTemplates { get; set; }
+        public DbSet<SplitType> SplitTypes { get; set; }
 
 
 

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
+using SplitExpense.Models.DbModels;
 using SplitExpense.Models.DTO;
 
 namespace SplitExpense.AutoMapperMapping
@@ -27,6 +28,12 @@ namespace SplitExpense.AutoMapperMapping
                      .ForMember(dest => dest.AddedByUserEmail, opt => opt.MapFrom(src => src.AddedByUser.Email))
                      .ForMember(dest => dest.AddedByUserId, opt => opt.MapFrom(src => src.CreatedBy));
             CreateMap<PagingResponse<UserGroupMapping>, PagingResponse<UserGroupMappingResponse>>();
+            #endregion
+
+            #region Split Type
+            CreateMap<SplitTypeRequest, SplitType>();
+            CreateMap<SplitType, SplitTypeResponse>();
+            CreateMap<PagingResponse<SplitType>, PagingResponse<SplitTypeResponse>>();
             #endregion
         }
     }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SplitExpense.Data;
 
@@ -11,9 +12,11 @@ using SplitExpense.Data;
 namespace SplitExpense.Data.Migrations
 {
     [DbContext(typeof(SplitExpenseDbContext))]
-    partial class SplitExpenseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250207073024_UpdateSplitType")]
+    partial class UpdateSplitType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,10 +44,6 @@ namespace SplitExpense.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Icon")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

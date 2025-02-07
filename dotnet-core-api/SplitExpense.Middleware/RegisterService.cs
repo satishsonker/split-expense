@@ -5,6 +5,7 @@ using SplitExpense.EmailManagement.Service;
 using SplitExpense.Logger;
 using SplitExpense.Logic;
 using SplitExpense.Logic.Email;
+using SplitExpense.Logic.Masters;
 
 namespace SplitExpense.Middleware
 {
@@ -17,6 +18,8 @@ namespace SplitExpense.Middleware
                 .AddSingleton<IUserContextService, UserContextService>()
                 .AddScoped<IGroupFactory, GroupFactory>()
                 .AddScoped<IGroupLogic, GroupsLogic>()
+                .AddScoped<ISplitTypeFactory,SplitTypeFactory>()
+                .AddScoped<ISplitTypeLogic,SplitTypeLogic>()
                 #region Email Service
                  .AddScoped<IEmailLogic, EmailLogic>()
                  .AddScoped<IEmailQueueService, EmailQueueService>()
