@@ -1,6 +1,6 @@
 ﻿namespace SplitExpense.SharedResource
 {
-    public enum SplitType
+    public enum SplitTypeEnum
     {
         Equal,        // Divide equally
         Unequal,      // Custom amounts per user

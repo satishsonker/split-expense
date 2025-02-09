@@ -27,5 +27,11 @@
         public const string EmailGetQueue = ApiPrefix + "get/queue";
         #endregion
 
+        #region Expense API Path
+            public const string ExpenseCreate = ApiPrefix + "create";
+            public const string ExpenseUpdate = ApiPrefix + "update";
+            public const string ExpenseDelete = ApiPrefix + "delete/{id}";
+        #endregion
+
     }
 }

@@ -4,8 +4,8 @@ namespace SplitExpense.Data.Factory
 {
     public interface IExpenseFactory
     {
-        Task<Expense> AddExpense(Expense request, Dictionary<int, (decimal value, decimal adjustedAmount)> splitValues); 
-        Task<Expense> UpdateExpense(Expense request, Dictionary<int, (decimal value, decimal adjustedAmount)> splitValues); 
+        Task<Expense> AddExpense(Expense request); 
+        Task<Expense> UpdateExpense(Expense request); 
         Task<bool> DeleteExpense(int expenseId);
     }
 }
