@@ -3,11 +3,9 @@ using Moq;
 using SplitExpense.Data.Factory;
 using SplitExpense.Logger;
 using SplitExpense.Logic.Masters;
-using SplitExpense.Models.Common;
-using SplitExpense.Models.DbModels;
-using SplitExpense.Models.DTO.Request;
-using SplitExpense.Models.DTO.Response;
 using SplitExpense.Models;
+using SplitExpense.Models.Common;
+using SplitExpense.Models.DTO;
 using Xunit;
 
 namespace SplitExpense.UnitTest.Logic

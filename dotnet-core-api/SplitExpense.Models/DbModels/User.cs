@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SplitExpense.Models.DbModels;
+using System.ComponentModel.DataAnnotations;
+using System.Transactions;
 
 namespace SplitExpense.Models
 {

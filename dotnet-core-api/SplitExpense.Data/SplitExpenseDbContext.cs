@@ -17,6 +17,11 @@ namespace SplitExpense.Data
         public DbSet<EmailQueue> EmailQueues { get; set; }
         public DbSet<EmailTemplate> EmailTemplates { get; set; }
         public DbSet<SplitType> SplitTypes { get; set; }
+        public DbSet<Expense> Expenses { get; set; }
+        public DbSet<ExpenseReceipt> ExpenseReceipts { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<ExpenseNote> ExpenseNotes { get; set; }
+        public DbSet<ExpenseShare> ExpenseShares { get; set; }
 
 
 

@@ -1,4 +1,4 @@
-﻿namespace SplitExpense.Models.DbModels
+﻿namespace SplitExpense.Models
 {
     public class SplitType:BaseDbModels
     {
