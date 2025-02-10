@@ -63,12 +63,12 @@ namespace SplitExpense.Controllers
             return await _groupLogic.GetAsync(id);
         }
 
-        [ProducesResponseType(typeof(PagingResponse<UserGroupMappingResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PagingResponse<GroupResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status503ServiceUnavailable)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
         [HttpGet(ApiPaths.GroupGetAll)]
-        public async Task<PagingResponse<UserGroupMappingResponse>> GetAllAsync([FromQuery] PagingRequest request)
+        public async Task<PagingResponse<GroupResponse>> GetAllAsync([FromQuery] PagingRequest request)
         {
             return await _groupLogic.GetAllAsync(request);
         }

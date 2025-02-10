@@ -9,7 +9,7 @@ namespace SplitExpense.Logic
     {
         Task<GroupResponse> CreateAsync(GroupRequest request);
         Task<bool> DeleteAsync(int id);
-        Task<PagingResponse<UserGroupMappingResponse>> GetAllAsync(PagingRequest request);
+        Task<PagingResponse<GroupResponse>> GetAllAsync(PagingRequest request);
         Task<GroupResponse> GetAsync(int id);
         Task<PagingResponse<UserGroupMappingResponse>> SearchAsync(SearchRequest request);
         Task<int> UpdateAsync(GroupRequest request);

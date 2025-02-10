@@ -4,14 +4,18 @@ using SplitExpense.Logic.Email;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
 using SplitExpense.Models.DTO;
+using SplitExpense.Logger;
+using SplitExpense.ExceptionManagement.Exceptions;
+using SplitExpense.SharedResource;
 
 namespace SplitExpense.Logic
 {
-    public class GroupsLogic(IMapper mapper, IGroupFactory factory,IEmailLogic emailLogic) : IGroupLogic
+    public class GroupsLogic(IMapper mapper, IGroupFactory factory,IEmailLogic emailLogic,ISplitExpenseLogger logger) : IGroupLogic
     {
         private readonly IMapper _mapper = mapper;
         private readonly IGroupFactory _factory=factory;
         private readonly IEmailLogic _emailLogic=emailLogic;
+        private readonly ISplitExpenseLogger _logger = logger;
 
         public async Task<bool> AddFriendInGroupAsync(AddFriendInGroupRequest request)
         {
@@ -24,12 +28,12 @@ namespace SplitExpense.Logic
                     var data = new Dictionary<string, string>
                     {
                         { "groupName", groupMappingData.GroupName },
-                        { "addedByUserEmail", groupMappingData.AddedByUserEmail }
+                        { "addedByUserEmail", groupMappingData.AddedUser.Email }
                     };
-                  await  _emailLogic.SendEmailOnUserAddedInGroup(groupMappingData.AddedUserEmail, 
-                        groupMappingData.AddedByUser, 
-                        groupMappingData.AddedUser, 
-                        groupMappingData.CreatedAt,data);
+                    await _emailLogic.SendEmailOnUserAddedInGroup(groupMappingData.AddedUser.Email,
+                          groupMappingData.AddedByUser,
+                          $"{groupMappingData.AddedUser.FirstName} {groupMappingData.AddedUser.LastName}",
+                          groupMappingData.CreatedAt, data);
                 }
             }
             return res?.Id>0;
@@ -47,13 +51,22 @@ namespace SplitExpense.Logic
             return await _factory.DeleteAsync(id);
         }
 
-        public async Task<PagingResponse<UserGroupMappingResponse>> GetAllAsync(PagingRequest request)
+        public async Task<PagingResponse<GroupResponse>> GetAllAsync(PagingRequest request)
         {
-            if(request.PageSize<=0)
-            throw new ArgumentException("InvalidPageSize");
-            if (request.PageNo <= 0)
-                throw new ArgumentException("InvalidPageNo");
-            return _mapper.Map<PagingResponse<UserGroupMappingResponse>>(await  _factory.GetAllAsync(request));
+            try
+            {
+                if (request.PageSize <= 0)
+                    throw new ArgumentException("InvalidPageSize");
+                if (request.PageNo <= 0)
+                    throw new ArgumentException("InvalidPageNo");
+                var res = _mapper.Map<PagingResponse<GroupResponse>>(await _factory.GetAllAsync(request));
+                return res;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, LogMessage.GeneralError);
+                throw new BusinessRuleViolationException((int)ErrorCodes.GeneralError,ex.Message,null);
+            }
         }
 
         public async Task<GroupResponse> GetAsync(int id)

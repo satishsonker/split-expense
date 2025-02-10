@@ -34,10 +34,8 @@ namespace SplitExpense.UnitTest.Logic
             var mappingData = new UserGroupMappingResponse
             {
                 GroupName = "Test Group",
-                AddedByUserEmail = "test@test.com",
-                AddedUserEmail = "added@test.com",
                 AddedByUser = "Test User",
-                AddedUser = "Added User",
+                AddedUser = new UserResponse(),
                 CreatedAt = DateTime.Now
             };
 
@@ -133,19 +131,19 @@ namespace SplitExpense.UnitTest.Logic
         {
             // Arrange
             var request = new PagingRequest { PageNo = 1, PageSize = 10 };
-            var pagedGroups = new PagingResponse<UserGroupMapping>
+            var pagedGroups = new PagingResponse<Group>
             {
-                Data = new List<UserGroupMapping> { new() { Id = 1 } },
+                Data = [new Group() { Icon="",Name="",Id=1,UserId=3}],
                 RecordCounts = 1
             };
-            var response = new PagingResponse<UserGroupMappingResponse>
+            var response = new PagingResponse<GroupResponse>
             {
-                Data = new List<UserGroupMappingResponse> { new() { Id = 1 } },
+                Data = new List<GroupResponse> { new() { Id = 1 } },
                 RecordCounts = 1
             };
 
             _mockFactory.Setup(f => f.GetAllAsync(request)).ReturnsAsync(pagedGroups);
-            _mockMapper.Setup(m => m.Map<PagingResponse<UserGroupMappingResponse>>(pagedGroups))
+            _mockMapper.Setup(m => m.Map<PagingResponse<GroupResponse>>(pagedGroups))
                 .Returns(response);
 
             // Act
@@ -166,10 +164,8 @@ namespace SplitExpense.UnitTest.Logic
             var mappingData = new UserGroupMappingResponse
             {
                 GroupName = "Test Group",
-                AddedByUserEmail = "test@test.com",
-                AddedUserEmail = "added@test.com",
                 AddedByUser = "Test User",
-                AddedUser = "Added User",
+                AddedUser = new UserResponse(),
                 CreatedAt = DateTime.Now
             };
 

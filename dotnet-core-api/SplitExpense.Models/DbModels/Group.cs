@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using SplitExpense.Models.DTO;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SplitExpense.Models
 {
@@ -10,5 +11,7 @@ namespace SplitExpense.Models
 
         [ForeignKey("UserId")]
         public User? User { get; set; }
+
+        public List<UserGroupMapping> Members { get; set; }
     }
 }

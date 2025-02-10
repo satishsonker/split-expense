@@ -5,7 +5,7 @@ namespace SplitExpense.Data.Factory
 {
     public interface IGroupFactory
     {
-        Task<PagingResponse<UserGroupMapping>> GetAllAsync(PagingRequest request);
+        Task<PagingResponse<Group>> GetAllAsync(PagingRequest request);
         Task<Group> CreateAsync(Group request);
         Task<int> UpdateAsync(Group request);
         Task<Group?> GetAsync(int id);

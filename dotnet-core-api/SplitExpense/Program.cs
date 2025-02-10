@@ -112,6 +112,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCors(option =>
+{
+    option.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+});
 app.UseCustomExceptionHandler();
 app.UseAuthorization();
 

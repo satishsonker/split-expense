@@ -8,7 +8,7 @@ namespace SplitExpense.Models
         public int GroupId { get; set; }
 
         [ForeignKey(nameof(FriendId))]
-        public User? User { get; set; }
+        public User? AddedUser { get; set; }
 
         [ForeignKey(nameof(CreatedBy))]
         public User? AddedByUser { get; set; }

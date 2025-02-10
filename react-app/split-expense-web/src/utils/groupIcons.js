@@ -29,6 +29,8 @@ export const groupIcons = [
 ];
 
 export const getGroupIcon = (groupName) => {
+    if(groupName===undefined)
+        return Groups
     const normalizedName = groupName.toLowerCase();
     
     // Find the first matching icon based on keywords

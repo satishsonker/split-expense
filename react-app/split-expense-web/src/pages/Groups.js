@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Box,
     Typography,
@@ -11,50 +11,116 @@ import {
     useMediaQuery,
     Avatar,
     AvatarGroup,
-    Tooltip
+    Tooltip,
+    Button,
+    CircularProgress
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { getGroupIcon } from '../utils/groupIcons';
 import CreateGroupDialog from '../components/CreateGroupDialog';
+import { apiService } from '../utils/axios';
+import { GROUP_PATHS } from '../constants/apiPaths';
+import { toast } from 'react-toastify';
+
+const GROUPS_PER_PAGE = 10;
 
 const Groups = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [openCreateDialog, setOpenCreateDialog] = useState(false);
-    
-    // This would typically come from your API/state management
-    const groups = [
-        {
-            id: 1,
-            name: 'Weekend Trip',
-            members: [
-                { id: 1, name: 'John Doe', email: 'john@example.com' },
-                { id: 2, name: 'Jane Smith', email: 'jane@example.com' }
-            ],
-            totalExpenses: 450
-        },
-        {
-            id: 2,
-            name: 'Apartment Rent',
-            members: [
-                { id: 1, name: 'John Doe', email: 'john@example.com' },
-                { id: 3, name: 'Mike Johnson', email: 'mike@example.com' }
-            ],
-            totalExpenses: 1200
-        }
-    ];
+    const [groups, setGroups] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [totalGroups, setTotalGroups] = useState(0);
 
-    const handleCreateGroup = (groupData) => {
-        console.log('Creating group:', groupData);
-        // Implement group creation logic here
-        setOpenCreateDialog(false);
+    const fetchGroups = async (pageNum = 1) => {
+        try {
+            setLoading(true);
+            const response = await apiService.get(GROUP_PATHS.LIST, {
+                pageNo: pageNum,
+                pageSize: GROUPS_PER_PAGE
+            });
+            
+            if (response?.data) {
+                if (pageNum === 1) {
+                    setGroups(response.data || []);
+                } else {
+                    setGroups(prev => [...prev, ...(response.data || [])]);
+                }
+                
+                setTotalGroups(response.recordCounts || 0);
+                setHasMore((response.recordCounts - (response.pageNo * response.pageSize)) > 0);
+            }
+        } catch (error) {
+            console.error('Error fetching groups:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
+    useEffect(() => {
+        fetchGroups();
+    }, []);
+
+    const handleCreateGroup = async (groupData) => {
+        try {
+            setLoading(true);
+            await apiService.post(GROUP_PATHS.CREATE, {
+                name: groupData.name,
+                members: groupData.members.map(m => m.id)
+            });
+            
+            toast.success('Group created successfully');
+            setOpenCreateDialog(false);
+            fetchGroups(1);
+            setPage(1);
+        } catch (error) {
+            console.error('Error creating group:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleLoadMore = () => {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        fetchGroups(nextPage);
+    };
+
+    function stringToColor(string) {
+        let hash = 0;
+        let i;
+      
+        /* eslint-disable no-bitwise */
+        for (i = 0; i < string.length; i += 1) {
+          hash = string.charCodeAt(i) + ((hash << 5) - hash);
+        }
+      
+        let color = '#';
+      
+        for (i = 0; i < 3; i += 1) {
+          const value = (hash >> (i * 8)) & 0xff;
+          color += `00${value.toString(16)}`.slice(-2);
+        }
+        /* eslint-enable no-bitwise */
+      
+        return color;
+      }
+    function stringAvatar(name) {
+        return {
+          sx: {
+            bgcolor: stringToColor(name),
+          },
+          children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`,
+        };
+      }
+      
     return (
         <Box sx={{ p: { xs: 2, sm: 3 } }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h5" component="h1">
-                    Groups
+                    Groups ({totalGroups})
                 </Typography>
                 {!isMobile && (
                     <IconButton
@@ -95,9 +161,9 @@ const Groups = () => {
                                     
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <AvatarGroup max={3}>
-                                            {group.members.map(member => (
-                                                <Tooltip key={member.id} title={member.name}>
-                                                    <Avatar>{member.name[0]}</Avatar>
+                                            {group?.members?.map(member => (
+                                                <Tooltip key={member.id} title={`${member.addedUser.firstName} ${member.addedUser.lastName}`}>
+                                                    <Avatar {...stringAvatar(`${member.addedUser.firstName} ${member.addedUser.lastName}`)} src={member.addedUser.profilePicture}>{`${member.addedUser.firstName[0]}`}</Avatar>
                                                 </Tooltip>
                                             ))}
                                         </AvatarGroup>
@@ -111,6 +177,19 @@ const Groups = () => {
                     );
                 })}
             </Grid>
+
+            {hasMore && (
+                <Box sx={{ mt: 3, textAlign: 'center' }}>
+                    <Button
+                        variant="outlined"
+                        onClick={handleLoadMore}
+                        disabled={loading}
+                        startIcon={loading && <CircularProgress size={20} />}
+                    >
+                        {loading ? 'Loading...' : 'Load More'}
+                    </Button>
+                </Box>
+            )}
 
             {isMobile && (
                 <Fab

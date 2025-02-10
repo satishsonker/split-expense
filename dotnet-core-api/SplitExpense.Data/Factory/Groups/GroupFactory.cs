@@ -96,21 +96,23 @@ namespace SplitExpense.Data.Factory
 
         }
 
-        public async Task<PagingResponse<UserGroupMapping>> GetAllAsync(PagingRequest request)
+        public async Task<PagingResponse<Group>> GetAllAsync(PagingRequest request)
         {
-            var query = _context.UserGroupMappings
-                .Include(x => x.Group)
-                .ThenInclude(x => x.User)
+            var query = _context.Groups
+                .Include(x => x.Members)
+                .ThenInclude(x => x.AddedUser)
                 .Include(x => x.User)
                 .Where(x => !x.IsDeleted && x.CreatedBy == userId)
                 .AsQueryable();
-            return new PagingResponse<UserGroupMapping>()
+            var response= new PagingResponse<Group>()
             {
                 Data = await query.Skip((request.PageNo - 1) * request.PageSize).Take(request.PageSize).ToListAsync(),
                 RecordCounts = await query.CountAsync(),
                 PageSize = request.PageSize,
                 PageNo = request.PageNo
             };
+            response.Data.ForEach(x => x.Members.ForEach(y => y.Group = null));
+            return response;
         }
 
         public async Task<Group?> GetAsync(int id)
@@ -123,8 +125,9 @@ namespace SplitExpense.Data.Factory
         public async Task<PagingResponse<UserGroupMapping>> SearchAsync(SearchRequest request)
         {
             var query = _context.UserGroupMappings
-                .Include(x => x.Group)
-                .Include(x => x.User)
+                 .Include(x => x.Group)
+                .Include(x => x.AddedUser)
+                .Include(x => x.AddedByUser)
                 .Where(x => !x.IsDeleted && x.CreatedBy == userId && (string.IsNullOrEmpty(request.SearchTerm) || x.Group.Name.Contains(request.SearchTerm)))
                 .AsQueryable();
 
@@ -162,7 +165,8 @@ namespace SplitExpense.Data.Factory
         {
             return await _context.UserGroupMappings
                 .Include(x => x.Group)
-                .Include(x => x.User)
+                .Include(x => x.AddedUser)
+                .Include(x => x.AddedByUser)
                 .Where(x => !x.IsDeleted && x.Id == id)
                .FirstOrDefaultAsync();
         }

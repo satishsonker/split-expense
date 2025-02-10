@@ -22,7 +22,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { AUTH_PATHS } from '../constants/apiPaths';
-import axios from 'axios';
+import { apiService } from '../utils/axios';
 
 const validationSchema = Yup.object({
     email: Yup.string()
@@ -50,12 +50,12 @@ const Login = () => {
             setError('');
             setIsLoading(true);
             try {
-                const response = {data: {id: 1, email: 'test@test.com', name: 'Test User'}};//await axios.post(AUTH_PATHS.LOGIN, values);
+                const response = {data: {id: 3, email: 'test@test.com', name: 'Test User'}};//await apiService.post(AUTH_PATHS.LOGIN, values);
+                localStorage.setItem('user', JSON.stringify(response.data));
                 login(response.data);
                 navigate('/');
             } catch (err) {
-                setError(err.response?.data?.message || 'An error occurred during login');
-                navigate('/');
+                setError(err.message || 'An error occurred during login');
             } finally {
                 setIsLoading(false);
             }

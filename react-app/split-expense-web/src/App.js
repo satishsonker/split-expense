@@ -9,9 +9,9 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
+import Groups from './pages/Groups';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
-import Groups from './pages/Groups';
 
 const AppContent = () => {
   const { trackError } = usePerformance();
@@ -27,9 +27,7 @@ const AppContent = () => {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
               <Route index element={<Dashboard />} />
-              <Route path="groups" element={<PrivateRoute><Layout /></PrivateRoute>}>
-                <Route index element={<Groups />} />
-              </Route>
+              <Route path="groups" element={<Groups />} />
               {/* Add more protected routes here */}
             </Route>
           </Routes>

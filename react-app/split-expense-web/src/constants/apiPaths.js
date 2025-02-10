@@ -1,4 +1,12 @@
-export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001/api';
+import env from '../config/env.config';
+
+export const API_BASE_URL = env.API_URL;
+
+export const GROUP_PATHS = {
+    CREATE: `${API_BASE_URL}/group/create`,
+    LIST: `${API_BASE_URL}/group/get/all`,
+    MEMBERS: `${API_BASE_URL}/users/contacts`,
+};
 
 export const AUTH_PATHS = {
     LOGIN: `${API_BASE_URL}/auth/login`,

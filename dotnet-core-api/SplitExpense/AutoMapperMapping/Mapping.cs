@@ -11,7 +11,7 @@ namespace SplitExpense.AutoMapperMapping
         {
             #region Group
                 CreateMap<GroupRequest, Group>();
-                CreateMap<Group, GroupResponse>();
+            CreateMap<Group, GroupResponse>();
                 CreateMap<PagingResponse<Group>, PagingResponse<GroupResponse>>();
             #endregion
 
@@ -22,9 +22,7 @@ namespace SplitExpense.AutoMapperMapping
                      .ForMember(dest => dest.AddedUserId, opt => opt.MapFrom(src => src.FriendId))
                       .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.Group.CreatedAt))
                        .ForMember(dest => dest.AddedAt, opt => opt.MapFrom(src => src.CreatedAt))
-                        .ForMember(dest => dest.AddedUser, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"))
-                        .ForMember(dest => dest.AddedUserEmail, opt => opt.MapFrom(src => src.User.Email))
-                         .ForMember(dest => dest.AddedByUserEmail, opt => opt.MapFrom(src => src.AddedByUser.Email))
+                       // .ForMember(dest => dest.AddedUser, opt => opt.MapFrom(src => $"{src.AddedUser.FirstName} {src.AddedUser.LastName}"))
                          .ForMember(dest => dest.AddedByUserId, opt => opt.MapFrom(src => src.CreatedBy));
                 CreateMap<PagingResponse<UserGroupMapping>, PagingResponse<UserGroupMappingResponse>>();
             #endregion
@@ -41,6 +39,10 @@ namespace SplitExpense.AutoMapperMapping
 
                 CreateMap<ExpenseShareRequest, ExpenseShare>();
                 CreateMap<ExpenseShare, ExpenseShareResponse>();
+            #endregion
+
+            #region User
+            CreateMap<User, UserResponse>();
             #endregion
         }
     }

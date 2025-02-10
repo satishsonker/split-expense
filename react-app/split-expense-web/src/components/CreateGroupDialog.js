@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -12,11 +12,17 @@ import {
     IconButton,
     Typography,
     useMediaQuery,
-    useTheme
+    useTheme,
+    Autocomplete,
+    InputAdornment
 } from '@mui/material';
 import { Close as CloseIcon, Add as AddIcon } from '@mui/icons-material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { getGroupIcon } from '../utils/groupIcons';
+import { GROUP_PATHS } from '../constants/apiPaths';
+import { toast } from 'react-toastify';
+import { apiService } from '../utils/axios';
 
 const validationSchema = Yup.object({
     name: Yup.string()
@@ -36,7 +42,25 @@ const validationSchema = Yup.object({
 const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
-    const [newMemberEmail, setNewMemberEmail] = useState('');
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [users, setUsers] = useState([]);
+    const [groupIcon, setGroupIcon] = useState(null);
+
+    // Fetch users/contacts from API
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const response = await apiService.get(GROUP_PATHS.MEMBERS);
+                setUsers(response.contacts || []);
+            } catch (error) {
+                console.error('Error fetching contacts:', error);
+            }
+        };
+
+        if (open) {
+            fetchUsers();
+        }
+    }, [open]);
 
     const formik = useFormik({
         initialValues: {
@@ -50,13 +74,19 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
         }
     });
 
+    // Update group icon when name changes
+    useEffect(() => {
+        const IconComponent = getGroupIcon(formik.values.name);
+        setGroupIcon(IconComponent);
+    }, [formik.values.name]);
+
     const handleAddMember = () => {
-        if (newMemberEmail && !formik.values.members.find(m => m.email === newMemberEmail)) {
+        if (selectedUser && !formik.values.members.find(m => m.email === selectedUser.email)) {
             formik.setFieldValue('members', [
                 ...formik.values.members,
-                { email: newMemberEmail, name: newMemberEmail.split('@')[0] }
+                { id: selectedUser.id, email: selectedUser.email, name: selectedUser.name }
             ]);
-            setNewMemberEmail('');
+            setSelectedUser(null);
         }
     };
 
@@ -69,7 +99,7 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
 
     const handleClose = () => {
         formik.resetForm();
-        setNewMemberEmail('');
+        setSelectedUser(null);
         onClose();
     };
 
@@ -83,7 +113,14 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
         >
             <DialogTitle>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    Create New Group
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {groupIcon && (
+                            <Avatar sx={{ bgcolor: 'primary.main' }}>
+                                {React.createElement(groupIcon)}
+                            </Avatar>
+                        )}
+                        <Typography variant="h6">Create New Group</Typography>
+                    </Box>
                     <IconButton onClick={handleClose} size="small">
                         <CloseIcon />
                     </IconButton>
@@ -102,6 +139,13 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
                         error={formik.touched.name && Boolean(formik.errors.name)}
                         helperText={formik.touched.name && formik.errors.name}
                         margin="normal"
+                        InputProps={{
+                            endAdornment: groupIcon && (
+                                <InputAdornment position="end">
+                                    {React.createElement(groupIcon)}
+                                </InputAdornment>
+                            )
+                        }}
                     />
 
                     <Box sx={{ mt: 3 }}>
@@ -110,25 +154,36 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
                         </Typography>
                         
                         <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                            <TextField
+                            <Autocomplete
                                 fullWidth
-                                label="Member Email"
-                                value={newMemberEmail}
-                                onChange={(e) => setNewMemberEmail(e.target.value)}
-                                onKeyPress={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        handleAddMember();
-                                    }
+                                value={selectedUser}
+                                onChange={(event, newValue) => {
+                                    setSelectedUser(newValue);
                                 }}
+                                options={users.filter(user => 
+                                    !formik.values.members.find(m => m.email === user.email)
+                                )}
+                                getOptionLabel={(option) => `${option.name} (${option.email})`}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Select Member"
+                                    />
+                                )}
                             />
-                            <IconButton 
+                            <Button
+                                variant="contained"
                                 onClick={handleAddMember}
-                                color="primary"
-                                sx={{ bgcolor: 'primary.light', '&:hover': { bgcolor: 'primary.main' } }}
+                                disabled={!selectedUser}
+                                sx={{ 
+                                    minWidth: '120px',
+                                    height: '56px', // Match Autocomplete height
+                                    whiteSpace: 'nowrap'
+                                }}
                             >
-                                <AddIcon />
-                            </IconButton>
+                                <AddIcon sx={{ mr: 1 }} />
+                                Add
+                            </Button>
                         </Box>
 
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -136,7 +191,7 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
                                 <Chip
                                     key={member.email}
                                     avatar={<Avatar>{member.name[0]}</Avatar>}
-                                    label={member.email}
+                                    label={`${member.name} (${member.email})`}
                                     onDelete={() => handleRemoveMember(member.email)}
                                 />
                             ))}
