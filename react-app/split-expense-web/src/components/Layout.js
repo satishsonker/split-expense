@@ -5,6 +5,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Header from './Header';
 import LeftMenu from './LeftMenu';
 import Footer from './Footer';
+import ContactsIcon from '@mui/icons-material/Contacts';
 
 const Layout = () => {
     const [menuOpen, setMenuOpen] = useState(false);

@@ -15,7 +15,8 @@
     "react-router-dom": "^7.1.5",
     "react-scripts": "5.0.1",
     "react-toastify": "^11.0.3",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "workbox-webpack-plugin": "^6.5.4"
   },
   "scripts": {
     "start": "react-scripts start",

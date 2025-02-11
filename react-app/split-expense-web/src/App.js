@@ -10,6 +10,7 @@ import ResetPassword from './pages/ResetPassword';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
 import Groups from './pages/Groups';
+import Contacts from './pages/Contacts';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
@@ -28,6 +29,7 @@ const AppContent = () => {
             <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
               <Route index element={<Dashboard />} />
               <Route path="groups" element={<Groups />} />
+              <Route path="contacts" element={<Contacts />} />
               {/* Add more protected routes here */}
             </Route>
           </Routes>

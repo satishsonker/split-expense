@@ -43,6 +43,13 @@ namespace SplitExpense.AutoMapperMapping
 
             #region User
             CreateMap<User, UserResponse>();
+            CreateMap<UserRequest, User>();
+            #endregion
+
+            #region Contact
+            CreateMap<ContactRequest, Contact>();
+            CreateMap<Contact, ContactResponse>();
+            CreateMap<PagingResponse<Contact>, PagingResponse<ContactResponse>>();
             #endregion
         }
     }

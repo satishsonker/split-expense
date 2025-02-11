@@ -15,12 +15,13 @@ import {
     Button,
     CircularProgress
 } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { getGroupIcon } from '../utils/groupIcons';
 import CreateGroupDialog from '../components/CreateGroupDialog';
 import { apiService } from '../utils/axios';
 import { GROUP_PATHS } from '../constants/apiPaths';
 import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 
 const GROUPS_PER_PAGE = 10;
 
@@ -33,6 +34,8 @@ const Groups = () => {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [totalGroups, setTotalGroups] = useState(0);
+    const [selectedGroup, setSelectedGroup] = useState(null);
+    const { user } = useAuth();
 
     const fetchGroups = async (pageNum = 1) => {
         try {
@@ -88,6 +91,22 @@ const Groups = () => {
         fetchGroups(nextPage);
     };
 
+    const handleDeleteGroup = async (groupId) => {
+        try {
+            await apiService.delete(`${GROUP_PATHS.DELETE}/${groupId}`);
+            toast.success('Group deleted successfully');
+            fetchGroups(1);
+            setPage(1);
+        } catch (error) {
+            console.error('Error deleting group:', error);
+        }
+    };
+
+    const handleEditGroup = async (group) => {
+        setSelectedGroup(group);
+        setOpenCreateDialog(true);
+    };
+
     function stringToColor(string) {
         let hash = 0;
         let i;
@@ -116,6 +135,10 @@ const Groups = () => {
         };
       }
       
+    const isGroupCreator = (group) => {
+        return group.createdBy === user.id;
+    };
+
     return (
         <Box sx={{ p: { xs: 2, sm: 3 } }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -136,6 +159,8 @@ const Groups = () => {
             <Grid container spacing={2}>
                 {groups.map(group => {
                     const GroupIcon = getGroupIcon(group.name);
+                    const canManageGroup = isGroupCreator(group);
+
                     return (
                         <Grid item xs={12} sm={6} md={4} key={group.id}>
                             <Card 
@@ -145,28 +170,70 @@ const Groups = () => {
                                 }}
                             >
                                 <CardContent>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                        <Avatar 
-                                            sx={{ 
-                                                bgcolor: 'primary.main',
-                                                mr: 2
-                                            }}
-                                        >
-                                            <GroupIcon />
-                                        </Avatar>
-                                        <Typography variant="h6" noWrap>
-                                            {group.name}
-                                        </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, justifyContent: 'space-between' }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <Avatar 
+                                                sx={{ 
+                                                    bgcolor: 'primary.main',
+                                                    mr: 2
+                                                }}
+                                            >
+                                                <GroupIcon />
+                                            </Avatar>
+                                            <Typography variant="h6" noWrap>
+                                                {group.name}
+                                            </Typography>
+                                        </Box>
+                                        {canManageGroup && (
+                                            <Box>
+                                                <IconButton 
+                                                    size="small" 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleEditGroup(group);
+                                                    }}
+                                                    title="Edit Group"
+                                                >
+                                                    <EditIcon fontSize="small" />
+                                                </IconButton>
+                                                <IconButton 
+                                                    size="small" 
+                                                    color="error"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (window.confirm('Are you sure you want to delete this group?')) {
+                                                            handleDeleteGroup(group.id);
+                                                        }
+                                                    }}
+                                                    title="Delete Group"
+                                                >
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
+                                            </Box>
+                                        )}
                                     </Box>
                                     
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <AvatarGroup max={3}>
-                                            {group?.members?.map(member => (
-                                                <Tooltip key={member.id} title={`${member.addedUser.firstName} ${member.addedUser.lastName}`}>
-                                                    <Avatar {...stringAvatar(`${member.addedUser.firstName} ${member.addedUser.lastName}`)} src={member.addedUser.profilePicture}>{`${member.addedUser.firstName[0]}`}</Avatar>
-                                                </Tooltip>
-                                            ))}
-                                        </AvatarGroup>
+                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <AvatarGroup max={3}>
+                                                {group?.members?.map(member => (
+                                                    <Tooltip 
+                                                        key={member.id} 
+                                                        title={`${member.addedUser.firstName} ${member.addedUser.lastName}${member.addedUser.id === group.createdBy ? ' (Creator)' : ''}`}
+                                                    >
+                                                        <Avatar 
+                                                            {...stringAvatar(`${member.addedUser.firstName} ${member.addedUser.lastName}`)} 
+                                                            src={member.addedUser.profilePicture}
+                                                            sx={member.addedUser.userId === group.createdBy ? {
+                                                                border: '2px solid gold'
+                                                            } : undefined}
+                                                        >
+                                                            {`${member.addedUser.firstName[0]}`}
+                                                        </Avatar>
+                                                    </Tooltip>
+                                                ))}
+                                            </AvatarGroup>
+                                        </Box>
                                         <Typography variant="subtitle1" color="primary">
                                             ${group.totalExpenses}
                                         </Typography>
@@ -203,8 +270,12 @@ const Groups = () => {
 
             <CreateGroupDialog
                 open={openCreateDialog}
-                onClose={() => setOpenCreateDialog(false)}
+                onClose={() => {
+                    setOpenCreateDialog(false);
+                    setSelectedGroup(null);
+                }}
                 onSubmit={handleCreateGroup}
+                group={selectedGroup}
             />
         </Box>
     );

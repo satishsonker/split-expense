@@ -23,7 +23,7 @@ namespace SplitExpense.Data
         public DbSet<ExpenseNote> ExpenseNotes { get; set; }
         public DbSet<ExpenseShare> ExpenseShares { get; set; }
 
-
+        public DbSet<Contact> Contacts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -14,7 +14,8 @@ import {
     Receipt as ReceiptIcon,
     AccountBalance as AccountBalanceIcon,
     Settings as SettingsIcon,
-    Close as CloseIcon
+    Close as CloseIcon,
+    Contacts as ContactsIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -29,6 +30,7 @@ const LeftMenu = ({ onClose }) => {
         { text: 'Expenses', icon: <ReceiptIcon />, path: '/expenses' },
         { text: 'Settlements', icon: <AccountBalanceIcon />, path: '/settlements' },
         { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
+        { text: 'Contacts', icon: <ContactsIcon />, path: '/contacts' },
     ];
 
     const handleNavigation = (path) => {

@@ -33,5 +33,15 @@
             public const string ExpenseDelete = ApiPrefix + "delete/{id}";
         #endregion
 
+        #region Contact API Path
+        public const string ContactCreate = ApiPrefix + "create";
+        public const string ContactGetAll = ApiPrefix + "get/all";
+        public const string ContactGetById = ApiPrefix + "get/{id}";
+        public const string ContactUpdate = ApiPrefix + "update";
+        public const string ContactDelete = ApiPrefix + "delete/{id}";
+        public const string ContactSearch = ApiPrefix + "search";
+        public const string ContactSearchUser = ApiPrefix + "search/user";
+        #endregion
+
     }
 }

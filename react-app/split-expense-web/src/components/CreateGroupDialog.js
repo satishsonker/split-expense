@@ -39,19 +39,24 @@ const validationSchema = Yup.object({
         )
 });
 
-const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
+const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
     const [selectedUser, setSelectedUser] = useState(null);
     const [users, setUsers] = useState([]);
     const [groupIcon, setGroupIcon] = useState(null);
+    const isEditing = Boolean(group);
 
     // Fetch users/contacts from API
     useEffect(() => {
         const fetchUsers = async () => {
             try {
                 const response = await apiService.get(GROUP_PATHS.MEMBERS);
-                setUsers(response.contacts || []);
+                debugger;
+                var modifiedResponse=response.data?.map((ele,index)=>{
+                    return ele?.contactUser;
+                });
+                setUsers(modifiedResponse || []);
             } catch (error) {
                 console.error('Error fetching contacts:', error);
             }
@@ -64,11 +69,27 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
 
     const formik = useFormik({
         initialValues: {
-            name: '',
-            members: []
+            name: group?.name || '',
+            members: group?.members?.map(m => ({
+                id: m.addedUser.id,
+                email: m.addedUser.email,
+                name: `${m.addedUser.firstName} ${m.addedUser.lastName}`
+            })) || []
         },
         validationSchema,
-        onSubmit: (values) => {
+        enableReinitialize: true,
+        onSubmit: async (values) => {
+            if (isEditing) {
+                await apiService.put(`${GROUP_PATHS.UPDATE}/${group.id}`, {
+                    name: values.name,
+                    members: values.members.map(m => m.id)
+                });
+            } else {
+                await apiService.post(GROUP_PATHS.CREATE, {
+                    name: values.name,
+                    members: values.members.map(m => m.id)
+                });
+            }
             onSubmit(values);
             formik.resetForm();
         }
@@ -84,7 +105,7 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
         if (selectedUser && !formik.values.members.find(m => m.email === selectedUser.email)) {
             formik.setFieldValue('members', [
                 ...formik.values.members,
-                { id: selectedUser.id, email: selectedUser.email, name: selectedUser.name }
+                { id: selectedUser.id, email: selectedUser.email, name: selectedUser.firstName }
             ]);
             setSelectedUser(null);
         }
@@ -119,7 +140,9 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
                                 {React.createElement(groupIcon)}
                             </Avatar>
                         )}
-                        <Typography variant="h6">Create New Group</Typography>
+                        <Typography variant="h6">
+                            {isEditing ? 'Edit Group' : 'Create New Group'}
+                        </Typography>
                     </Box>
                     <IconButton onClick={handleClose} size="small">
                         <CloseIcon />
@@ -163,7 +186,7 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
                                 options={users.filter(user => 
                                     !formik.values.members.find(m => m.email === user.email)
                                 )}
-                                getOptionLabel={(option) => `${option.name} (${option.email})`}
+                                getOptionLabel={(option) => `${option.firstName} (${option.email})`}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
@@ -206,7 +229,7 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
                         variant="contained"
                         disabled={formik.isSubmitting || !formik.values.name}
                     >
-                        Create Group
+                        {isEditing ? 'Update Group' : 'Create Group'}
                     </Button>
                 </DialogActions>
             </form>

@@ -24,6 +24,8 @@ namespace SplitExpense.Middleware
                  .AddScoped<IEmailLogic, EmailLogic>()
                  .AddScoped<IEmailQueueService, EmailQueueService>()
                  .AddScoped<IEmailTemplateService, EmailTemplateService>()
+                 .AddScoped<IContactFactory,ContactFactory>()
+                 .AddScoped<IContactLogic,ContactLogic>()
                  .AddScoped<EmailSmtpService>()
                  .AddScoped<EmailApiService>()
                  .AddScoped<EmailServiceFactory>()
