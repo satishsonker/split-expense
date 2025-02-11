@@ -14,6 +14,26 @@ namespace SplitExpense.Data.Factory
         private readonly SplitExpenseDbContext _context = context;
         private readonly ISplitExpenseLogger _logger = logger;
         private int userId = userContext.GetUserId();
+
+        public async Task<bool> AddInContactListAsync(int contactUserId)
+        {
+           var alreadyInContact = _context.Contacts
+                .Where(x => !x.IsDeleted && x.UserId == userId && x.ContactId == contactUserId)
+                .FirstOrDefault();
+            if (alreadyInContact != null)
+            {
+                _logger.LogError(LogMessage.UserAlreadyAddedInContact.ToFormattedString(), ErrorCodes.RecordAlreadyExist.GetDescription(), "ContactFactory-AddInContactListAsync");
+                throw new BusinessRuleViolationException(ErrorCodes.RecordAlreadyExist);
+            }
+            var contact = new Contact()
+            {
+                UserId = userId,
+                ContactId = contactUserId
+            };
+            var entity = _context.Contacts.Add(contact);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
         public async Task<Contact> CreateAsync(User request)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -64,12 +84,12 @@ namespace SplitExpense.Data.Factory
         public async Task<bool> DeleteAsync(int id)
         {
             var oldData = await _context.Contacts
-            .Where(x => !x.IsDeleted && x.Id==id && x.CreatedBy==userId)
+            .Where(x => !x.IsDeleted && x.ContactId==id && x.CreatedBy==userId)
                 .FirstOrDefaultAsync();
             if (oldData == null)
             {
                 _logger.LogError(LogMessage.RecordNotExist.ToFormattedString(), ErrorCodes.RecordNotFound.GetDescription(), "ContactFactory-DeleteAsync");
-                throw new BusinessRuleViolationException(ErrorCodes.RecordAlreadyExist);
+                throw new BusinessRuleViolationException(ErrorCodes.RecordNotFound);
             }
             oldData.IsDeleted = true;
             _context.Contacts.Update(oldData);

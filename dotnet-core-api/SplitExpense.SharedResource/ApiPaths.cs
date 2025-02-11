@@ -35,6 +35,7 @@
 
         #region Contact API Path
         public const string ContactCreate = ApiPrefix + "create";
+        public const string ContactAddInList = ApiPrefix + "add/in/contact/list/{id}";
         public const string ContactGetAll = ApiPrefix + "get/all";
         public const string ContactGetById = ApiPrefix + "get/{id}";
         public const string ContactUpdate = ApiPrefix + "update";

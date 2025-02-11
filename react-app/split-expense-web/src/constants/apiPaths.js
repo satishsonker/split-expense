@@ -25,4 +25,5 @@ export const CONTACT_PATHS = {
     DELETE: `${API_BASE_URL}/contacts/delete`,
     ADD: `${API_BASE_URL}/contacts/add`,
     CREATE: `${API_BASE_URL}/contacts/create`,
+    ADD_IN_CONTACT_LIST:`${API_BASE_URL}/contacts/add/in/contact/list/`,
 }; 

@@ -23,6 +23,16 @@ namespace SplitExpense.Controllers
             return await _contactLogic.CreateAsync(request);
         }
 
+        [ProducesResponseType(typeof(bool), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status503ServiceUnavailable)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+        [HttpPost(ApiPaths.ContactAddInList)]
+        public async Task<bool> AddInContactListAsync([FromRoute] int id)
+        {
+            return await _contactLogic.AddInContactListAsync(id);
+        }
+
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status503ServiceUnavailable)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]

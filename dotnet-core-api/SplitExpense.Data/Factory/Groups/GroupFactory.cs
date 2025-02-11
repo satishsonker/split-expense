@@ -45,7 +45,7 @@ namespace SplitExpense.Data.Factory
             }
         }
 
-        public async Task<Group> CreateAsync(Group request)
+        public async Task<Group> CreateAsync(Group request,List<int> members)
         {
             try
             {
@@ -54,12 +54,16 @@ namespace SplitExpense.Data.Factory
                 var entity = await _context.Groups.AddAsync(request);
                 if (await _context.SaveChangesAsync() > 0)
                 {
-                    var userGroupMap = new UserGroupMapping()
+                    var userGroupMap = new List<UserGroupMapping>()
                     {
-                        GroupId = entity.Entity.Id,
-                        FriendId=userId
+                        new(){FriendId=userId,GroupId=entity.Entity.Id}
                     };
-                    _context.UserGroupMappings.Add(userGroupMap);
+                    if(members!=null && members.Count>0)
+                    {
+                        members.ForEach(memberId => userGroupMap.Add(new() { FriendId = memberId, GroupId = entity.Entity.Id }));
+                        
+                    }
+                    _context.UserGroupMappings.AddRange(userGroupMap);
                     if (await _context.SaveChangesAsync() > 0)
                     {
                         await trans.CommitAsync();

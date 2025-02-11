@@ -41,9 +41,16 @@ namespace SplitExpense.Logic
 
         public async Task<GroupResponse> CreateAsync(GroupRequest request)
         {
-            ArgumentNullException.ThrowIfNull(request);
-            var mappedRequest = _mapper.Map<Group>(request);
-            return _mapper.Map<GroupResponse>(await _factory.CreateAsync(mappedRequest));
+            try
+            {
+                ArgumentNullException.ThrowIfNull(request);
+                var mappedRequest = _mapper.Map<Group>(request);
+                return _mapper.Map<GroupResponse>(await _factory.CreateAsync(mappedRequest, request.Members));
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)

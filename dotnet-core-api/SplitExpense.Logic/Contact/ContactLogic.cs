@@ -10,6 +10,12 @@ namespace SplitExpense.Logic
     {
         private readonly IContactFactory _contactFactory = contactFactory;
         private readonly IMapper _mapper = mapper;
+
+        public async Task<bool> AddInContactListAsync(int contactUserId)
+        {
+            return await _contactFactory.AddInContactListAsync(contactUserId);
+        }
+
         public async Task<ContactResponse> CreateAsync(UserRequest request)
         {
             ArgumentNullException.ThrowIfNull(request);

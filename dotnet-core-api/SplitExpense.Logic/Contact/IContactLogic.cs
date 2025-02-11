@@ -6,7 +6,8 @@ namespace SplitExpense.Logic
 {
     public interface IContactLogic
     {
-        Task<ContactResponse> CreateAsync(UserRequest request);
+        Task<ContactResponse> CreateAsync(UserRequest request); 
+        Task<bool> AddInContactListAsync(int contactUserId);
         Task<bool> DeleteAsync(int id);
         Task<PagingResponse<ContactResponse>> GetAllAsync(PagingRequest request);
         Task<ContactResponse> GetAsync(int id);

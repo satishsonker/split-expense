@@ -6,6 +6,7 @@ namespace SplitExpense.Data.Factory
     public interface IContactFactory
     {
         Task<Contact> CreateAsync(User request);
+        Task<bool> AddInContactListAsync(int contactUserId);
         Task<int> UpdateAsync(Contact request);
         Task<Contact?> GetAsync(int id);
         Task<bool> DeleteAsync(int id);

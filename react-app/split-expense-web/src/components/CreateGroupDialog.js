@@ -105,7 +105,7 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
         if (selectedUser && !formik.values.members.find(m => m.email === selectedUser.email)) {
             formik.setFieldValue('members', [
                 ...formik.values.members,
-                { id: selectedUser.id, email: selectedUser.email, name: selectedUser.firstName }
+                { id: selectedUser.userId, email: selectedUser.email, name: selectedUser.firstName }
             ]);
             setSelectedUser(null);
         }

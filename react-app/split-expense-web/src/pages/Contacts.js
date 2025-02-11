@@ -24,6 +24,7 @@ import { CONTACT_PATHS } from '../constants/apiPaths';
 import { toast } from 'react-toastify';
 import AddContactDialog from '../components/AddContactDialog';
 import { debounce } from 'lodash';
+import DeleteConfirmationDialog from '../components/DeleteConfirmationDialog';
 
 const Contacts = () => {
     const theme = useTheme();
@@ -32,6 +33,9 @@ const Contacts = () => {
     const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [openAddDialog, setOpenAddDialog] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [contactToDelete, setContactToDelete] = useState(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     const fetchContacts = async () => {
         try {
@@ -85,25 +89,38 @@ const Contacts = () => {
         debouncedSearch(query);
     };
 
-    const handleDeleteContact = async (contactId) => {
+    const handleDeleteContact = async (contact) => {
+        setContactToDelete(contact);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
         try {
-            if (window.confirm('Are you sure you want to remove this contact?')) {
-                await apiService.delete(`${CONTACT_PATHS.DELETE}/${contactId}`);
-                toast.success('Contact removed successfully');
-                fetchContacts();
-            }
+            setDeleteLoading(true);
+            await apiService.delete(`${CONTACT_PATHS.DELETE}/${contactToDelete.userId}`);
+            toast.success('Contact deleted successfully');
+            fetchContacts();
         } catch (error) {
             console.error('Error deleting contact:', error);
+            toast.error(error.response?.data?.message || 'Failed to delete contact');
+        } finally {
+            setDeleteLoading(false);
+            setDeleteDialogOpen(false);
+            setContactToDelete(null);
         }
+    };
+
+    const handleCloseDeleteDialog = () => {
+        setDeleteDialogOpen(false);
+        setContactToDelete(null);
     };
 
     const handleAddContact = async (contactData) => {
         try {
             setLoading(true);
-            if (contactData.existingUser) {
-                await apiService.post(CONTACT_PATHS.ADD, {
-                    userId: contactData.userId
-                });
+            if (contactData.isExistingUser) {
+                await apiService.post(`${CONTACT_PATHS.ADD_IN_CONTACT_LIST}${contactData.userId}`);
+                toast.success('Contact added successfully');
             } else {
                 await apiService.post(CONTACT_PATHS.CREATE, {
                     firstName: contactData.firstName,
@@ -111,12 +128,14 @@ const Contacts = () => {
                     email: contactData.email,
                     phoneNumber: contactData.phoneNumber
                 });
+                toast.success('Contact created successfully');
             }
-            toast.success('Contact added successfully');
             setOpenAddDialog(false);
-            fetchContacts();
+            setSearchQuery('');
+            await fetchContacts();
         } catch (error) {
             console.error('Error adding contact:', error);
+            toast.error(error.response?.data?.message || 'Failed to add contact');
         } finally {
             setLoading(false);
         }
@@ -192,7 +211,7 @@ const Contacts = () => {
                                         <IconButton
                                             size="small"
                                             color="error"
-                                            onClick={() => handleDeleteContact(contact.id)}
+                                            onClick={() => handleDeleteContact(contact)}
                                             disabled={loading}
                                         >
                                             <DeleteIcon />
@@ -219,6 +238,17 @@ const Contacts = () => {
                 open={openAddDialog}
                 onClose={() => setOpenAddDialog(false)}
                 onSubmit={handleAddContact}
+            />
+
+            <DeleteConfirmationDialog
+                open={deleteDialogOpen}
+                onClose={handleCloseDeleteDialog}
+                onConfirm={handleConfirmDelete}
+                loading={deleteLoading}
+                type="contact"
+                data={contactToDelete}
+                title="Delete Contact"
+                warningMessage="This action cannot be undone."
             />
         </Box>
     );

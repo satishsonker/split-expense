@@ -22,6 +22,7 @@ import { apiService } from '../utils/axios';
 import { GROUP_PATHS } from '../constants/apiPaths';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
+import DeleteConfirmationDialog from '../components/DeleteConfirmationDialog';
 
 const GROUPS_PER_PAGE = 10;
 
@@ -36,6 +37,9 @@ const Groups = () => {
     const [totalGroups, setTotalGroups] = useState(0);
     const [selectedGroup, setSelectedGroup] = useState(null);
     const { user } = useAuth();
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [groupToDelete, setGroupToDelete] = useState(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     const fetchGroups = async (pageNum = 1) => {
         try {
@@ -91,15 +95,30 @@ const Groups = () => {
         fetchGroups(nextPage);
     };
 
-    const handleDeleteGroup = async (groupId) => {
+    const handleDeleteGroup = (group) => {
+        setGroupToDelete(group);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
         try {
-            await apiService.delete(`${GROUP_PATHS.DELETE}/${groupId}`);
+            setDeleteLoading(true);
+            await apiService.delete(`${GROUP_PATHS.DELETE}/${groupToDelete.id}`);
             toast.success('Group deleted successfully');
-            fetchGroups(1);
-            setPage(1);
+            fetchGroups(); // Refresh the list
         } catch (error) {
             console.error('Error deleting group:', error);
+            toast.error(error.response?.data?.message || 'Failed to delete group');
+        } finally {
+            setDeleteLoading(false);
+            setDeleteDialogOpen(false);
+            setGroupToDelete(null);
         }
+    };
+
+    const handleCloseDeleteDialog = () => {
+        setDeleteDialogOpen(false);
+        setGroupToDelete(null);
     };
 
     const handleEditGroup = async (group) => {
@@ -201,9 +220,7 @@ const Groups = () => {
                                                     color="error"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        if (window.confirm('Are you sure you want to delete this group?')) {
-                                                            handleDeleteGroup(group.id);
-                                                        }
+                                                        handleDeleteGroup(group);
                                                     }}
                                                     title="Delete Group"
                                                 >
@@ -276,6 +293,17 @@ const Groups = () => {
                 }}
                 onSubmit={handleCreateGroup}
                 group={selectedGroup}
+            />
+
+            <DeleteConfirmationDialog
+                open={deleteDialogOpen}
+                onClose={handleCloseDeleteDialog}
+                onConfirm={handleConfirmDelete}
+                loading={deleteLoading}
+                type="group"
+                data={groupToDelete}
+                title="Delete Group"
+                warningMessage="This action cannot be undone. All group expenses and settlements will be deleted."
             />
         </Box>
     );

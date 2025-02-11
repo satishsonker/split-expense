@@ -10,7 +10,8 @@ namespace SplitExpense.AutoMapperMapping
         public Mapping()
         {
             #region Group
-                CreateMap<GroupRequest, Group>();
+                CreateMap<GroupRequest, Group>()
+                .ForMember(dest => dest.Members, opt => opt.Ignore()); ;
             CreateMap<Group, GroupResponse>();
                 CreateMap<PagingResponse<Group>, PagingResponse<GroupResponse>>();
             #endregion
