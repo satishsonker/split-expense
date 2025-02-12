@@ -1,4 +1,5 @@
-﻿using SplitExpense.Models.DTO;
+﻿using SplitExpense.Models.DbModels;
+using SplitExpense.Models.DTO;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SplitExpense.Models
@@ -7,9 +8,14 @@ namespace SplitExpense.Models
     {
         public required int UserId { get; set; }
         public required string Name { get; set; }
-        public required string? Icon { get; set; }
+        public string? Icon { get; set; }
+        public string? ImagePath { get; set; }
+        public int? GroupTypeId { get; set; }
 
-        [ForeignKey("UserId")]
+        [ForeignKey(nameof(GroupTypeId))]
+        public GroupType? GroupType { get; set; }
+
+        [ForeignKey(nameof(UserId))]
         public User? User { get; set; }
 
         public List<UserGroupMapping> Members { get; set; }

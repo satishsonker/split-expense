@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SplitExpense.Models
+namespace SplitExpense.Models.DbModels
 {
-    public class Contact:BaseDbModels
+    public class Contact : BaseDbModels
     {
 
         public required int UserId { get; set; }

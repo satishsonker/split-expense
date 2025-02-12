@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SplitExpense.Models;
+using SplitExpense.Models.DbModels;
 using SplitExpense.Logger;
 
 namespace SplitExpense.Data.Factory

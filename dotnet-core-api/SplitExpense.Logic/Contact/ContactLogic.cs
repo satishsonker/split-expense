@@ -2,6 +2,7 @@
 using SplitExpense.Data.Factory;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
+using SplitExpense.Models.DbModels;
 using SplitExpense.Models.DTO;
 
 namespace SplitExpense.Logic

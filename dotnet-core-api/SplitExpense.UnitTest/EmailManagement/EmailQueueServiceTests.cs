@@ -6,7 +6,7 @@ using SplitExpense.Data;
 using SplitExpense.EmailManagement.Service;
 using SplitExpense.ExceptionManagement.Exceptions;
 using SplitExpense.Logger;
-using SplitExpense.Models;
+using SplitExpense.Models.DbModels;
 using SplitExpense.SharedResource;
 using Xunit;
 

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SplitExpense.Data;
 using SplitExpense.ExceptionManagement.Exceptions;
-using SplitExpense.Models;
+using SplitExpense.Models.DbModels;
 using SplitExpense.SharedResource;
 
 namespace SplitExpense.EmailManagement.Service

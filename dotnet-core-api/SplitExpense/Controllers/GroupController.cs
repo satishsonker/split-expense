@@ -48,7 +48,7 @@ namespace SplitExpense.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
         [HttpDelete(ApiPaths.GroupDelete)]
-        public async Task<bool> UpdateAsync([FromRoute] int id)
+        public async Task<bool> DeleteAsync([FromRoute] int id)
         {
             return await _groupLogic.DeleteAsync(id);
         }

@@ -1,8 +1,6 @@
-﻿using SplitExpense.Models.DbModels;
-using System.ComponentModel.DataAnnotations;
-using System.Transactions;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace SplitExpense.Models
+namespace SplitExpense.Models.DbModels
 {
     public class User
     {

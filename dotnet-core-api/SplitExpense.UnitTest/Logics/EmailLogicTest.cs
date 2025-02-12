@@ -6,6 +6,7 @@ using SplitExpense.Logger;
 using SplitExpense.Logic.Email;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
+using SplitExpense.Models.DbModels;
 using SplitExpense.Models.DTO.Response;
 using SplitExpense.SharedResource;
 using Xunit;

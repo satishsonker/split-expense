@@ -1,5 +1,6 @@
 ﻿using SplitExpense.Models;
 using SplitExpense.Models.Common;
+using SplitExpense.Models.DbModels;
 using SplitExpense.SharedResource;
 
 namespace SplitExpense.EmailManagement.Service

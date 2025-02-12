@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Xunit;
+﻿using Microsoft.EntityFrameworkCore;
 using Moq;
-using Microsoft.EntityFrameworkCore;
 using SplitExpense.Data;
-using SplitExpense.Models;
-using SplitExpense.ExceptionManagement.Exceptions;
 using SplitExpense.EmailManagement.Service;
+using SplitExpense.ExceptionManagement.Exceptions;
+using SplitExpense.Models.DbModels;
 using SplitExpense.SharedResource;
-using System.Xml;
+using Xunit;
 
 namespace SplitExpense.UnitTest.EmailManagement
 {

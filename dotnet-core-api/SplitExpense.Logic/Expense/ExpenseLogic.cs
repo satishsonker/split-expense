@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using SplitExpense.Data.Factory;
-using SplitExpense.Models;
+using SplitExpense.Models.DbModels;
 using SplitExpense.Models.DTO;
 
 namespace SplitExpense.Logic

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace SplitExpense.Models
+namespace SplitExpense.Models.DbModels
 {
     public class ExpenseShare : BaseDbModels
     {

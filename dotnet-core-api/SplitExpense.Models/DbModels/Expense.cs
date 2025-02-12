@@ -1,8 +1,7 @@
-﻿using SplitExpense.SharedResource;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
 
-namespace SplitExpense.Models
+namespace SplitExpense.Models.DbModels
 {
     public class Expense:BaseDbModels
     {

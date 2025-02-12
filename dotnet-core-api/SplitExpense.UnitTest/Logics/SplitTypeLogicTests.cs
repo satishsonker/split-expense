@@ -5,6 +5,7 @@ using SplitExpense.Logger;
 using SplitExpense.Logic.Masters;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
+using SplitExpense.Models.DbModels;
 using SplitExpense.Models.DTO;
 using Xunit;
 

@@ -6,6 +6,7 @@ using SplitExpense.SharedResource;
 using SplitExpense.ExceptionManagement.Exceptions;
 using Microsoft.Extensions.Configuration;
 using SplitExpense.Models.Common;
+using SplitExpense.Models.DbModels;
 
 namespace SplitExpense.EmailManagement.Service
 {

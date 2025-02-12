@@ -1,13 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace SplitExpense.Models
+namespace SplitExpense.Models.DbModels
 {
-    public class Transaction:BaseDbModels
-    {       
+    public class Transaction : BaseDbModels
+    {
         public int FromUserId { get; set; }
 
-       
+
         public int ToUserId { get; set; }
 
         [Required]

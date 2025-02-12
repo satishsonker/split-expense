@@ -6,6 +6,7 @@ using SplitExpense.Logic;
 using SplitExpense.Logic.Email;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
+using SplitExpense.Models.DbModels;
 using SplitExpense.Models.DTO;
 using Xunit;
 
@@ -79,10 +80,11 @@ namespace SplitExpense.UnitTest.Logic
             var request = new GroupRequest { Name = "Test Group" };
             var group = new Group { Id = id, Name = "Test Group",Icon=string.Empty,UserId=1 };
             var response = new GroupResponse { Id = id, Name = "Test Group" };
+            var members = new List<int> { 1, 2, 3 };
 
             _mockMapper.Setup(m => m.Map<Group>(request)).Returns(group);
             _mockMapper.Setup(m => m.Map<GroupResponse>(group)).Returns(response);
-            _mockFactory.Setup(f => f.CreateAsync(group)).ReturnsAsync(group);
+            _mockFactory.Setup(f => f.CreateAsync(group,members)).ReturnsAsync(group);
 
             // Act
             var result = await _groupsLogic.CreateAsync(request);

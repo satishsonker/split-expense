@@ -1,6 +1,6 @@
 ﻿using SplitExpense.SharedResource;
 
-namespace SplitExpense.Models
+namespace SplitExpense.Models.DbModels
 {
     public class EmailQueue : BaseDbModels
     {

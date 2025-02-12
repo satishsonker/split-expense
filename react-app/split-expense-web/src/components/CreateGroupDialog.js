@@ -21,7 +21,6 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { getGroupIcon } from '../utils/groupIcons';
 import { GROUP_PATHS } from '../constants/apiPaths';
-import { toast } from 'react-toastify';
 import { apiService } from '../utils/axios';
 
 const validationSchema = Yup.object({
@@ -52,7 +51,6 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
         const fetchUsers = async () => {
             try {
                 const response = await apiService.get(GROUP_PATHS.MEMBERS);
-                debugger;
                 var modifiedResponse=response.data?.map((ele,index)=>{
                     return ele?.contactUser;
                 });
@@ -80,8 +78,9 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
         enableReinitialize: true,
         onSubmit: async (values) => {
             if (isEditing) {
-                await apiService.put(`${GROUP_PATHS.UPDATE}/${group.id}`, {
+                await apiService.put(`${GROUP_PATHS.UPDATE}`, {
                     name: values.name,
+                    id:group.id,
                     members: values.members.map(m => m.id)
                 });
             } else {
