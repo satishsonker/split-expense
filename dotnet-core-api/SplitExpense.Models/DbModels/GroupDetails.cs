@@ -2,7 +2,7 @@
 
 namespace SplitExpense.Models.DbModels
 {
-    public class GroupDetails : BaseDbModels
+    public class GroupDetail : BaseDbModels
     {
         public int GroupId { get; set; }
         public bool EnableGroupDate { get; set; }

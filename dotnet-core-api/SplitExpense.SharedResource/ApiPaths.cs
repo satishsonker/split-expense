@@ -44,5 +44,14 @@
         public const string ContactSearchUser = ApiPrefix + "search/user";
         #endregion
 
+        #region GroupType
+        public const string GroupTypeCreate = "api/grouptype/create";
+        public const string GroupTypeUpdate = "api/grouptype/update";
+        public const string GroupTypeDelete = "api/grouptype/delete/{id}";
+        public const string GroupTypeGetById = "api/grouptype/{id}";
+        public const string GroupTypeGetAll = "api/grouptype/getall";
+        public const string GroupTypeSearch = "api/grouptype/search";
+        #endregion
+
     }
 }

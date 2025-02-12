@@ -1,5 +1,4 @@
 ﻿using SplitExpense.Models.DbModels;
-using SplitExpense.Models.DTO;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SplitExpense.Models

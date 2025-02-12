@@ -25,6 +25,9 @@ namespace SplitExpense.Data
 
         public DbSet<Contact> Contacts { get; set; }
 
+        public DbSet<GroupType> GroupTypes { get; set; }
+        public DbSet<GroupDetail> GroupDetails { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

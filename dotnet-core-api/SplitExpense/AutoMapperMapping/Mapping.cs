@@ -53,6 +53,12 @@ namespace SplitExpense.AutoMapperMapping
             CreateMap<Contact, ContactResponse>();
             CreateMap<PagingResponse<Contact>, PagingResponse<ContactResponse>>();
             #endregion
+
+            #region GroupType
+            CreateMap<GroupTypeRequest, GroupType>();
+            CreateMap<GroupType, GroupTypeResponse>();
+            CreateMap<PagingResponse<GroupType>, PagingResponse<GroupTypeResponse>>();
+            #endregion
         }
     }
 }

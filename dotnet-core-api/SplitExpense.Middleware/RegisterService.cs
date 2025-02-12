@@ -20,7 +20,9 @@ namespace SplitExpense.Middleware
                 .AddScoped<IGroupLogic, GroupsLogic>()
                 .AddScoped<ISplitTypeFactory,SplitTypeFactory>()
                 .AddScoped<ISplitTypeLogic,SplitTypeLogic>()
-                #region Email Service
+                .AddScoped<IGroupTypeFactory, GroupTypeFactory>()
+                .AddScoped<IGroupTypeLogic, GroupTypeLogic>()
+            #region Email Service
                  .AddScoped<IEmailLogic, EmailLogic>()
                  .AddScoped<IEmailQueueService, EmailQueueService>()
                  .AddScoped<IEmailTemplateService, EmailTemplateService>()

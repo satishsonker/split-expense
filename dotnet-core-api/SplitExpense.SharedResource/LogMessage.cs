@@ -13,5 +13,6 @@
         public const string UserAlreadyAddedInGroup = "UserAlreadyAddedInGroup";
         public const string UserAlreadyAddedInContact = "UserAlreadyAddedInContact";
         public const string RecordNotExist = "RecordNotExist";
+        public const string RecordAlreadyExist = "RecordAlreadyExist";
     }
 }
