@@ -12,7 +12,8 @@ namespace SplitExpense.Models.DTO
 
         [StringLength(500)]
         public string? Description { get; set; }
-        
+
         public string Icon { get; set; } = string.Empty;
+        public string? GroupNameSuggestion { get; set; }
     }
-} 
+}

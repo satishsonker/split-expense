@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SplitExpense.EmailManagement\SplitExpense.EmailManagement.csproj" />
     <ProjectReference Include="..\SplitExpense.ExceptionManagement\SplitExpense.ExceptionManagement.csproj" />
+    <ProjectReference Include="..\SplitExpense.FileManagement\SplitExpense.FileManagement.csproj" />
     <ProjectReference Include="..\SplitExpense.Logger\SplitExpense.Logger.csproj" />
     <ProjectReference Include="..\SplitExpense.Logic\SplitExpense.Logic.csproj" />
     <ProjectReference Include="..\SplitExpense.Middleware\SplitExpense.Middleware.csproj" />

@@ -27,7 +27,13 @@ namespace SplitExpense.SharedResource
         [Description("Missing required field")]
         MissingRequiredField = 2001,
         [Description("Invalid field format")]
-        InvalidFieldFormat = 2002,
+        InvalidFieldFormat = 2002, 
+        [Description("Invalid File/Image")]
+        InvalidFile = 2003,
+        [Description("Invalid File/Image Extension")]
+        InvalidFileExtension = 2004,
+        [Description("File/Image SizeExceeded")]
+        FileSizeExceeded = 2005,
 
         // Database Errors
         [Description("Database connection failed")]

@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SplitExpense.ExceptionManagement\SplitExpense.ExceptionManagement.csproj" />
+    <ProjectReference Include="..\SplitExpense.Logger\SplitExpense.Logger.csproj" />
+    <ProjectReference Include="..\SplitExpense.Models\SplitExpense.Models.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -6,5 +6,6 @@ namespace SplitExpense.Models
     {
         public string Name { get; set; }
         public List<int> Members { get; set; }
+        public IFormFile MyProperty { get; set; }
     }
 }

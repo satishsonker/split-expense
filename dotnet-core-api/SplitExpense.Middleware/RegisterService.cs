@@ -2,6 +2,8 @@
 using SplitExpense.Data.Factory;
 using SplitExpense.Data.Services;
 using SplitExpense.EmailManagement.Service;
+using SplitExpense.FileManagement.Service;
+using SplitExpense.FileManagement.Storage;
 using SplitExpense.Logger;
 using SplitExpense.Logic;
 using SplitExpense.Logic.Email;
@@ -22,6 +24,8 @@ namespace SplitExpense.Middleware
                 .AddScoped<ISplitTypeLogic,SplitTypeLogic>()
                 .AddScoped<IGroupTypeFactory, GroupTypeFactory>()
                 .AddScoped<IGroupTypeLogic, GroupTypeLogic>()
+                .AddScoped<IFileUploadService, FileUploadService>()
+                .AddScoped<IStorageProvider,LocalStorageProvider>()
             #region Email Service
                  .AddScoped<IEmailLogic, EmailLogic>()
                  .AddScoped<IEmailQueueService, EmailQueueService>()

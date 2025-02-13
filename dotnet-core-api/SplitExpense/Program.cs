@@ -9,6 +9,8 @@ using SplitExpense.Middleware;
 using SplitExpense.ExceptionManagement.Exceptions;
 using NLog.Web;
 using SplitExpense.Models.ConfigModels;
+using SplitExpense.FileManagement.Storage;
+using SplitExpense.FileManagement.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -103,6 +105,29 @@ builder.Services.AddAuthentication(options =>
 //    options.AppId = builder.Configuration["Authentication:Facebook:AppId"];
 //    options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
 //});
+
+// In your service registration
+builder.Services.Configure<FileUploadSettings>(builder.Configuration.GetSection("FileUpload"));
+
+// Register the appropriate storage provider based on configuration
+var storageType = builder.Configuration.GetValue<StorageType>("FileUpload:StorageSettings:StorageType");
+switch (storageType)
+{
+    case StorageType.Local:
+        builder.Services.AddScoped<IStorageProvider, LocalStorageProvider>();
+        break;
+    case StorageType.AzureBlob:
+        builder.Services.AddScoped<IStorageProvider, AzureBlobStorageProvider>();
+        break;
+    case StorageType.AwsS3:
+        builder.Services.AddScoped<IStorageProvider, AwsS3StorageProvider>();
+        break;
+    case StorageType.Api:
+        builder.Services.AddScoped<IStorageProvider, ApiStorageProvider>();
+        break;
+}
+
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
 var app = builder.Build();
 

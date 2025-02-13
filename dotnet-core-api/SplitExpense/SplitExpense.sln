@@ -21,9 +21,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense.EmailManagemen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense.UnitTest", "..\SplitExpense.UnitTest\SplitExpense.UnitTest.csproj", "{50112FA2-C66B-4C52-BBA2-978DE899230B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.Middleware", "..\SplitExpense.Middleware\SplitExpense.Middleware.csproj", "{FC0577DB-C7BD-4CC8-B137-006CCCCD4031}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense.Middleware", "..\SplitExpense.Middleware\SplitExpense.Middleware.csproj", "{FC0577DB-C7BD-4CC8-B137-006CCCCD4031}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.ExceptionManagement", "..\SplitExpense.ExceptionManagement\SplitExpense.ExceptionManagement.csproj", "{4068E4B4-4E7A-41EC-96B2-23741DAEDCA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense.ExceptionManagement", "..\SplitExpense.ExceptionManagement\SplitExpense.ExceptionManagement.csproj", "{4068E4B4-4E7A-41EC-96B2-23741DAEDCA6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.FileManagement", "..\SplitExpense.FileManagement\SplitExpense.FileManagement.csproj", "{2CDF6E86-A05B-4ABA-95BE-75EB3345FA6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,10 @@ Global
 		{4068E4B4-4E7A-41EC-96B2-23741DAEDCA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4068E4B4-4E7A-41EC-96B2-23741DAEDCA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4068E4B4-4E7A-41EC-96B2-23741DAEDCA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CDF6E86-A05B-4ABA-95BE-75EB3345FA6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CDF6E86-A05B-4ABA-95BE-75EB3345FA6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CDF6E86-A05B-4ABA-95BE-75EB3345FA6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CDF6E86-A05B-4ABA-95BE-75EB3345FA6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
