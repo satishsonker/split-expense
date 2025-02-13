@@ -42,3 +42,4 @@
 /dotnet-core-api/SplitExpense.Middleware/obj
 /dotnet-core-api/SplitExpense.UnitTest/bin/Debug/net8.0
 /dotnet-core-api/SplitExpense.FileManagement/obj
+/dotnet-core-api/SplitExpense.FileManagement/bin/Debug/net8.0

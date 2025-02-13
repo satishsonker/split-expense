@@ -9,6 +9,7 @@ namespace SplitExpense.Models
         public required string Name { get; set; }
         public string? Icon { get; set; }
         public string? ImagePath { get; set; }
+        public string? ThumbImagePath { get; set; }
         public int? GroupTypeId { get; set; }
 
         [ForeignKey(nameof(GroupTypeId))]
@@ -17,6 +18,7 @@ namespace SplitExpense.Models
         [ForeignKey(nameof(UserId))]
         public User? User { get; set; }
 
-        public List<UserGroupMapping> Members { get; set; }
+        public List<UserGroupMapping>? Members { get; set; }
+        public GroupDetail? GroupDetail { get; set; }
     }
 }

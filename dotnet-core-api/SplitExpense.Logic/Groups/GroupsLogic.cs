@@ -7,15 +7,17 @@ using SplitExpense.Models.DTO;
 using SplitExpense.Logger;
 using SplitExpense.ExceptionManagement.Exceptions;
 using SplitExpense.SharedResource;
+using SplitExpense.FileManagement.Service;
 
 namespace SplitExpense.Logic
 {
-    public class GroupsLogic(IMapper mapper, IGroupFactory factory,IEmailLogic emailLogic,ISplitExpenseLogger logger) : IGroupLogic
+    public class GroupsLogic(IMapper mapper, IGroupFactory factory,IEmailLogic emailLogic,ISplitExpenseLogger logger, IFileUploadService fileUploadService) : IGroupLogic
     {
         private readonly IMapper _mapper = mapper;
         private readonly IGroupFactory _factory=factory;
         private readonly IEmailLogic _emailLogic=emailLogic;
         private readonly ISplitExpenseLogger _logger = logger;
+        private readonly IFileUploadService _fileUploadService = fileUploadService;
 
         public async Task<bool> AddFriendInGroupAsync(AddFriendInGroupRequest request)
         {
@@ -45,6 +47,12 @@ namespace SplitExpense.Logic
             {
                 ArgumentNullException.ThrowIfNull(request);
                 var mappedRequest = _mapper.Map<Group>(request);
+                if(request.GroupImage != null && request.GroupImage.Length>0)
+                {
+                    var fileUploadResponse = await _fileUploadService.UploadFileAsync(request.GroupImage);
+                    mappedRequest.ImagePath = fileUploadResponse.FilePath;
+                    mappedRequest.ThumbImagePath = fileUploadResponse.ThumbnailPath;
+                }
                 return _mapper.Map<GroupResponse>(await _factory.CreateAsync(mappedRequest, request.Members));
             }
             catch (Exception ex)
