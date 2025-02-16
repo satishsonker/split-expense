@@ -45,12 +45,12 @@
         #endregion
 
         #region GroupType
-        public const string GroupTypeCreate = "api/grouptype/create";
-        public const string GroupTypeUpdate = "api/grouptype/update";
-        public const string GroupTypeDelete = "api/grouptype/delete/{id}";
-        public const string GroupTypeGetById = "api/grouptype/{id}";
-        public const string GroupTypeGetAll = "api/grouptype/getall";
-        public const string GroupTypeSearch = "api/grouptype/search";
+        public const string GroupTypeCreate = ApiPrefix + "create";
+        public const string GroupTypeUpdate = ApiPrefix + "update";
+        public const string GroupTypeDelete = ApiPrefix + "delete/{id}";
+        public const string GroupTypeGetById = ApiPrefix + "get/{id}";
+        public const string GroupTypeGetAll = ApiPrefix + "get/all";
+        public const string GroupTypeSearch = ApiPrefix + "search";
         #endregion
 
     }

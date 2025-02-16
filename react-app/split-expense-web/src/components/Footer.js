@@ -2,7 +2,11 @@ import { Box, Container, Typography, Link, useTheme, useMediaQuery } from '@mui/
 
 const Footer = () => {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'));
+
+    if (!isLargeScreen) {
+        return null;
+    }
 
     return (
         <Box
@@ -21,13 +25,13 @@ const Footer = () => {
                 <Box
                     sx={{
                         display: 'flex',
-                        flexDirection: isMobile ? 'column' : 'row',
+                        flexDirection: 'row',
                         justifyContent: 'space-between',
-                        alignItems: isMobile ? 'center' : 'flex-start',
-                        textAlign: isMobile ? 'center' : 'left',
+                        alignItems: 'flex-start',
+                        textAlign: 'left',
                     }}
                 >
-                    <Box sx={{ mb: isMobile ? 2 : 0 }}>
+                    <Box sx={{ mb: 2 }}>
                         <Typography variant="h6" color="text.primary" gutterBottom>
                             Split Expense
                         </Typography>
@@ -39,7 +43,7 @@ const Footer = () => {
                     <Box
                         sx={{
                             display: 'flex',
-                            flexDirection: isMobile ? 'column' : 'row',
+                            flexDirection: 'row',
                             gap: 4,
                         }}
                     >
