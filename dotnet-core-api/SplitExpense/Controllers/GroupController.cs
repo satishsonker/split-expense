@@ -18,8 +18,25 @@ namespace SplitExpense.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
         [HttpPost(ApiPaths.GroupCreate)]
-        public async Task<GroupResponse> CreateAsync([FromBody] GroupRequest request)
+        [Consumes("multipart/form-data")]
+        public async Task<GroupResponse> CreateAsync(
+            [FromForm] string name,
+            [FromForm] string? icon,
+             IFormFile? image,
+            [FromForm] List<int>? members,
+            [FromForm] int? groupTypeId,
+            [FromForm] GroupDetailRequest? groupDetail)
         {
+            var request = new GroupRequest
+            {
+                Name = name,
+                Icon = icon,
+                GroupImage = image,
+                Members = members ?? [],
+                GroupTypeId = groupTypeId,
+                GroupDetail = groupDetail
+            };
+            
             return await _groupLogic.CreateAsync(request);
         }
         
@@ -38,8 +55,27 @@ namespace SplitExpense.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
         [HttpPut(ApiPaths.GroupUpdate)]
-        public async Task<int> UpdateAsync([FromBody] GroupRequest request)
+        [Consumes("multipart/form-data")]
+        public async Task<int> UpdateAsync(
+            [FromForm] int id,
+            [FromForm] string name,
+            [FromForm] string? icon,
+            IFormFile? image,
+            [FromForm] List<int>? members,
+            [FromForm] int? groupTypeId,
+            [FromForm] GroupDetailRequest? groupDetail)
         {
+            var request = new GroupRequest
+            {
+                Id = id,
+                Name = name,
+                Icon = icon,
+                GroupImage = image,
+                Members = members ?? [],
+                GroupTypeId = groupTypeId,
+                GroupDetail = groupDetail
+            };
+            
             return await _groupLogic.UpdateAsync(request);
         }
 

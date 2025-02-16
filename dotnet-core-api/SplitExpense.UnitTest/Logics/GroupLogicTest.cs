@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Moq;
 using SplitExpense.Data.Factory;
+using SplitExpense.FileManagement.Service;
 using SplitExpense.Logger;
 using SplitExpense.Logic;
 using SplitExpense.Logic.Email;
@@ -18,6 +19,7 @@ namespace SplitExpense.UnitTest.Logic
         private readonly Mock<IGroupFactory> _mockFactory;
         private readonly Mock<IEmailLogic> _mockEmailLogic;
         private readonly Mock<ISplitExpenseLogger> _mockLogger;
+        private readonly Mock<IFileUploadService> _mockFileUploadService;
         private readonly GroupsLogic _groupsLogic;
 
         public GroupsLogicTests()
@@ -26,7 +28,8 @@ namespace SplitExpense.UnitTest.Logic
             _mockFactory = new Mock<IGroupFactory>();
             _mockEmailLogic = new Mock<IEmailLogic>();
             _mockLogger = new Mock<ISplitExpenseLogger>();
-            _groupsLogic = new GroupsLogic(_mockMapper.Object, _mockFactory.Object, _mockEmailLogic.Object,_mockLogger.Object);
+            _mockFileUploadService = new Mock<IFileUploadService>();
+            _groupsLogic = new GroupsLogic(_mockMapper.Object, _mockFactory.Object, _mockEmailLogic.Object,_mockLogger.Object,_mockFileUploadService.Object);
         }
 
         [Fact]

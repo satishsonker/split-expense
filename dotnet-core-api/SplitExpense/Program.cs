@@ -11,6 +11,7 @@ using NLog.Web;
 using SplitExpense.Models.ConfigModels;
 using SplitExpense.FileManagement.Storage;
 using SplitExpense.FileManagement.Service;
+using SplitExpense.Middleware.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,41 +40,8 @@ builder.Services.RegisterValidator();
 // Add AutoMapper AddAutoMapper(cfg => cfg.AddProfile<SplitExpense.AutoMapperMapping.Mapping>());
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<Mapping>());
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "My API",
-        Version = "v1"
-    });
-
-    // Add a custom header parameter for `userId`
-    options.AddSecurityDefinition("userId", new OpenApiSecurityScheme
-    {
-        Name = "userId",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Description = "Custom header for UserId"
-    });
-
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "userId"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
-
+// Add Swagger configuration
+builder.Services.AddSwaggerConfiguration();
 
 // Add authentication and external login providers
 builder.Services.AddAuthentication(options =>
@@ -134,8 +102,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerConfiguration();
 }
 app.UseCors(option =>
 {
