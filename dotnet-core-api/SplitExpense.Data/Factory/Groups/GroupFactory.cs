@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SplitExpense.Data.Services;
 using SplitExpense.ExceptionManagement.Exceptions;
+using SplitExpense.FileManagement.Service;
 using SplitExpense.Logger;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
@@ -10,9 +11,10 @@ using SplitExpense.SharedResource;
 
 namespace SplitExpense.Data.Factory
 {
-    public class GroupFactory(SplitExpenseDbContext context, ISplitExpenseLogger logger, IUserContextService userContextService) : IGroupFactory
+    public class GroupFactory(SplitExpenseDbContext context, ISplitExpenseLogger logger, IUserContextService userContextService, IFileUploadService fileUploadService) : IGroupFactory
     {
         private readonly SplitExpenseDbContext _context = context;
+        private readonly IFileUploadService _fileUploadService = fileUploadService;
         private int userId = userContextService.GetUserId();
         private readonly ISplitExpenseLogger _logger = logger;
 
@@ -144,19 +146,60 @@ namespace SplitExpense.Data.Factory
             };
         }
 
-        public async Task<int> UpdateAsync(Group request)
+        public async Task<int> UpdateAsync(Group request, List<int> members)
         {
             ArgumentNullException.ThrowIfNull(request);
-
+            var transAsync = await _context.Database.BeginTransactionAsync();           
             try
             {
+                if (members != null && members.Count > 0)
+                {
+                    var oldMembers = await _context.UserGroupMappings
+                        .Where(x => !x.IsDeleted && x.GroupId == request.Id)
+                        .ToListAsync();
+                    if(oldMembers.Count > 0)
+                    {
+                        _context.UserGroupMappings.RemoveRange(oldMembers);
+                    }
+
+                    var userGroupMap = new List<UserGroupMapping>()
+                    {
+                        new(){FriendId=userId,GroupId=request.Id}
+                    };
+                    members.ForEach(memberId => userGroupMap.Add(new() { FriendId = memberId, GroupId = request.Id }));
+                    userGroupMap.Add(new() { FriendId = userId, GroupId = request.Id });
+                    await _context.UserGroupMappings.AddRangeAsync(userGroupMap);
+                    if(await _context.SaveChangesAsync() <= 0)
+                    {
+                        await transAsync.RollbackAsync();
+                        _logger.LogInfo($"Unable to add members in group id:{request.Id}", "Group-UpdateAsync");
+                        throw new BusinessRuleViolationException(ErrorCodes.UnableToAddRecord);
+                    }
+                }
                 var oldData = await _context.Groups
+                      .Include(x=>x.GroupDetail)
                       .Where(x => !x.IsDeleted && x.Id == request.Id && x.CreatedBy == userId)
                       .FirstOrDefaultAsync() ?? throw new BusinessRuleViolationException(ErrorCodes.RecordNotFound);
-
+                var oldImagePath = oldData.ImagePath;
+                var oldThumbPath = oldData.ThumbImagePath;
                 oldData.Name = request.Name;
+                oldData.Icon = request.Icon;
+                oldData.GroupDetail = request.GroupDetail;
+                oldData.GroupTypeId = request.GroupTypeId;
+                oldData.ImagePath = request.ImagePath;
+                oldData.ThumbImagePath = request.ThumbImagePath;
                 _context.Groups.Update(oldData);
-                return await _context.SaveChangesAsync();
+                if(await _context.SaveChangesAsync()>0)
+                {
+                    await transAsync.CommitAsync();
+                    if (!string.IsNullOrEmpty(oldImagePath))
+                    {
+                        await _fileUploadService.DeleteFileAsync(oldImagePath, oldThumbPath);
+                    }
+                    return oldData.Id;
+                }
+                await transAsync.RollbackAsync();
+                throw new BusinessRuleViolationException(ErrorCodes.UnableToUpdateRecord);
             }
             catch (Exception ex)
             {

@@ -32,11 +32,12 @@ import {
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { getGroupIcon } from '../utils/groupIcons';
-import { GROUP_PATHS, CONTACT_PATHS, GROUP_TYPES_PATHS } from '../constants/apiPaths';
+import { CONTACT_PATHS, GROUP_TYPES_PATHS } from '../constants/apiPaths';
 import { apiService } from '../utils/axios';
 import { toast } from 'react-toastify';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
+import {getImageUrl} from '../utils/imageUtils'
 
 const validationSchema = Yup.object({
     name: Yup.string()
@@ -102,7 +103,7 @@ const ImageSourceDialog = ({ open, onClose, onSelect }) => {
     );
 };
 
-const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
+const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
     const [groupTypes, setGroupTypes] = useState([]);
@@ -148,6 +149,33 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
             fetchGroupTypes();
         }
     }, [open]);
+
+    useEffect(() => {
+        if (open && group) {
+            // Set initial values for edit mode
+            formik.setValues({
+                name: group.name || '',
+                members: group.members || [],
+                groupTypeId: group.groupTypeId || null,
+                image: null,
+                icon: group.icon || '',
+                groupDetail: {
+                    enableGroupDate: group.groupDetail?.enableGroupDate || false,
+                    enableSettleUpReminders: group.groupDetail?.enableSettleUpReminders || false,
+                    enableBalanceAlert: group.groupDetail?.enableBalanceAlert || false,
+                    maxGroupBudget: group.groupDetail?.maxGroupBudget || null,
+                    startDate: group.groupDetail?.startDate ? dayjs(group.groupDetail.startDate) : null,
+                    endDate: group.groupDetail?.endDate ? dayjs(group.groupDetail.endDate) : null
+                }
+            });
+
+            // Log the members data for debugging
+            console.log('Group members:', group.members);
+            
+            setSelectedGroupType(groupTypes.find(t => t.id === group.groupTypeId));
+            setImagePreview(group.imagePath ? getImageUrl(group.imagePath) : null);
+        }
+    }, [open, group, groupTypes]);
 
     const handleImageSourceSelect = (source) => {
         setImageSourceDialogOpen(false);
@@ -224,7 +252,9 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
     const isFormValid = () => {
         return formik.values.name.trim() !== '' && !formik.errors.name;
     };
-
+ const test=(dd)=>{
+    debugger;
+ }
     return (
         <Dialog
             open={open}
@@ -235,7 +265,7 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
         >
             <DialogTitle>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="h6">Create New Group</Typography>
+                    <Typography variant="h6">{group ? 'Edit Group' : 'Create New Group'}</Typography>
                     <IconButton onClick={handleClose} size="small">
                         <CloseIcon />
                     </IconButton>
@@ -329,7 +359,7 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
                                 multiple
                                 options={contacts}
                                 loading={loadingContacts}
-                                getOptionLabel={(option) => `${option.contactUser.firstName} ${option.contactUser.lastName || ''}`}
+                                getOptionLabel={(option) => `${option.addedUser.firstName} ${option.addedUser.lastName || ''}`}
                                 value={formik.values.members}
                                 onChange={(_, newValue) => {
                                     formik.setFieldValue('members', newValue);
@@ -347,11 +377,11 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
                                     value.map((option, index) => (
                                         <Chip
                                             key={option.id}
-                                            label={`${option.contactUser.firstName} ${option.contactUser.lastName || ''}`}
+                                            label={`${option.addedUser.firstName} ${option.addedUser.lastName || ''}`}
                                             {...getTagProps({ index })}
                                             avatar={
                                                 <Avatar>
-                                                    {option.contactUser.firstName[0]}
+                                                    {option.addedUser.firstName[0]}
                                                 </Avatar>
                                             }
                                         />
@@ -361,14 +391,14 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
                                     <li {...props}>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                             <Avatar sx={{ width: 32, height: 32 }}>
-                                                {option.contactUser.firstName[0]}
+                                                {option.addedUser.firstName[0]}
                                             </Avatar>
                                             <Box>
                                                 <Typography>
-                                                    {`${option.contactUser.firstName} ${option.contactUser.lastName || ''}`}
+                                                    {`${option.addedUser.firstName} ${option.addedUser.lastName || ''}`}
                                                 </Typography>
                                                 <Typography variant="body2" color="textSecondary">
-                                                    {option.contactUser.email}
+                                                    {option.addedUser.email}
                                                 </Typography>
                                             </Box>
                                         </Box>
@@ -522,12 +552,11 @@ const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
                 <DialogActions sx={{ p: 2 }}>
                     <Button onClick={handleClose}>Cancel</Button>
                     <Button 
-                        type="submit" 
+                        type="submit"
                         variant="contained"
                         disabled={loading || !isFormValid()}
-                        startIcon={loading && <CircularProgress size={20} />}
                     >
-                        {loading ? 'Creating...' : 'Create Group'}
+                        {loading ? (group ? 'Updating...' : 'Creating...') : (group ? 'Update' : 'Create')}
                     </Button>
                 </DialogActions>
             </form>

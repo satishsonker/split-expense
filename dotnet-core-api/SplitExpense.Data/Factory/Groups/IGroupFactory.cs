@@ -8,7 +8,7 @@ namespace SplitExpense.Data.Factory
     {
         Task<PagingResponse<Group>> GetAllAsync(PagingRequest request);
         Task<Group> CreateAsync(Group request,List<int> members);
-        Task<int> UpdateAsync(Group request);
+        Task<int> UpdateAsync(Group request, List<int> members);
         Task<Group?> GetAsync(int id);
         Task<UserGroupMapping?> GetUserGroupMappingAsync(int id);
         Task<bool> DeleteAsync(int id);

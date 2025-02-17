@@ -140,6 +140,81 @@ const Groups = () => {
         }
     };
 
+    const handleUpdateGroup = async (groupData) => {
+        try {
+            setLoading(true);
+            const formData = new FormData();
+            
+            // Required fields
+            formData.append('name', groupData.name);
+            formData.append('id', selectedGroup.id); // Add group ID to form data
+            
+            // Optional fields
+            if (groupData.icon) {
+                formData.append('icon', groupData.icon);
+            } else {
+                // If no icon selected, use the existing one
+                formData.append('icon', selectedGroup.icon || getGroupIcon(groupData.name).name);
+            }
+            
+            if (groupData.image) {
+                formData.append('image', groupData.image);
+            }
+            
+            // Members array - ensure we're using the correct property
+            const members = groupData.members || [];
+            if (members.length > 0) {
+                members.forEach(member => {
+                    // Check if member has contactId or id
+                    const memberId = member.contactId || member.id;
+                    if (memberId) {
+                        formData.append('members', memberId);
+                    }
+                });
+            }
+            
+            // Optional group type
+            if (groupData.groupTypeId) {
+                formData.append('groupTypeId', groupData.groupTypeId);
+            }
+            
+            // Optional group details
+            if (groupData.groupDetail) {
+                const groupDetail = {
+                    enableGroupDate: groupData.groupDetail.enableGroupDate || false,
+                    enableSettleUpReminders: groupData.groupDetail.enableSettleUpReminders || false,
+                    enableBalanceAlert: groupData.groupDetail.enableBalanceAlert || false,
+                    maxGroupBudget: groupData.groupDetail.maxGroupBudget || null,
+                    startDate: groupData.groupDetail.startDate ? dayjs(groupData.groupDetail.startDate).toISOString() : null,
+                    endDate: groupData.groupDetail.endDate ? dayjs(groupData.groupDetail.endDate).toISOString() : null
+                };
+                formData.append('groupDetail', JSON.stringify(groupDetail));
+            }
+
+            // Log form data for debugging
+            console.log('Update FormData entries:');
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+
+            await apiService.put(GROUP_PATHS.UPDATE, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
+            toast.success('Group updated successfully');
+            setOpenCreateDialog(false);
+            setSelectedGroup(null);
+            fetchGroups(page);
+        } catch (error) {
+            console.error('Error updating group:', error);
+            toast.error(error.response?.data?.message || 'Failed to update group');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleLoadMore = () => {
         const nextPage = page + 1;
         setPage(nextPage);
@@ -172,7 +247,7 @@ const Groups = () => {
         setGroupToDelete(null);
     };
 
-    const handleEditGroup = async (group) => {
+    const handleEditGroup = (group) => {
         setSelectedGroup(group);
         setOpenCreateDialog(true);
     };
@@ -360,7 +435,7 @@ const Groups = () => {
                     setOpenCreateDialog(false);
                     setSelectedGroup(null);
                 }}
-                onSubmit={handleCreateGroup}
+                onSubmit={selectedGroup ? handleUpdateGroup : handleCreateGroup}
                 group={selectedGroup}
             />
 

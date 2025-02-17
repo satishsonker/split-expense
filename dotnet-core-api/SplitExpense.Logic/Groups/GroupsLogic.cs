@@ -102,7 +102,13 @@ namespace SplitExpense.Logic
         public async Task<int> UpdateAsync(GroupRequest request)
         {
             var mappedRequest = _mapper.Map<Group>(request);
-            return await _factory.UpdateAsync(mappedRequest);
+            if (request.GroupImage != null && request.GroupImage.Length > 0)
+            {
+                var fileUploadResponse = await _fileUploadService.UploadFileAsync(request.GroupImage);
+                mappedRequest.ImagePath = fileUploadResponse.FilePath;
+                mappedRequest.ThumbImagePath = fileUploadResponse.ThumbnailPath;
+            }
+            return await _factory.UpdateAsync(mappedRequest,request.Members);
         }
     }
 }
