@@ -58,7 +58,7 @@ namespace SplitExpense.Data.Factory
                     {
                         new(){FriendId=userId,GroupId=entity.Entity.Id}
                     };
-                    if(members!=null && members.Count>0)
+                    if(members != null && members.Count>0)
                     {
                         members.ForEach(memberId => userGroupMap.Add(new() { FriendId = memberId, GroupId = entity.Entity.Id }));
                         

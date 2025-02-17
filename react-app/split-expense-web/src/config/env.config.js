@@ -1,6 +1,7 @@
 const env = {
     ENV: process.env.REACT_APP_ENV || 'development',
-    API_URL: process.env.REACT_APP_API_URL || 'http://localhost:5008/api/v1',
+    BASE_URL_API:process.env.REACT_APP_API_BASE_URL || 'http://localhost:5008/',
+    API_URL: process.env.REACT_APP_API_BASE_URL+process.env.REACT_APP_API_SUFFIX || 'http://localhost:5008/api/v1',
     DEBUG: process.env.REACT_APP_DEBUG === 'true',
     APP_NAME: process.env.REACT_APP_NAME || 'Split Expense',
     VERSION: process.env.REACT_APP_VERSION || '1.0.0',

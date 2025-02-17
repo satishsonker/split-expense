@@ -104,6 +104,10 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwaggerConfiguration();
 }
+
+// Add static file middleware before routing
+app.UseStaticFileConfiguration(builder.Configuration);
+
 app.UseCors(option =>
 {
     option.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();

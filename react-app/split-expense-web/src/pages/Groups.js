@@ -23,6 +23,9 @@ import { GROUP_PATHS } from '../constants/apiPaths';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import DeleteConfirmationDialog from '../components/DeleteConfirmationDialog';
+import dayjs from 'dayjs';
+import ImageViewDialog from '../components/ImageViewDialog';
+import { getImageUrl } from '../utils/imageUtils';
 
 const GROUPS_PER_PAGE = 10;
 
@@ -40,6 +43,7 @@ const Groups = () => {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [groupToDelete, setGroupToDelete] = useState(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
 
     const fetchGroups = async (pageNum = 1) => {
         try {
@@ -72,10 +76,56 @@ const Groups = () => {
 
     const handleCreateGroup = async (groupData) => {
         try {
+            console.log('Group Data:', groupData);
             setLoading(true);
-            await apiService.post(GROUP_PATHS.CREATE, {
-                name: groupData.name,
-                members: groupData.members.map(m => m.id)
+            const formData = new FormData();
+            
+            // Required field
+            formData.append('name', groupData.name);
+            
+            // Optional fields
+            if (groupData.icon) {
+                formData.append('icon', groupData.icon);
+            }
+            
+            if (groupData.image) {
+                formData.append('image', groupData.image);
+            }
+            
+            // Optional members array
+            if (groupData.members?.length > 0) {
+                groupData.members.forEach(member => {
+                    formData.append('members', member.contactId);
+                });
+            }
+            
+            // Optional group type
+            if (groupData.groupTypeId) {
+                formData.append('groupTypeId', groupData.groupTypeId);
+            }
+            
+            // Optional group details
+            if (groupData.groupDetail) {
+                const groupDetail = {
+                    enableGroupDate: groupData.groupDetail.enableGroupDate || false,
+                    enableSettleUpReminders: groupData.groupDetail.enableSettleUpReminders || false,
+                    enableBalanceAlert: groupData.groupDetail.enableBalanceAlert || false,
+                    maxGroupBudget: groupData.groupDetail.maxGroupBudget || null,
+                    startDate: groupData.groupDetail.startDate ? dayjs(groupData.groupDetail.startDate).toISOString() : null,
+                    endDate: groupData.groupDetail.endDate ? dayjs(groupData.groupDetail.endDate).toISOString() : null
+                };
+                formData.append('groupDetail', JSON.stringify(groupDetail));
+            }
+
+            console.log('FormData entries:');
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+            
+            await apiService.post(GROUP_PATHS.CREATE, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
             });
             
             toast.success('Group created successfully');
@@ -84,6 +134,7 @@ const Groups = () => {
             setPage(1);
         } catch (error) {
             console.error('Error creating group:', error);
+            toast.error(error.response?.data?.message || 'Failed to create group');
         } finally {
             setLoading(false);
         }
@@ -179,6 +230,8 @@ const Groups = () => {
                 {groups.map(group => {
                     const GroupIcon = getGroupIcon(group.name);
                     const canManageGroup = isGroupCreator(group);
+                    const thumbUrl = getImageUrl(group.thumbImagePath);
+                    const fullImageUrl = getImageUrl(group.imagePath);
 
                     return (
                         <Grid item xs={12} sm={6} md={4} key={group.id}>
@@ -191,14 +244,30 @@ const Groups = () => {
                                 <CardContent>
                                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, justifyContent: 'space-between' }}>
                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                            <Avatar 
-                                                sx={{ 
-                                                    bgcolor: 'primary.main',
-                                                    mr: 2
-                                                }}
-                                            >
-                                                <GroupIcon />
-                                            </Avatar>
+                                            {thumbUrl ? (
+                                                <Avatar 
+                                                    src={thumbUrl}
+                                                    sx={{ 
+                                                        width: 40, 
+                                                        height: 40,
+                                                        mr: 2,
+                                                        cursor: group.imagePath ? 'pointer' : 'default',
+                                                        '&:hover': {
+                                                            opacity: group.imagePath ? 0.8 : 1
+                                                        }
+                                                    }}
+                                                    onClick={() => fullImageUrl && setSelectedImage(fullImageUrl)}
+                                                />
+                                            ) : (
+                                                <Avatar 
+                                                    sx={{ 
+                                                        bgcolor: 'primary.main',
+                                                        mr: 2
+                                                    }}
+                                                >
+                                                    <GroupIcon />
+                                                </Avatar>
+                                            )}
                                             <Typography variant="h6" noWrap>
                                                 {group.name}
                                             </Typography>
@@ -304,6 +373,12 @@ const Groups = () => {
                 data={groupToDelete}
                 title="Delete Group"
                 warningMessage="This action cannot be undone. All group expenses and settlements will be deleted."
+            />
+
+            <ImageViewDialog 
+                open={Boolean(selectedImage)}
+                onClose={() => setSelectedImage(null)}
+                imagePath={selectedImage}
             />
         </Box>
     );

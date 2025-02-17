@@ -53,7 +53,7 @@ namespace SplitExpense.Logic
                     mappedRequest.ImagePath = fileUploadResponse.FilePath;
                     mappedRequest.ThumbImagePath = fileUploadResponse.ThumbnailPath;
                 }
-                return _mapper.Map<GroupResponse>(await _factory.CreateAsync(mappedRequest, request.Members));
+                return _mapper.Map<GroupResponse>(await _factory.CreateAsync(mappedRequest,request.Members));
             }
             catch (Exception ex)
             {

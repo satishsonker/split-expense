@@ -32,28 +32,17 @@ import {
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { getGroupIcon } from '../utils/groupIcons';
-import { GROUP_PATHS } from '../constants/apiPaths';
-import { GROUP_TYPES_PATHS } from '../constants/apiPaths';
+import { GROUP_PATHS, CONTACT_PATHS, GROUP_TYPES_PATHS } from '../constants/apiPaths';
 import { apiService } from '../utils/axios';
 import { toast } from 'react-toastify';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import dayjs from 'dayjs';
 
 const validationSchema = Yup.object({
     name: Yup.string()
         .required('Group name is required')
         .max(100, 'Group name must be at most 100 characters'),
-    members: Yup.array()
-        .of(
-            Yup.object({
-                email: Yup.string()
-                    .email('Invalid email address')
-                    .required('Email is required'),
-                name: Yup.string()
-            })
-        )
-        .min(1, 'At least one member is required'),
+    members: Yup.array(),
     groupTypeId: Yup.number().nullable(),
     groupDetail: Yup.object({
         enableGroupDate: Yup.boolean(),
@@ -61,10 +50,9 @@ const validationSchema = Yup.object({
         enableBalanceAlert: Yup.boolean(),
         maxGroupBudget: Yup.number().nullable(),
         startDate: Yup.date().nullable(),
-        endDate: Yup.date().nullable().min(
-            Yup.ref('startDate'),
-            'End date must be after start date'
-        )
+        endDate: Yup.date().nullable().when('startDate', (startDate, schema) => {
+            return startDate && startDate[0]!=null ? schema.min(startDate, 'End date must be after start date') : schema;
+        })
     })
 });
 
@@ -114,135 +102,52 @@ const ImageSourceDialog = ({ open, onClose, onSelect }) => {
     );
 };
 
-const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
+const CreateGroupDialog = ({ open, onClose, onSubmit }) => {
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [users, setUsers] = useState([]);
-    const [groupIcon, setGroupIcon] = useState(null);
     const [groupTypes, setGroupTypes] = useState([]);
     const [selectedGroupType, setSelectedGroupType] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const [loading, setLoading] = useState(false);
-    const isEditing = Boolean(group);
     const [imageSourceDialogOpen, setImageSourceDialogOpen] = useState(false);
+    const [contacts, setContacts] = useState([]);
+    const [loadingContacts, setLoadingContacts] = useState(false);
     const cameraInputRef = useRef(null);
     const galleryInputRef = useRef(null);
 
-    // Fetch users/contacts from API
     useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const response = await apiService.get(GROUP_PATHS.MEMBERS);
-                var modifiedResponse=response.data?.map((ele,index)=>{
-                    return ele?.contactUser;
-                });
-                setUsers(modifiedResponse || []);
-            } catch (error) {
-                console.error('Error fetching contacts:', error);
+        const fetchContacts = async () => {
+            if (open) {
+                try {
+                    setLoadingContacts(true);
+                    const response = await apiService.get(CONTACT_PATHS.LIST);
+                    setContacts(response.data || []);
+                } catch (error) {
+                    console.error('Error fetching contacts:', error);
+                    toast.error('Failed to load contacts');
+                } finally {
+                    setLoadingContacts(false);
+                }
             }
         };
 
-        if (open) {
-            fetchUsers();
-        }
-    }, [open]);
-
-    useEffect(() => {
         const fetchGroupTypes = async () => {
-            try {
-                const response = await apiService.get(GROUP_TYPES_PATHS.LIST);
-                setGroupTypes(response.data || []);
-            } catch (error) {
-                console.error('Error fetching group types:', error);
-                toast.error('Failed to fetch group types');
+            if (open) {
+                try {
+                    const response = await apiService.get(GROUP_TYPES_PATHS.LIST);
+                    setGroupTypes(response.data || []);
+                } catch (error) {
+                    console.error('Error fetching group types:', error);
+                    toast.error('Failed to fetch group types');
+                }
             }
         };
-        
+
         if (open) {
+            fetchContacts();
             fetchGroupTypes();
         }
     }, [open]);
-
-    const formik = useFormik({
-        initialValues: {
-            name: group?.name || '',
-            members: group?.members?.map(m => ({
-                id: m.addedUser.id,
-                email: m.addedUser.email,
-                name: `${m.addedUser.firstName} ${m.addedUser.lastName}`
-            })) || [],
-            groupTypeId: group?.groupTypeId || null,
-            image: null,
-            icon: '',
-            groupDetail: {
-                enableGroupDate: group?.groupDetail?.enableGroupDate || false,
-                enableSettleUpReminders: group?.groupDetail?.enableSettleUpReminders || false,
-                enableBalanceAlert: group?.groupDetail?.enableBalanceAlert || false,
-                maxGroupBudget: group?.groupDetail?.maxGroupBudget || null,
-                startDate: group?.groupDetail?.startDate || null,
-                endDate: group?.groupDetail?.endDate || null
-            }
-        },
-        validationSchema,
-        enableReinitialize: true,
-        onSubmit: async (values) => {
-            try {
-                setLoading(true);
-                const formData = new FormData();
-                formData.append('name', values.name);
-                formData.append('icon', values.icon || getGroupIcon(values.name).name);
-                
-                if (values.image) {
-                    formData.append('image', values.image);
-                }
-                
-                if (values.members.length > 0) {
-                    values.members.forEach(member => {
-                        formData.append('members', member.id);
-                    });
-                }
-                
-                if (values.groupTypeId) {
-                    formData.append('groupTypeId', values.groupTypeId);
-                    formData.append('groupDetail', JSON.stringify(values.groupDetail));
-                }
-
-                await onSubmit(formData);
-                formik.resetForm();
-                setImagePreview(null);
-                setSelectedGroupType(null);
-            } catch (error) {
-                console.error('Error creating group:', error);
-                toast.error('Failed to create group');
-            } finally {
-                setLoading(false);
-            }
-        }
-    });
-
-    // Update group icon when name changes
-    useEffect(() => {
-        const IconComponent = getGroupIcon(formik.values.name);
-        setGroupIcon(IconComponent);
-    }, [formik.values.name]);
-
-    const handleAddMember = () => {
-        if (selectedUser && !formik.values.members.find(m => m.email === selectedUser.email)) {
-            formik.setFieldValue('members', [
-                ...formik.values.members,
-                { id: selectedUser.userId, email: selectedUser.email, name: selectedUser.firstName }
-            ]);
-            setSelectedUser(null);
-        }
-    };
-
-    const handleRemoveMember = (email) => {
-        formik.setFieldValue(
-            'members',
-            formik.values.members.filter(m => m.email !== email)
-        );
-    };
 
     const handleImageSourceSelect = (source) => {
         setImageSourceDialogOpen(false);
@@ -254,7 +159,7 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
     };
 
     const handleImageCapture = (event) => {
-        const file = event.target.files[0];
+        const file = event.target.files?.[0];
         if (file) {
             formik.setFieldValue('image', file);
             const reader = new FileReader();
@@ -263,26 +168,61 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
             };
             reader.readAsDataURL(file);
         }
-        // Reset the input value to allow selecting the same file again
         event.target.value = '';
     };
 
     const handleRemoveImage = () => {
-        formik.setFieldValue('image', null);
         setImagePreview(null);
+        formik.setFieldValue('image', null);
     };
 
-    const handleGroupTypeSelect = (groupType) => {
-        setSelectedGroupType(groupType);
-        formik.setFieldValue('groupTypeId', groupType.id);
+    const handleGroupTypeSelect = (type) => {
+        setSelectedGroupType(type);
+        formik.setFieldValue('groupTypeId', type.id);
     };
+
+    const formik = useFormik({
+        initialValues: {
+            name: '',
+            members: [],
+            groupTypeId: null,
+            image: null,
+            icon: '',
+            groupDetail: {
+                enableGroupDate: false,
+                enableSettleUpReminders: false,
+                enableBalanceAlert: false,
+                maxGroupBudget: null,
+                startDate: null,
+                endDate: null
+            }
+        },
+        validationSchema,
+        validateOnMount: false,
+        validateOnChange: true,
+        onSubmit: async (values) => {
+            try {
+                setLoading(true);
+                await onSubmit(values);
+                handleClose();
+            } catch (error) {
+                console.error('Error creating group:', error);
+                toast.error('Failed to create group');
+            } finally {
+                setLoading(false);
+            }
+        }
+    });
 
     const handleClose = () => {
         formik.resetForm();
-        setSelectedUser(null);
         setImagePreview(null);
         setSelectedGroupType(null);
         onClose();
+    };
+
+    const isFormValid = () => {
+        return formik.values.name.trim() !== '' && !formik.errors.name;
     };
 
     return (
@@ -387,8 +327,9 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
                         <Grid item xs={12}>
                             <Autocomplete
                                 multiple
-                                options={[]} // You'll need to fetch contacts here
-                                getOptionLabel={(option) => `${option.firstName} ${option.lastName}`}
+                                options={contacts}
+                                loading={loadingContacts}
+                                getOptionLabel={(option) => `${option.contactUser.firstName} ${option.contactUser.lastName || ''}`}
                                 value={formik.values.members}
                                 onChange={(_, newValue) => {
                                     formik.setFieldValue('members', newValue);
@@ -398,22 +339,41 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
                                         {...params}
                                         label="Select Members (Optional)"
                                         placeholder="Search members"
+                                        error={formik.touched.members && Boolean(formik.errors.members)}
+                                        helperText={formik.touched.members && formik.errors.members}
                                     />
                                 )}
                                 renderTags={(value, getTagProps) =>
                                     value.map((option, index) => (
                                         <Chip
                                             key={option.id}
-                                            label={`${option.firstName} ${option.lastName}`}
+                                            label={`${option.contactUser.firstName} ${option.contactUser.lastName || ''}`}
                                             {...getTagProps({ index })}
                                             avatar={
                                                 <Avatar>
-                                                    {option.firstName[0]}
+                                                    {option.contactUser.firstName[0]}
                                                 </Avatar>
                                             }
                                         />
                                     ))
                                 }
+                                renderOption={(props, option) => (
+                                    <li {...props}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Avatar sx={{ width: 32, height: 32 }}>
+                                                {option.contactUser.firstName[0]}
+                                            </Avatar>
+                                            <Box>
+                                                <Typography>
+                                                    {`${option.contactUser.firstName} ${option.contactUser.lastName || ''}`}
+                                                </Typography>
+                                                <Typography variant="body2" color="textSecondary">
+                                                    {option.contactUser.email}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                    </li>
+                                )}
                             />
                         </Grid>
 
@@ -490,23 +450,31 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
                                                 }
                                                 label="Enable Group Date"
                                             />
-                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                <DatePicker
-                                                    label="Start Date"
-                                                    value={formik.values.groupDetail.startDate}
-                                                    onChange={(date) => formik.setFieldValue('groupDetail.startDate', date)}
-                                                    slotProps={{ textField: { fullWidth: true } }}
-                                                />
-                                                <Box sx={{ mt: 2 }}>
-                                                    <DatePicker
-                                                        label="End Date"
-                                                        value={formik.values.groupDetail.endDate}
-                                                        onChange={(date) => formik.setFieldValue('groupDetail.endDate', date)}
-                                                        slotProps={{ textField: { fullWidth: true } }}
-                                                        minDate={formik.values.groupDetail.startDate}
-                                                    />
-                                                </Box>
-                                            </LocalizationProvider>
+                                            <DatePicker
+                                                label="Start Date"
+                                                value={formik.values.groupDetail.startDate}
+                                                onChange={(date) => formik.setFieldValue('groupDetail.startDate', date)}
+                                                slotProps={{ 
+                                                    textField: { 
+                                                        fullWidth: true,
+                                                        error: formik.touched.groupDetail?.startDate && Boolean(formik.errors.groupDetail?.startDate),
+                                                        helperText: formik.touched.groupDetail?.startDate && formik.errors.groupDetail?.startDate
+                                                    } 
+                                                }}
+                                            />
+                                            <DatePicker
+                                                label="End Date"
+                                                value={formik.values.groupDetail.endDate}
+                                                onChange={(date) => formik.setFieldValue('groupDetail.endDate', date)}
+                                                slotProps={{ 
+                                                    textField: { 
+                                                        fullWidth: true,
+                                                        error: formik.touched.groupDetail?.endDate && Boolean(formik.errors.groupDetail?.endDate),
+                                                        helperText: formik.touched.groupDetail?.endDate && formik.errors.groupDetail?.endDate
+                                                    } 
+                                                }}
+                                                minDate={formik.values.groupDetail.startDate}
+                                            />
                                         </Box>
                                     )}
 
@@ -556,7 +524,7 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
                     <Button 
                         type="submit" 
                         variant="contained"
-                        disabled={loading || !formik.isValid}
+                        disabled={loading || !isFormValid()}
                         startIcon={loading && <CircularProgress size={20} />}
                     >
                         {loading ? 'Creating...' : 'Create Group'}

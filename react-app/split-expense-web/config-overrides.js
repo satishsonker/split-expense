@@ -2,6 +2,7 @@ const { override, addWebpackPlugin } = require('customize-cra');
 const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
 
 module.exports = override(
+  // Remove the incorrect alias configuration
   addWebpackPlugin(
     new WorkboxWebpackPlugin.GenerateSW({
       clientsClaim: true,

@@ -13,6 +13,8 @@ import Groups from './pages/Groups';
 import Contacts from './pages/Contacts';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 const AppContent = () => {
   const { trackError } = usePerformance();
@@ -20,20 +22,17 @@ const AppContent = () => {
   return (
     <ErrorBoundary onError={trackError}>
       <AuthProvider>
-        <Router>
-          <ToastContainer position="top-right" autoClose={3000} />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
-              <Route index element={<Dashboard />} />
-              <Route path="groups" element={<Groups />} />
-              <Route path="contacts" element={<Contacts />} />
-              {/* Add more protected routes here */}
-            </Route>
-          </Routes>
-        </Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
+            <Route index element={<Dashboard />} />
+            <Route path="groups" element={<Groups />} />
+            <Route path="contacts" element={<Contacts />} />
+            {/* Add more protected routes here */}
+          </Route>
+        </Routes>
       </AuthProvider>
     </ErrorBoundary>
   );
@@ -42,7 +41,16 @@ const AppContent = () => {
 function App() {
   return (
     <PerformanceProvider>
-      <AppContent />
+      <ErrorBoundary>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <Router>
+            <AuthProvider>
+              <ToastContainer />
+              <AppContent />
+            </AuthProvider>
+          </Router>
+        </LocalizationProvider>
+      </ErrorBoundary>
     </PerformanceProvider>
   );
 }
