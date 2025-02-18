@@ -38,6 +38,7 @@ import { toast } from 'react-toastify';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import {getImageUrl} from '../utils/imageUtils'
+import { capitalizeText } from '../utils/stringUtils';
 
 const validationSchema = Yup.object({
     name: Yup.string()
@@ -231,7 +232,12 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
         onSubmit: async (values) => {
             try {
                 setLoading(true);
-                await onSubmit(values);
+                // Capitalize the name before submitting
+                const submissionValues = {
+                    ...values,
+                    name: capitalizeText(values.name)
+                };
+                await onSubmit(submissionValues);
                 handleClose();
             } catch (error) {
                 console.error('Error creating group:', error);
@@ -241,6 +247,12 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
             }
         }
     });
+
+    // Handle name input with capitalization
+    const handleNameChange = (e) => {
+        const value = e.target.value;
+        formik.setFieldValue('name', capitalizeText(value));
+    };
 
     const handleClose = () => {
         formik.resetForm();
@@ -346,7 +358,7 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
                                     name="name"
                                     label="Group Name"
                                     value={formik.values.name}
-                                    onChange={formik.handleChange}
+                                    onChange={handleNameChange}
                                     error={formik.touched.name && Boolean(formik.errors.name)}
                                     helperText={formik.touched.name && formik.errors.name}
                                 />
@@ -359,7 +371,7 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
                                 multiple
                                 options={contacts}
                                 loading={loadingContacts}
-                                getOptionLabel={(option) => `${option.addedUser.firstName} ${option.addedUser.lastName || ''}`}
+                                getOptionLabel={(option) => `${option.addedUser?.firstName??option.contactUser?.firstName} ${option.addedUser?.lastName || option.contactUser?.firstName}`}
                                 value={formik.values.members}
                                 onChange={(_, newValue) => {
                                     formik.setFieldValue('members', newValue);
@@ -377,11 +389,11 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
                                     value.map((option, index) => (
                                         <Chip
                                             key={option.id}
-                                            label={`${option.addedUser.firstName} ${option.addedUser.lastName || ''}`}
+                                            label={`${option.addedUser?.firstName??option.contactUser?.firstName} ${(option.addedUser?.lastName??option.contactUser?.lastName) || ''}`}
                                             {...getTagProps({ index })}
                                             avatar={
                                                 <Avatar>
-                                                    {option.addedUser.firstName[0]}
+                                                    {(option.addedUser?.firstName??option.contactUser?.firstName)[0]}
                                                 </Avatar>
                                             }
                                         />
@@ -391,14 +403,14 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
                                     <li {...props}>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                             <Avatar sx={{ width: 32, height: 32 }}>
-                                                {option.addedUser.firstName[0]}
+                                                {(option.addedUser?.firstName??option.contactUser?.firstName)[0]}
                                             </Avatar>
                                             <Box>
                                                 <Typography>
-                                                    {`${option.addedUser.firstName} ${option.addedUser.lastName || ''}`}
+                                                    {`${option.addedUser?.firstName??option.contactUser?.firstName} ${(option.addedUser?.lastName??option.contactUser?.lastName) || ''}`}
                                                 </Typography>
                                                 <Typography variant="body2" color="textSecondary">
-                                                    {option.addedUser.email}
+                                                    {option.addedUser?.email??option.contactUser?.email}
                                                 </Typography>
                                             </Box>
                                         </Box>

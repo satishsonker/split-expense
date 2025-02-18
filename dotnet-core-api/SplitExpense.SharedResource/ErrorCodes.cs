@@ -74,6 +74,7 @@ namespace SplitExpense.SharedResource
         [Description("Data processing error")]
         DataProcessingError = 6001,
         [Description("Resource limit exceeded")]
-        ResourceLimitExceeded = 6002
+        ResourceLimitExceeded = 6002,
+        InvalidData = 6003
     }
 }

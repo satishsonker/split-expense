@@ -8,6 +8,7 @@ using SplitExpense.Models.Common;
 using SplitExpense.Models.DbModels;
 using SplitExpense.Models.DTO;
 using SplitExpense.SharedResource;
+using System.Linq;
 
 namespace SplitExpense.Data.Factory
 {
@@ -146,65 +147,109 @@ namespace SplitExpense.Data.Factory
             };
         }
 
-        public async Task<int> UpdateAsync(Group request, List<int> members)
+        public async Task<int> UpdateAsync(Group request,List<int> members)
         {
-            ArgumentNullException.ThrowIfNull(request);
-            var transAsync = await _context.Database.BeginTransactionAsync();           
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            string oldGroupImage, oldThumbImage;
             try
             {
-                if (members != null && members.Count > 0)
+                var existingGroup = await _context.Groups
+                    .Include(x => x.Members)
+                    .Include(x => x.GroupDetail)
+                    .FirstOrDefaultAsync(x => x.Id == request.Id && !x.IsDeleted) ?? throw new BusinessRuleViolationException(ErrorCodes.RecordNotFound);
+
+                oldGroupImage = existingGroup.ImagePath;
+                oldThumbImage = existingGroup.ThumbImagePath;
+                // Update basic group properties
+                existingGroup.Name = request.Name;
+                existingGroup.Icon = request.Icon;
+                existingGroup.GroupTypeId = request.GroupTypeId;
+
+                if (!string.IsNullOrEmpty(request.ImagePath))
                 {
-                    var oldMembers = await _context.UserGroupMappings
-                        .Where(x => !x.IsDeleted && x.GroupId == request.Id)
-                        .ToListAsync();
-                    if(oldMembers.Count > 0)
+                    existingGroup.ImagePath = request.ImagePath;
+                    existingGroup.ThumbImagePath = request.ThumbImagePath;
+                }
+
+                // Update group details
+                if (request.GroupDetail != null)
+                {
+                    if (existingGroup.GroupDetail == null)
                     {
-                        _context.UserGroupMappings.RemoveRange(oldMembers);
+                        request.GroupDetail.GroupId = request.Id;
+                        await _context.GroupDetails.AddAsync(request.GroupDetail);
+                    }
+                    else
+                    {
+                        existingGroup.GroupDetail.EnableBalanceAlert = request.GroupDetail.EnableBalanceAlert;
+                        existingGroup.GroupDetail.EnableGroupDate = request.GroupDetail.EnableGroupDate;
+                        existingGroup.GroupDetail.EnableSettleUpReminders = request.GroupDetail.EnableSettleUpReminders;
+                        existingGroup.GroupDetail.MaxGroupBudget = request.GroupDetail.MaxGroupBudget;
+                        existingGroup.GroupDetail.StartDate = request.GroupDetail.StartDate;
+                        existingGroup.GroupDetail.EndDate = request.GroupDetail.EndDate;
+                    }
+                }
+
+                // Update user mappings
+                if (members != null && members.Count>0)
+                {
+                    // Get existing member IDs
+                    var existingMemberIds = existingGroup.Members?.Select(m => m.FriendId).ToList() ?? [];
+
+                    // Find members to add and remove
+                    var membersToAdd = members.Except(existingMemberIds).ToList();
+                    var membersToRemove = existingMemberIds.Except(members.Select(x=>x).ToList()).ToList();
+
+                    // Remove old mappings
+                    if (membersToRemove.Count != 0)
+                    {
+                        var mappingsToRemove = await _context.UserGroupMappings
+                            .Where(m => m.GroupId == request.Id && membersToRemove.Contains(m.FriendId))
+                            .ToListAsync();
+                        _context.UserGroupMappings.RemoveRange(mappingsToRemove);
                     }
 
-                    var userGroupMap = new List<UserGroupMapping>()
+                    // Add new mappings
+                    if (membersToAdd.Count != 0)
                     {
-                        new(){FriendId=userId,GroupId=request.Id}
-                    };
-                    members.ForEach(memberId => userGroupMap.Add(new() { FriendId = memberId, GroupId = request.Id }));
-                    userGroupMap.Add(new() { FriendId = userId, GroupId = request.Id });
-                    await _context.UserGroupMappings.AddRangeAsync(userGroupMap);
-                    if(await _context.SaveChangesAsync() <= 0)
-                    {
-                        await transAsync.RollbackAsync();
-                        _logger.LogInfo($"Unable to add members in group id:{request.Id}", "Group-UpdateAsync");
-                        throw new BusinessRuleViolationException(ErrorCodes.UnableToAddRecord);
+                        // Verify all users exist
+                        var existingUsers = await _context.Users
+                            .Where(u => membersToAdd.Contains(u.UserId))
+                            .Select(u => u.UserId)
+                            .ToListAsync();
+
+                        var invalidUserIds = membersToAdd.Except(existingUsers).ToList();
+                        if (invalidUserIds.Count != 0)
+                        {
+                            throw new BusinessRuleViolationException(
+                                ErrorCodes.InvalidData.GetDescription(),
+                                $"Invalid user IDs: {string.Join(", ", invalidUserIds)}");
+                        }
+
+                        var newMappings = membersToAdd.Select(friendId => new UserGroupMapping
+                        {
+                            GroupId = request.Id,
+                            FriendId = friendId
+                        });
+
+                        await _context.UserGroupMappings.AddRangeAsync(newMappings);
                     }
                 }
-                var oldData = await _context.Groups
-                      .Include(x=>x.GroupDetail)
-                      .Where(x => !x.IsDeleted && x.Id == request.Id && x.CreatedBy == userId)
-                      .FirstOrDefaultAsync() ?? throw new BusinessRuleViolationException(ErrorCodes.RecordNotFound);
-                var oldImagePath = oldData.ImagePath;
-                var oldThumbPath = oldData.ThumbImagePath;
-                oldData.Name = request.Name;
-                oldData.Icon = request.Icon;
-                oldData.GroupDetail = request.GroupDetail;
-                oldData.GroupTypeId = request.GroupTypeId;
-                oldData.ImagePath = request.ImagePath;
-                oldData.ThumbImagePath = request.ThumbImagePath;
-                _context.Groups.Update(oldData);
-                if(await _context.SaveChangesAsync()>0)
+
+                var result = await _context.SaveChangesAsync();
+                if (oldGroupImage != null && string.IsNullOrEmpty(request.ImagePath))
                 {
-                    await transAsync.CommitAsync();
-                    if (!string.IsNullOrEmpty(oldImagePath))
-                    {
-                        await _fileUploadService.DeleteFileAsync(oldImagePath, oldThumbPath);
-                    }
-                    return oldData.Id;
+                    await _fileUploadService.DeleteFileAsync(oldGroupImage, oldThumbImage);
                 }
-                await transAsync.RollbackAsync();
-                throw new BusinessRuleViolationException(ErrorCodes.UnableToUpdateRecord);
+                await transaction.CommitAsync();
+                return result;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message, "Group-UpdateAsync");
-                throw new DbUpdateException(ex.Message);
+                await _fileUploadService.DeleteFileAsync(request.ImagePath, request.ThumbImagePath);
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, $"Error updating group with id {request.Id}");
+                throw;
             }
         }
 

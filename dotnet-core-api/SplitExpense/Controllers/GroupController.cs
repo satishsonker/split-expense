@@ -25,7 +25,12 @@ namespace SplitExpense.Controllers
              IFormFile? image,
             [FromForm] List<int>? members,
             [FromForm] int? groupTypeId,
-            [FromForm] GroupDetailRequest? groupDetail)
+            [FromForm] bool EnableGroupDate,
+            [FromForm] bool EnableSettleUpReminders,
+            [FromForm] bool EnableBalanceAlert,
+            [FromForm] decimal? MaxGroupBudget,
+            [FromForm] DateTime? StartDate,
+            [FromForm] DateTime? EndDate)
         {
             var request = new GroupRequest
             {
@@ -34,7 +39,15 @@ namespace SplitExpense.Controllers
                 GroupImage = image,
                 Members = members ?? [],
                 GroupTypeId = groupTypeId,
-                GroupDetail = groupDetail
+                GroupDetail = new GroupDetailRequest()
+                {
+                    EnableBalanceAlert = EnableBalanceAlert,
+                    EnableGroupDate = EnableGroupDate,
+                    EnableSettleUpReminders = EnableSettleUpReminders,
+                    MaxGroupBudget = MaxGroupBudget,
+                    StartDate = StartDate,
+                    EndDate = EndDate
+                }
             };
             
             return await _groupLogic.CreateAsync(request);
@@ -63,7 +76,13 @@ namespace SplitExpense.Controllers
             IFormFile? image,
             [FromForm] List<int>? members,
             [FromForm] int? groupTypeId,
-            [FromForm] GroupDetailRequest? groupDetail)
+            [FromForm] int GroupId, 
+            [FromForm] bool EnableGroupDate,
+            [FromForm] bool EnableSettleUpReminders,
+            [FromForm] bool EnableBalanceAlert,
+            [FromForm] decimal? MaxGroupBudget,
+            [FromForm] DateTime? StartDate,
+            [FromForm] DateTime? EndDate)
         {
             var request = new GroupRequest
             {
@@ -73,7 +92,15 @@ namespace SplitExpense.Controllers
                 GroupImage = image,
                 Members = members ?? [],
                 GroupTypeId = groupTypeId,
-                GroupDetail = groupDetail
+                GroupDetail = new GroupDetailRequest()
+                {
+                    EnableBalanceAlert = EnableBalanceAlert,
+                    EnableGroupDate = EnableGroupDate,
+                    EnableSettleUpReminders = EnableSettleUpReminders,
+                    MaxGroupBudget = MaxGroupBudget,
+                    StartDate = StartDate,
+                    EndDate = EndDate
+                }
             };
             
             return await _groupLogic.UpdateAsync(request);

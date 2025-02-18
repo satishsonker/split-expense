@@ -26,6 +26,7 @@ import DeleteConfirmationDialog from '../components/DeleteConfirmationDialog';
 import dayjs from 'dayjs';
 import ImageViewDialog from '../components/ImageViewDialog';
 import { getImageUrl } from '../utils/imageUtils';
+import { capitalizeText } from '../utils/stringUtils';
 
 const GROUPS_PER_PAGE = 10;
 
@@ -52,14 +53,14 @@ const Groups = () => {
                 pageNo: pageNum,
                 pageSize: GROUPS_PER_PAGE
             });
-            
+
             if (response?.data) {
                 if (pageNum === 1) {
                     setGroups(response.data || []);
                 } else {
                     setGroups(prev => [...prev, ...(response.data || [])]);
                 }
-                
+
                 setTotalGroups(response.recordCounts || 0);
                 setHasMore((response.recordCounts - (response.pageNo * response.pageSize)) > 0);
             }
@@ -74,60 +75,67 @@ const Groups = () => {
         fetchGroups();
     }, []);
 
+    // Helper function to prepare group details
+    const prepareGroupDetail = (groupDetail, formData, groupTypeId) => {
+        // Always return group detail if we have a groupTypeId
+        if (groupTypeId) {
+            formData.append('enableGroupDate', groupDetail?.enableGroupDate ?? false);
+            formData.append('enableSettleUpReminders', groupDetail?.enableSettleUpReminders ?? false);
+            formData.append('enableBalanceAlert', groupDetail?.enableBalanceAlert ?? false);
+            formData.append('maxGroupBudget', groupDetail?.maxGroupBudget ?? 0);
+            if (groupDetail?.startDate != null)
+                formData.append('startDate', groupDetail?.startDate ? dayjs(groupDetail.startDate).toISOString() : null);
+            if (groupDetail?.endDate != null)
+                formData.append('endDate', groupDetail?.endDate ? dayjs(groupDetail.endDate).toISOString() : null);
+            return formData;
+        }
+        return formData;
+    };
+
     const handleCreateGroup = async (groupData) => {
         try {
-            console.log('Group Data:', groupData);
             setLoading(true);
-            const formData = new FormData();
-            
+            let formData = new FormData();
+
             // Required field
             formData.append('name', groupData.name);
-            
-            // Optional fields
-            if (groupData.icon) {
-                formData.append('icon', groupData.icon);
+
+            // Optional fields - handle icon properly
+            const icon = groupData.icon || getGroupIcon(groupData.name).name;
+            if (icon && icon !== 'undefined') {
+                formData.append('icon', icon);
             }
-            
+
             if (groupData.image) {
                 formData.append('image', groupData.image);
             }
-            
+
             // Optional members array
             if (groupData.members?.length > 0) {
                 groupData.members.forEach(member => {
                     formData.append('members', member.contactId);
                 });
             }
-            
-            // Optional group type
+
+            // Group type and details
             if (groupData.groupTypeId) {
                 formData.append('groupTypeId', groupData.groupTypeId);
             }
-            
-            // Optional group details
-            if (groupData.groupDetail) {
-                const groupDetail = {
-                    enableGroupDate: groupData.groupDetail.enableGroupDate || false,
-                    enableSettleUpReminders: groupData.groupDetail.enableSettleUpReminders || false,
-                    enableBalanceAlert: groupData.groupDetail.enableBalanceAlert || false,
-                    maxGroupBudget: groupData.groupDetail.maxGroupBudget || null,
-                    startDate: groupData.groupDetail.startDate ? dayjs(groupData.groupDetail.startDate).toISOString() : null,
-                    endDate: groupData.groupDetail.endDate ? dayjs(groupData.groupDetail.endDate).toISOString() : null
-                };
-                formData.append('groupDetail', JSON.stringify(groupDetail));
-            }
 
-            console.log('FormData entries:');
+            // Always append groupDetail when there's a groupTypeId
+            formData = prepareGroupDetail(groupData.groupDetail, formData, groupData.groupTypeId);
+
+            console.log('Create FormData entries:');
             for (let pair of formData.entries()) {
                 console.log(pair[0] + ': ' + pair[1]);
             }
-            
+
             await apiService.post(GROUP_PATHS.CREATE, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            
+
             toast.success('Group created successfully');
             setOpenCreateDialog(false);
             fetchGroups(1);
@@ -143,71 +151,58 @@ const Groups = () => {
     const handleUpdateGroup = async (groupData) => {
         try {
             setLoading(true);
-            const formData = new FormData();
-            
+            let formData = new FormData();
+
             // Required fields
             formData.append('name', groupData.name);
-            formData.append('id', selectedGroup.id); // Add group ID to form data
-            
-            // Optional fields
-            if (groupData.icon) {
-                formData.append('icon', groupData.icon);
-            } else {
-                // If no icon selected, use the existing one
-                formData.append('icon', selectedGroup.icon || getGroupIcon(groupData.name).name);
+            formData.append('id', selectedGroup.id);
+
+            // Optional fields - handle icon properly
+            const icon = groupData.icon || selectedGroup.icon || getGroupIcon(groupData.name).name;
+            if (icon && icon !== 'undefined') {
+                formData.append('icon', icon);
             }
-            
+
             if (groupData.image) {
                 formData.append('image', groupData.image);
             }
-            
-            // Members array - ensure we're using the correct property
+
+            // Members array
             const members = groupData.members || [];
             if (members.length > 0) {
                 members.forEach(member => {
-                    // Check if member has contactId or id
-                    const memberId = member.contactId || member.id;
+                    const memberId = member.contactId || member.addedUserId;
                     if (memberId) {
                         formData.append('members', memberId);
                     }
                 });
             }
-            
-            // Optional group type
+
+            // Group type and details
             if (groupData.groupTypeId) {
                 formData.append('groupTypeId', groupData.groupTypeId);
             }
-            
-            // Optional group details
-            if (groupData.groupDetail) {
-                const groupDetail = {
-                    enableGroupDate: groupData.groupDetail.enableGroupDate || false,
-                    enableSettleUpReminders: groupData.groupDetail.enableSettleUpReminders || false,
-                    enableBalanceAlert: groupData.groupDetail.enableBalanceAlert || false,
-                    maxGroupBudget: groupData.groupDetail.maxGroupBudget || null,
-                    startDate: groupData.groupDetail.startDate ? dayjs(groupData.groupDetail.startDate).toISOString() : null,
-                    endDate: groupData.groupDetail.endDate ? dayjs(groupData.groupDetail.endDate).toISOString() : null
-                };
-                formData.append('groupDetail', JSON.stringify(groupDetail));
-            }
 
-            // Log form data for debugging
+            // Always append groupDetail when there's a groupTypeId
+            formData = prepareGroupDetail(groupData.groupDetail, formData, groupData.groupTypeId);
+
             console.log('Update FormData entries:');
             for (let pair of formData.entries()) {
                 console.log(pair[0] + ': ' + pair[1]);
             }
 
-            await apiService.put(GROUP_PATHS.UPDATE, formData, {
+            var response = await apiService.put(GROUP_PATHS.UPDATE, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            
+            debugger;
             toast.success('Group updated successfully');
             setOpenCreateDialog(false);
             setSelectedGroup(null);
             fetchGroups(page);
         } catch (error) {
+            setOpenCreateDialog(true);
             console.error('Error updating group:', error);
             toast.error(error.response?.data?.message || 'Failed to update group');
         } finally {
@@ -255,31 +250,31 @@ const Groups = () => {
     function stringToColor(string) {
         let hash = 0;
         let i;
-      
+
         /* eslint-disable no-bitwise */
         for (i = 0; i < string.length; i += 1) {
-          hash = string.charCodeAt(i) + ((hash << 5) - hash);
+            hash = string.charCodeAt(i) + ((hash << 5) - hash);
         }
-      
+
         let color = '#';
-      
+
         for (i = 0; i < 3; i += 1) {
-          const value = (hash >> (i * 8)) & 0xff;
-          color += `00${value.toString(16)}`.slice(-2);
+            const value = (hash >> (i * 8)) & 0xff;
+            color += `00${value.toString(16)}`.slice(-2);
         }
         /* eslint-enable no-bitwise */
-      
+
         return color;
-      }
+    }
     function stringAvatar(name) {
         return {
-          sx: {
-            bgcolor: stringToColor(name),
-          },
-          children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`,
+            sx: {
+                bgcolor: stringToColor(name),
+            },
+            children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`,
         };
-      }
-      
+    }
+
     const isGroupCreator = (group) => {
         return group.createdBy === user.id;
     };
@@ -310,8 +305,8 @@ const Groups = () => {
 
                     return (
                         <Grid item xs={12} sm={6} md={4} key={group.id}>
-                            <Card 
-                                sx={{ 
+                            <Card
+                                sx={{
                                     cursor: 'pointer',
                                     '&:hover': { boxShadow: 6 }
                                 }}
@@ -320,10 +315,10 @@ const Groups = () => {
                                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, justifyContent: 'space-between' }}>
                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                             {thumbUrl ? (
-                                                <Avatar 
+                                                <Avatar
                                                     src={thumbUrl}
-                                                    sx={{ 
-                                                        width: 40, 
+                                                    sx={{
+                                                        width: 40,
                                                         height: 40,
                                                         mr: 2,
                                                         cursor: group.imagePath ? 'pointer' : 'default',
@@ -334,8 +329,8 @@ const Groups = () => {
                                                     onClick={() => fullImageUrl && setSelectedImage(fullImageUrl)}
                                                 />
                                             ) : (
-                                                <Avatar 
-                                                    sx={{ 
+                                                <Avatar
+                                                    sx={{
                                                         bgcolor: 'primary.main',
                                                         mr: 2
                                                     }}
@@ -344,13 +339,13 @@ const Groups = () => {
                                                 </Avatar>
                                             )}
                                             <Typography variant="h6" noWrap>
-                                                {group.name}
+                                                {capitalizeText(group.name)}
                                             </Typography>
                                         </Box>
                                         {canManageGroup && (
                                             <Box>
-                                                <IconButton 
-                                                    size="small" 
+                                                <IconButton
+                                                    size="small"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         handleEditGroup(group);
@@ -359,8 +354,8 @@ const Groups = () => {
                                                 >
                                                     <EditIcon fontSize="small" />
                                                 </IconButton>
-                                                <IconButton 
-                                                    size="small" 
+                                                <IconButton
+                                                    size="small"
                                                     color="error"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
@@ -373,17 +368,17 @@ const Groups = () => {
                                             </Box>
                                         )}
                                     </Box>
-                                    
+
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                             <AvatarGroup max={3}>
                                                 {group?.members?.map(member => (
-                                                    <Tooltip 
-                                                        key={member.id} 
+                                                    <Tooltip
+                                                        key={member.id}
                                                         title={`${member.addedUser.firstName} ${member.addedUser.lastName}${member.addedUser.id === group.createdBy ? ' (Creator)' : ''}`}
                                                     >
-                                                        <Avatar 
-                                                            {...stringAvatar(`${member.addedUser.firstName} ${member.addedUser.lastName}`)} 
+                                                        <Avatar
+                                                            {...stringAvatar(`${member.addedUser.firstName} ${member.addedUser.lastName}`)}
                                                             src={member.addedUser.profilePicture}
                                                             sx={member.addedUser.userId === group.createdBy ? {
                                                                 border: '2px solid gold'
@@ -450,7 +445,7 @@ const Groups = () => {
                 warningMessage="This action cannot be undone. All group expenses and settlements will be deleted."
             />
 
-            <ImageViewDialog 
+            <ImageViewDialog
                 open={Boolean(selectedImage)}
                 onClose={() => setSelectedImage(null)}
                 imagePath={selectedImage}
