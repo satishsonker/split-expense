@@ -39,6 +39,8 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import {getImageUrl} from '../utils/imageUtils'
 import { capitalizeText } from '../utils/stringUtils';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 const validationSchema = Yup.object({
     name: Yup.string()
@@ -161,20 +163,24 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
                 image: null,
                 icon: group.icon || '',
                 groupDetail: {
-                    enableGroupDate: group.groupDetail?.enableGroupDate || false,
-                    enableSettleUpReminders: group.groupDetail?.enableSettleUpReminders || false,
-                    enableBalanceAlert: group.groupDetail?.enableBalanceAlert || false,
-                    maxGroupBudget: group.groupDetail?.maxGroupBudget || null,
+                    enableGroupDate: group.groupDetail?.enableGroupDate ?? false,
+                    enableSettleUpReminders: group.groupDetail?.enableSettleUpReminders ?? false,
+                    enableBalanceAlert: group.groupDetail?.enableBalanceAlert ?? false,
+                    maxGroupBudget: group.groupDetail?.maxGroupBudget ?? null,
                     startDate: group.groupDetail?.startDate ? dayjs(group.groupDetail.startDate) : null,
                     endDate: group.groupDetail?.endDate ? dayjs(group.groupDetail.endDate) : null
                 }
             });
 
-            // Log the members data for debugging
-            console.log('Group members:', group.members);
+            // Set selected group type to show proper controls
+            debugger;
+            const currentGroupType = groupTypes.find(t => t.id === group.groupTypeId);
+            setSelectedGroupType(currentGroupType);
             
-            setSelectedGroupType(groupTypes.find(t => t.id === group.groupTypeId));
-            setImagePreview(group.imagePath ? getImageUrl(group.imagePath) : null);
+            // Set image preview if exists
+            if (group.imagePath) {
+                setImagePreview(getImageUrl(group.imagePath));
+            }
         }
     }, [open, group, groupTypes]);
 
@@ -480,7 +486,7 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
                         {/* Conditional Fields Based on Group Type */}
                         {selectedGroupType && (
                             <Grid item xs={12}>
-                                <Paper variant="outlined" sx={{ p: 2 }}>
+                                <Paper sx={{ p: 2, mt: 2 }}>
                                     {selectedGroupType.name === 'Trip' && (
                                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                                             <FormControlLabel
@@ -492,31 +498,35 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
                                                 }
                                                 label="Enable Group Date"
                                             />
-                                            <DatePicker
-                                                label="Start Date"
-                                                value={formik.values.groupDetail.startDate}
-                                                onChange={(date) => formik.setFieldValue('groupDetail.startDate', date)}
-                                                slotProps={{ 
-                                                    textField: { 
-                                                        fullWidth: true,
-                                                        error: formik.touched.groupDetail?.startDate && Boolean(formik.errors.groupDetail?.startDate),
-                                                        helperText: formik.touched.groupDetail?.startDate && formik.errors.groupDetail?.startDate
-                                                    } 
-                                                }}
-                                            />
-                                            <DatePicker
-                                                label="End Date"
-                                                value={formik.values.groupDetail.endDate}
-                                                onChange={(date) => formik.setFieldValue('groupDetail.endDate', date)}
-                                                slotProps={{ 
-                                                    textField: { 
-                                                        fullWidth: true,
-                                                        error: formik.touched.groupDetail?.endDate && Boolean(formik.errors.groupDetail?.endDate),
-                                                        helperText: formik.touched.groupDetail?.endDate && formik.errors.groupDetail?.endDate
-                                                    } 
-                                                }}
-                                                minDate={formik.values.groupDetail.startDate}
-                                            />
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                <DatePicker
+                                                    label="Start Date"
+                                                    value={formik.values.groupDetail.startDate}
+                                                    onChange={(date) => formik.setFieldValue('groupDetail.startDate', date)}
+                                                    slotProps={{ 
+                                                        textField: { 
+                                                            fullWidth: true,
+                                                            error: formik.touched.groupDetail?.startDate && Boolean(formik.errors.groupDetail?.startDate),
+                                                            helperText: formik.touched.groupDetail?.startDate && formik.errors.groupDetail?.startDate
+                                                        } 
+                                                    }}
+                                                />
+                                                <Box sx={{ mt: 2 }}>
+                                                    <DatePicker
+                                                        label="End Date"
+                                                        value={formik.values.groupDetail.endDate}
+                                                        onChange={(date) => formik.setFieldValue('groupDetail.endDate', date)}
+                                                        slotProps={{ 
+                                                            textField: { 
+                                                                fullWidth: true,
+                                                                error: formik.touched.groupDetail?.endDate && Boolean(formik.errors.groupDetail?.endDate),
+                                                                helperText: formik.touched.groupDetail?.endDate && formik.errors.groupDetail?.endDate
+                                                            } 
+                                                        }}
+                                                        minDate={formik.values.groupDetail.startDate}
+                                                    />
+                                                </Box>
+                                            </LocalizationProvider>
                                         </Box>
                                     )}
 

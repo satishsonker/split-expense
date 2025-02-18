@@ -8,6 +8,7 @@ namespace SplitExpense.Models
         public string? Name { get; set; }
         public string? Icon { get; set; }
         public int CreatedBy { get; set; }
+        public int GroupTypeId { get; set; }
         public string? ImagePath { get; set; }
         public string? ThumbImagePath { get; set; }
         public List<UserGroupMappingResponse>? Members { get; set; }

@@ -106,6 +106,8 @@ namespace SplitExpense.Data.Factory
         public async Task<PagingResponse<Group>> GetAllAsync(PagingRequest request)
         {
             var query = _context.Groups
+                .Include(x=>x.GroupDetail)
+                .Include(x => x.GroupType)
                 .Include(x => x.Members)
                 .ThenInclude(x => x.AddedUser)
                 .Include(x => x.User)
@@ -125,6 +127,8 @@ namespace SplitExpense.Data.Factory
         public async Task<Group?> GetAsync(int id)
         {
             return await _context.Groups
+                .Include(x => x.GroupDetail)
+                .Include(x => x.GroupType)
                  .Where(x => !x.IsDeleted && x.Id == id && x.CreatedBy == userId)
                  .FirstOrDefaultAsync();
         }
@@ -132,7 +136,10 @@ namespace SplitExpense.Data.Factory
         public async Task<PagingResponse<UserGroupMapping>> SearchAsync(SearchRequest request)
         {
             var query = _context.UserGroupMappings
-                 .Include(x => x.Group)
+                .Include(x => x.Group)
+                .ThenInclude(x => x.GroupDetail)
+                .Include(x => x.Group)
+                .ThenInclude(x => x.GroupType)
                 .Include(x => x.AddedUser)
                 .Include(x => x.AddedByUser)
                 .Where(x => !x.IsDeleted && x.CreatedBy == userId && (string.IsNullOrEmpty(request.SearchTerm) || x.Group.Name.Contains(request.SearchTerm)))
@@ -256,7 +263,10 @@ namespace SplitExpense.Data.Factory
         public async Task<UserGroupMapping> GetUserGroupMappingAsync(int id)
         {
             return await _context.UserGroupMappings
+                 .Include(x => x.Group)
+                .ThenInclude(x => x.GroupDetail)
                 .Include(x => x.Group)
+                .ThenInclude(x => x.GroupType)
                 .Include(x => x.AddedUser)
                 .Include(x => x.AddedByUser)
                 .Where(x => !x.IsDeleted && x.Id == id)
