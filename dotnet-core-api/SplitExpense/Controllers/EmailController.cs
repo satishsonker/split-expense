@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using SplitExpense.Models.Common;
+﻿using Microsoft.AspNetCore.Mvc;
+using SplitExpense.Logic;
 using SplitExpense.Models;
-using SplitExpense.SharedResource;
-using SplitExpense.Logic.Email;
+using SplitExpense.Models.Common;
 using SplitExpense.Models.DTO.Response;
+using SplitExpense.SharedResource;
 
 namespace SplitExpense.Controllers
 {

@@ -1,11 +1,11 @@
 ﻿
-using SplitExpense.EmailManagement.Service;
-using SplitExpense.SharedResource;
-using SplitExpense.ExceptionManagement.Exceptions;
-using SplitExpense.Models.DTO.Response;
-using SplitExpense.Models;
 using AutoMapper;
+using SplitExpense.EmailManagement.Service;
+using SplitExpense.ExceptionManagement.Exceptions;
 using SplitExpense.Logger;
+using SplitExpense.Models;
+using SplitExpense.Models.DTO.Response;
+using SplitExpense.SharedResource;
 
 namespace SplitExpense.Logic.Email
 {
@@ -52,6 +52,58 @@ namespace SplitExpense.Logic.Email
                 _logger.LogError(ex,LogMessage.NotFoundEmailTemplate, "EmailLogic-SendEmailOnUserAddedInGroup");
                 throw;
             }
+        }
+        public async Task<bool> SendEmailOnPasswordResetAsync(string toEmail, string userName, DateTime requestTime, Dictionary<string, string> emailData)
+        {
+            try
+            {
+                var template = await _emailTemplateService.GetTemplateByCodeAsync(EmailTemplateCode.PasswordReset);
+                if (template == null)
+                {
+                    _logger.LogError("Password reset email template not found");
+                    return false;
+                }
+
+                var body = template.Body;
+                foreach (var item in emailData)
+                {
+                    body = body.Replace($"##{item.Key}##", item.Value);
+                }
+
+                return await _emailQueueService.AddEmailToQueue(toEmail, template.Subject, body);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error sending password reset email to {toEmail}");
+                return false;
+            }
+        }
+
+        public async Task<bool> SendEmailOnUsernameReminderAsync(string toEmail, string userName, DateTime requestTime, Dictionary<string, string> emailData)
+        {
+            try
+            {
+                var template = await _emailTemplateService.GetTemplateByCodeAsync(EmailTemplateCode.UsernameReminder);
+                if (template == null)
+                {
+                    _logger.LogError("Username reminder email template not found");
+                    return false;
+                }
+
+                var body = template.Body;
+                foreach (var item in emailData)
+                {
+                    body = body.Replace($"##{item.Key}##", item.Value);
+                }
+
+                return await _emailQueueService.AddEmailToQueue(toEmail, template.Subject, body);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error sending username reminder email to {toEmail}");
+                return false;
+            }
+            throw new NotImplementedException();
         }
     }
 }

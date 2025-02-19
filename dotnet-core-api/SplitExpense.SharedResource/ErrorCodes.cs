@@ -33,7 +33,13 @@ namespace SplitExpense.SharedResource
         [Description("Invalid File/Image Extension")]
         InvalidFileExtension = 2004,
         [Description("File/Image SizeExceeded")]
-        FileSizeExceeded = 2005,
+        FileSizeExceeded = 2005, 
+        [Description("Invalid Credentials")]
+        InvalidCredentials = 2006, 
+        [Description("Invalid ResetToken")]
+        InvalidResetToken = 2007, 
+        [Description("Email Already Exists")]
+        EmailAlreadyExists = 2008,
 
         // Database Errors
         [Description("Database connection failed")]

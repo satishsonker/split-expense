@@ -53,5 +53,13 @@
         public const string GroupTypeSearch = ApiPrefix + "search";
         #endregion
 
+        #region Auth
+        public const string Register = ApiPrefix + "register";
+        public const string Login = ApiPrefix + "login";
+        public const string Logout = ApiPrefix + "logout";
+        public const string ForgotPassword = ApiPrefix + "forgot-password";
+        public const string ResetPassword = ApiPrefix + "reset-password";
+        public const string ForgotUsername = ApiPrefix + "forgot-username";
+        #endregion
     }
 }

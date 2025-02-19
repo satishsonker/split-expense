@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace SplitExpense.Models.DbModels
 {
@@ -15,6 +16,11 @@ namespace SplitExpense.Models.DbModels
         public string? CurrencyCode { get; set; } = "INR";
         public string? CountryCode { get; set; }
         public string? ISDCode { get; set; }
+        public string? ResetToken { get; set; }
+        public byte[]? PasswordHash { get; set; }
+        public byte[]? PasswordSalt { get; set; }
+        public DateTime? ResetTokenExpiry { get; set; }
+        public DateTime? LastLoginAt { get; set; }
         public bool IsDeleted {  get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }

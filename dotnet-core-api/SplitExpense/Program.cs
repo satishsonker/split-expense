@@ -2,16 +2,17 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using NLog.Web;
 using SplitExpense.AutoMapperMapping;
 using SplitExpense.Data;
-using SplitExpense.Middleware;
 using SplitExpense.ExceptionManagement.Exceptions;
-using NLog.Web;
-using SplitExpense.Models.ConfigModels;
-using SplitExpense.FileManagement.Storage;
 using SplitExpense.FileManagement.Service;
+using SplitExpense.FileManagement.Storage;
+using SplitExpense.Middleware;
 using SplitExpense.Middleware.Extensions;
+using SplitExpense.Models.ConfigModels;
+using SplitExpense.Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,25 +45,21 @@ builder.Services.AddAutoMapper(cfg => cfg.AddProfile<Mapping>());
 builder.Services.AddSwaggerConfiguration();
 
 // Add authentication and external login providers
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
- {
-     options.TokenValidationParameters = new TokenValidationParameters
-     {
-         ValidateIssuer = true,
-         ValidateAudience = true,
-         ValidateLifetime = true,
-         ValidateIssuerSigningKey = true,
-         ValidIssuer = builder.Configuration["Jwt:Issuer"],
-         ValidAudience = builder.Configuration["Jwt:Audience"],
-         IssuerSigningKey = new SymmetricSecurityKey(
-             System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-     };
- });
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new ArgumentNullException("Jwt:Key")))
+        };
+    });
 //.AddGoogle(options =>
 //{
 //    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
@@ -96,6 +93,9 @@ switch (storageType)
 }
 
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+
+// Add JWT service
+builder.Services.AddScoped<IJwtService, JwtService>();
 
 var app = builder.Build();
 

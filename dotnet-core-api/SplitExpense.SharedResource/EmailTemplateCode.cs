@@ -2,6 +2,9 @@
 {
     public enum EmailTemplateCode
     {
-        UserAddedToExpenseGroup=1
+        UserAddedToExpenseGroup=1,
+        PasswordReset,
+        UsernameReminder,
+        WelcomeEmail,
     }
 }

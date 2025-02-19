@@ -63,6 +63,13 @@ namespace SplitExpense.AutoMapperMapping
             CreateMap<GroupType, GroupTypeResponse>();
             CreateMap<PagingResponse<GroupType>, PagingResponse<GroupTypeResponse>>();
             #endregion
+
+            #region Auth
+            CreateMap<User, LoginResponse>()
+                .ForMember(dest => dest.Token, opt => opt.Ignore())
+                .ForMember(dest => dest.RefreshToken, opt => opt.Ignore())
+                .ForMember(dest => dest.TokenExpiration, opt => opt.Ignore());
+            #endregion
         }
     }
 }
