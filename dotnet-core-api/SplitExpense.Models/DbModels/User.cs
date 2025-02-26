@@ -12,9 +12,11 @@ namespace SplitExpense.Models.DbModels
         public string? Email { get; set; }
         public string? Phone { get; set; }
         public string? ProfilePicture { get; set; }
+        public string? ThumbProfilePicture { get; set; }
         public string? LanguageCode { get; set; } = "us-en";
         public string? CurrencyCode { get; set; } = "INR";
         public string? CountryCode { get; set; }
+        public string? Timezone { get; set; }
         public string? ISDCode { get; set; }
         public string? ResetToken { get; set; }
         public byte[]? PasswordHash { get; set; }

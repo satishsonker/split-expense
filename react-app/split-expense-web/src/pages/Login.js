@@ -50,9 +50,11 @@ const Login = () => {
             setError('');
             setIsLoading(true);
             try {
-                const response = {data: {id: 3, email: 'test@test.com', name: 'Test User'}};//await apiService.post(AUTH_PATHS.LOGIN, values);
-                localStorage.setItem('user', JSON.stringify(response.data));
-                login(response.data);
+                const response = await apiService.post(AUTH_PATHS.LOGIN, values);
+                debugger;
+                localStorage.setItem('user', JSON.stringify(response.user));
+                localStorage.setItem('token', JSON.stringify(response));
+                login(response.user);
                 navigate('/');
             } catch (err) {
                 setError(err.message || 'An error occurred during login');

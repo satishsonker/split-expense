@@ -8,6 +8,8 @@ using SplitExpense.Models.DTO;
 using SplitExpense.SharedResource;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Http;
+using SplitExpense.FileManagement.Service;
 
 namespace SplitExpense.Logic
 {
@@ -17,7 +19,8 @@ namespace SplitExpense.Logic
         IMapper mapper,
         IEmailLogic emailLogic,
         ISplitExpenseLogger logger,
-        IConfiguration configuration) : IAuthLogic
+        IConfiguration configuration,
+        IFileUploadService fileUploadService) : IAuthLogic
     {
         private readonly IAuthFactory _authFactory = authFactory;
         private readonly IMapper _mapper = mapper;
@@ -25,6 +28,7 @@ namespace SplitExpense.Logic
         private readonly ISplitExpenseLogger _logger = logger;
         private readonly IConfiguration _configuration = configuration;
         private readonly IUserFactory _userFactory = userFactory;
+        private readonly IFileUploadService _fileUploadService = fileUploadService;
 
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
@@ -64,7 +68,7 @@ namespace SplitExpense.Logic
         {
             try
             {
-                var user = await _authFactory.GetUserByEmailAsync(request.Email);
+                var user = await _authFactory.GetUserByEmailOrPhoneAsync(request.Email,string.Empty);
                 if (user == null) return true; // Don't reveal if email exists
 
                 // Generate reset token
@@ -119,7 +123,7 @@ namespace SplitExpense.Logic
         {
             try
             {
-                var user = await _authFactory.GetUserByEmailAsync(request.Email);
+                var user = await _authFactory.GetUserByEmailOrPhoneAsync(request.Email,string.Empty);
                 if (user == null) return true; // Don't reveal if email exists
 
                 // Send username reminder email
@@ -145,7 +149,7 @@ namespace SplitExpense.Logic
             try
             {
                 // Check if email already exists
-                var existingUser = await _authFactory.GetUserByEmailAsync(request.Email);
+                var existingUser = await _authFactory.GetUserByEmailOrPhoneAsync(request.Email,request.PhoneNumber);
                 if (existingUser != null)
                 {
                     throw new BusinessRuleViolationException(ErrorCodes.EmailAlreadyExists);
@@ -189,6 +193,114 @@ namespace SplitExpense.Logic
             using var hmac = new HMACSHA512();
             passwordSalt = hmac.Key;
             passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+        }
+
+        public async Task<UserResponse> UpdateUserAsync(UpdateUserRequest request)
+        {
+            try
+            {
+                // Check email uniqueness if changed
+                if (!string.IsNullOrEmpty(request.Email))
+                {
+                    var existingUser = await _authFactory.GetUserByEmailOrPhoneAsync(request.Email, string.Empty);
+                    if (existingUser != null && existingUser.UserId != request.UserId)
+                    {
+                        throw new BusinessRuleViolationException(ErrorCodes.EmailAlreadyExists);
+                    }
+                }
+
+                var user = new User
+                {
+                    UserId = request.UserId,
+                    FirstName = request.FirstName,
+                    LastName = request.LastName,
+                    Email = request.Email,
+                    Phone = request.PhoneNumber,
+                    LanguageCode = request.LanguageCode,
+                    CurrencyCode = request.CurrencyCode,
+                    CountryCode = request.CountryCode,
+                    ISDCode = request.ISDCode
+                };
+
+                var updatedUser = await _authFactory.UpdateUserAsync(user);
+                return _mapper.Map<UserResponse>(updatedUser);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating user {request.UserId}");
+                throw;
+            }
+        }
+
+        public async Task<UserResponse> UpdateProfilePictureAsync(int userId, IFormFile file)
+        {
+            try
+            {
+                var user = await _userFactory.GetByIdAsync(userId);
+                if (user == null)
+                    throw new BusinessRuleViolationException(ErrorCodes.UserNotFound);
+
+                // Delete old profile picture if exists
+                if (!string.IsNullOrEmpty(user.ProfilePicture))
+                {
+                    await _fileUploadService.DeleteFileAsync(user.ProfilePicture,user.ThumbProfilePicture);
+                }
+
+                // Upload new profile picture
+                var uploadResult = await _fileUploadService.UploadFileAsync(file);
+                var updatedUser = await _authFactory.UpdateProfilePictureAsync(userId, uploadResult);
+
+                return _mapper.Map<UserResponse>(updatedUser);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating profile picture for user {userId}");
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteProfilePictureAsync(int userId)
+        {
+            try
+            {
+                var user = await _userFactory.GetByIdAsync(userId);
+                if (user == null)
+                    throw new BusinessRuleViolationException(ErrorCodes.UserNotFound);
+
+                if (!string.IsNullOrEmpty(user.ProfilePicture))
+                {
+                    await _fileUploadService.DeleteFileAsync(user.ProfilePicture);
+                }
+
+                return await _authFactory.DeleteProfilePictureAsync(userId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting profile picture for user {userId}");
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteUserAsync(int userId)
+        {
+            try
+            {
+                var user = await _userFactory.GetByIdAsync(userId);
+                if (user == null)
+                    throw new BusinessRuleViolationException(ErrorCodes.UserNotFound);
+
+                if (!string.IsNullOrEmpty(user.ProfilePicture))
+                {
+                    await _fileUploadService.DeleteFileAsync(user.ProfilePicture);
+                }
+
+                return await _userFactory.DeleteAsync(userId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting user {userId}");
+                throw;
+            }
         }
     }
 } 

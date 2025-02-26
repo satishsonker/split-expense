@@ -22,9 +22,12 @@ export const GROUP_TYPES_PATHS={
 
 export const AUTH_PATHS = {
     LOGIN: `${API_BASE_URL}/auth/login`,
+    UPDATE_PROFILE: `${API_BASE_URL}/auth/update`,
+    LOGOUT: `${API_BASE_URL}/auth/logout`,
     REGISTER: `${API_BASE_URL}/auth/register`,
     GOOGLE_LOGIN: `${API_BASE_URL}/auth/google`,
     FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
+    FORGOT_USERNAME: `${API_BASE_URL}/auth/forgot-username`,
     RESET_PASSWORD: `${API_BASE_URL}/auth/reset-password`,
 };
 

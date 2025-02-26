@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-    AppBar, 
-    Toolbar, 
-    IconButton, 
-    Typography, 
-    Menu, 
-    MenuItem, 
+import { getImageUrl } from '../utils/imageUtils';
+import {
+    AppBar,
+    Toolbar,
+    IconButton,
+    Typography,
+    Menu,
+    MenuItem,
     Badge,
     Avatar,
     Box,
@@ -30,7 +31,16 @@ const Header = ({ onMenuClick }) => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
     const [profileAnchor, setProfileAnchor] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
     const [notificationAnchor, setNotificationAnchor] = useState(null);
+    useEffect(() => {
+        const userData = JSON.parse(localStorage.getItem('user'));
+        if (userData) {
+            if (userData.thumbProfilePicture) {
+                setImagePreview(getImageUrl(userData.thumbProfilePicture ?? userData.profilePicture));
+            }
+        }
+    }, []);
 
     const handleProfileClick = (event) => {
         setProfileAnchor(event.currentTarget);
@@ -83,7 +93,9 @@ const Header = ({ onMenuClick }) => {
 
                 <IconButton color="inherit" onClick={handleProfileClick}>
                     {user ? (
-                        <Avatar sx={{ width: 32, height: 32 }}>
+                        <Avatar sx={{ width: 32, height: 32 }}
+                            src={imagePreview}
+                        >
                             {user.name?.charAt(0) || 'U'}
                         </Avatar>
                     ) : (
@@ -113,6 +125,15 @@ const Header = ({ onMenuClick }) => {
                                 )}
                             </Box>
                             <Divider />
+                            <MenuItem onClick={() => {
+                                navigate('/profile');
+                                handleClose();
+                            }}>
+                                <ListItemIcon>
+                                    <PersonIcon fontSize="small" />
+                                </ListItemIcon>
+                                <ListItemText>Profile</ListItemText>
+                            </MenuItem>
                             <MenuItem>
                                 <ListItemIcon>
                                     <CurrencyIcon fontSize="small" />

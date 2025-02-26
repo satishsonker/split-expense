@@ -15,7 +15,7 @@ import {
     Button,
     CircularProgress
 } from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, CurrencyRupeeIcon RupeeICo } from '@mui/icons-material';
 import { getGroupIcon } from '../utils/groupIcons';
 import CreateGroupDialog from '../components/CreateGroupDialog';
 import { apiService } from '../utils/axios';
@@ -375,11 +375,11 @@ const Groups = () => {
                                                 {group?.members?.map(member => (
                                                     <Tooltip
                                                         key={member.id}
-                                                        title={`${member.addedUser.firstName} ${member.addedUser.lastName}${member.addedUser.id === group.createdBy ? ' (Creator)' : ''}`}
+                                                        title={`${member.addedUser.firstName} ${member.addedUser.lastName} ${member.addedUser.userId === group.createdBy ? ' (Creator)' : ''}`}
                                                     >
                                                         <Avatar
                                                             {...stringAvatar(`${member.addedUser.firstName} ${member.addedUser.lastName}`)}
-                                                            src={member.addedUser.profilePicture}
+                                                            src={ getImageUrl(member.addedUser.profilePicture)}
                                                             sx={member.addedUser.userId === group.createdBy ? {
                                                                 border: '2px solid gold'
                                                             } : undefined}

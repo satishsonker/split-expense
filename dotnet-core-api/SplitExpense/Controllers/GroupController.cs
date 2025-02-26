@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SplitExpense.Logic;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
@@ -7,7 +8,7 @@ using SplitExpense.SharedResource;
 
 namespace SplitExpense.Controllers
 {
-
+    [Authorize]
     [ApiController]
     public class GroupController(IGroupLogic groupLogic) : ControllerBase
     {
@@ -76,7 +77,6 @@ namespace SplitExpense.Controllers
             IFormFile? image,
             [FromForm] List<int>? members,
             [FromForm] int? groupTypeId,
-            [FromForm] int GroupId, 
             [FromForm] bool EnableGroupDate,
             [FromForm] bool EnableSettleUpReminders,
             [FromForm] bool EnableBalanceAlert,

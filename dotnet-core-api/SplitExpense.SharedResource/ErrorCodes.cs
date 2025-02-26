@@ -39,7 +39,9 @@ namespace SplitExpense.SharedResource
         [Description("Invalid ResetToken")]
         InvalidResetToken = 2007, 
         [Description("Email Already Exists")]
-        EmailAlreadyExists = 2008,
+        EmailAlreadyExists = 2008, 
+        [Description("User Not Found")]
+        UserNotFound = 2009,
 
         // Database Errors
         [Description("Database connection failed")]

@@ -60,6 +60,10 @@
         public const string ForgotPassword = ApiPrefix + "forgot-password";
         public const string ResetPassword = ApiPrefix + "reset-password";
         public const string ForgotUsername = ApiPrefix + "forgot-username";
+        public const string UpdateUserProfile = ApiPrefix + "update/profile";
+        public const string UpdateUserProfilePicture = ApiPrefix + "update/profile-picture";
+        public const string DeleteUserProfilePicture = ApiPrefix + "delete/profile-picture";
+        public const string DeleteUserProfile = ApiPrefix + "delete/profile";
         #endregion
     }
 }

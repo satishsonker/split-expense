@@ -13,6 +13,7 @@ using SplitExpense.Middleware.Extensions;
 using SplitExpense.Models.ConfigModels;
 using SplitExpense.Services;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,7 @@ builder.Logging.SetMinimumLevel(LogLevel.Trace);
 builder.Host.UseNLog();
 
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 
 // Add services to the container.
 builder.Services
@@ -39,37 +41,31 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.RegisterValidator();
 
 // Add AutoMapper AddAutoMapper(cfg => cfg.AddProfile<SplitExpense.AutoMapperMapping.Mapping>());
-builder.Services.AddAutoMapper(cfg => cfg.AddProfile<Mapping>());
+builder.Services.AddAutoMapper(typeof(Mapping));
 
 // Add Swagger configuration
 builder.Services.AddSwaggerConfiguration();
 
-// Add authentication and external login providers
+// Add JWT Service
+builder.Services.AddScoped<IJwtService, JwtService>();
+
+// Configure Authentication and Authorization
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
+            ValidateIssuer = builder.Configuration.GetValue<bool>("Jwt:EnableAuthentication"),
+            ValidateAudience = builder.Configuration.GetValue<bool>("Jwt:EnableAuthentication"),
+            ValidateLifetime = builder.Configuration.GetValue<bool>("Jwt:EnableAuthentication"),
+            ValidateIssuerSigningKey = builder.Configuration.GetValue<bool>("Jwt:EnableAuthentication"),
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new ArgumentNullException("Jwt:Key")))
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? 
+                    throw new ArgumentNullException("Jwt:Key")))
         };
     });
-//.AddGoogle(options =>
-//{
-//    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-//    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-//})
-//.AddFacebook(options =>
-//{
-//    options.AppId = builder.Configuration["Authentication:Facebook:AppId"];
-//    options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
-//});
 
 // In your service registration
 builder.Services.Configure<FileUploadSettings>(builder.Configuration.GetSection("FileUpload"));
@@ -94,8 +90,25 @@ switch (storageType)
 
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
-// Add JWT service
-builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddAuthorization(options =>
+{
+    if (builder.Configuration.GetValue<bool>("Jwt:EnableAuthentication"))
+    {
+        options.FallbackPolicy = new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .Build();
+    }
+    else
+    {
+        options.DefaultPolicy = new AuthorizationPolicyBuilder()
+            .RequireAssertion(_ => true)
+            .Build();
+        
+        options.FallbackPolicy = new AuthorizationPolicyBuilder()
+            .RequireAssertion(_ => true)
+            .Build();
+    }
+});
 
 var app = builder.Build();
 
@@ -113,6 +126,9 @@ app.UseCors(option =>
     option.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
 });
 app.UseCustomExceptionHandler();
+
+// Always add Authentication and Authorization middleware
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

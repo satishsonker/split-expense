@@ -30,10 +30,14 @@ class ApiService {
     // Request interceptor
     handleRequest = (config) => {
         const user = JSON.parse(localStorage.getItem('user'));
-        if (user?.id) {
-            config.headers['userId'] = user.id;
+        const tokenData = JSON.parse(localStorage.getItem('token')??"{}");
+        if (user?.userId) {
+            config.headers['userId'] = user.userId;
         }
 
+        if (tokenData?.token) {
+            config.headers['Authorization'] = `Bearer ${tokenData.token}`;
+        }
         if (env.isDevelopment()) {
             console.log('API Request:', {
                 url: config.url,

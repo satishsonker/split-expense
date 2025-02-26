@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using SplitExpense.Logger;
 using SplitExpense.Models.Common;
+using SplitExpense.Models.DbModels;
 using System.Net;
 using System.Text.Json;
 
@@ -15,7 +16,7 @@ namespace SplitExpense.ExceptionManagement.Exceptions
         private readonly Func<Exception, ExceptionResponse>? _localExceptionHandlerFunc;
         private readonly RequestDelegate _next;
         private ISplitExpenseLogger _logger;
-        //private IErrorLogFactory _errorLogRepository;
+        private ISplitExpenseLogger _errorLogRepository;
         private IConfiguration _configuration;
 
         public GlobalExceptionHandlerMiddleware(RequestDelegate next,
@@ -25,15 +26,15 @@ namespace SplitExpense.ExceptionManagement.Exceptions
             _localExceptionHandlerFunc = localExceptionHandlerFunc;
         }
 
-        public async Task InvokeAsync(HttpContext context, ISplitExpenseLogger logger,IConfiguration configuration)
+        public async Task InvokeAsync(HttpContext context, ISplitExpenseLogger logger,IConfiguration configuration, ISplitExpenseLogger errorLogRepository)
         {
             bool enableLogInDb=false;
             try
             {
-                //_errorLogRepository = errorLogRepository;
+                _errorLogRepository = errorLogRepository;
                 _logger=logger;
                 _configuration=configuration;
-                //enableLogInDb = _configuration.GetValue<bool>("Logger:enableLogInDb");
+               // enableLogInDb = _configuration.GetSection("Logger:enableLogInDb").Value=="true";
                 await _next(context);
             }
             catch (Exception ex)
@@ -81,10 +82,12 @@ namespace SplitExpense.ExceptionManagement.Exceptions
                     case BusinessRuleViolationException businessRuleViolationException:
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                         errorResponse.ErrorResponseType = businessRuleViolationException.ErrorResponseType;
+                        errorResponse.Message = businessRuleViolationException.Message;
                         break;
                     case NotFoundException notFoundException:
                         response.StatusCode = (int)HttpStatusCode.NotFound;
                         errorResponse.ErrorResponseType = notFoundException.ErrorResponseType;
+                        errorResponse.Message = notFoundException.Message;
                         break;
                     case UnauthorizedException _:
                         response.StatusCode = (int)HttpStatusCode.Unauthorized;
@@ -102,6 +105,7 @@ namespace SplitExpense.ExceptionManagement.Exceptions
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                         errorResponse.ErrorResponseType = validationException.ErrorResponseType;
                         errorResponse.Errors = validationException.Errors;
+                        errorResponse.Message = validationException.Message;
                         break;
                     case HttpRequestException requestException:
                         response.StatusCode = (int)HttpStatusCode.InternalServerError;

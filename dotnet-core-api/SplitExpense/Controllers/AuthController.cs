@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SplitExpense.Data.Services;
 using SplitExpense.Logic;
 using SplitExpense.Models.DTO;
 using SplitExpense.Services;
@@ -7,11 +8,13 @@ using SplitExpense.SharedResource;
 
 namespace SplitExpense.Controllers
 {
+    [AllowAnonymous]
     [ApiController]
-    public class AuthController(IAuthLogic authLogic,IJwtService jwtService) : ControllerBase
+    public class AuthController(IAuthLogic authLogic, IJwtService jwtService,IUserContextService userContext) : ControllerBase
     {
         private readonly IAuthLogic _authLogic = authLogic;
         private readonly IJwtService _jwtService = jwtService;
+        private readonly IUserContextService _userContext = userContext;        
 
         [HttpPost(ApiPaths.Login)]
         [AllowAnonymous]
@@ -43,7 +46,7 @@ namespace SplitExpense.Controllers
         [Authorize]
         public async Task<ActionResult<bool>> LogoutAsync()
         {
-            var userId = int.Parse(User.FindFirst("userId")?.Value ?? "0");
+            var userId = _userContext.GetUserId();
             return await _authLogic.LogoutAsync(userId);
         }
 
@@ -66,6 +69,39 @@ namespace SplitExpense.Controllers
         public async Task<ActionResult<bool>> ForgotUsernameAsync([FromBody] ForgotUsernameRequest request)
         {
             return await _authLogic.ForgotUsernameAsync(request);
+        }
+
+        [HttpPut(ApiPaths.UpdateUserProfile)]
+        [Authorize]
+        public async Task<ActionResult<UserResponse>> UpdateUserAsync([FromBody] UpdateUserRequest request)
+        {
+            var userId = _userContext.GetUserId();
+            request.UserId = userId;
+            return await _authLogic.UpdateUserAsync(request);
+        }
+
+        [HttpPost("profile-picture")]
+        [Authorize]
+        public async Task<ActionResult<UserResponse>> UpdateProfilePictureAsync(IFormFile file)
+        {
+            var userId = _userContext.GetUserId();
+            return await _authLogic.UpdateProfilePictureAsync(userId, file);
+        }
+
+        [HttpDelete("profile-picture")]
+        [Authorize]
+        public async Task<ActionResult<bool>> DeleteProfilePictureAsync()
+        {
+            var userId = _userContext.GetUserId();
+            return await _authLogic.DeleteProfilePictureAsync(userId);
+        }
+
+        [HttpDelete("delete")]
+        [Authorize]
+        public async Task<ActionResult<bool>> DeleteUserAsync()
+        {
+            var userId = _userContext.GetUserId();
+            return await _authLogic.DeleteUserAsync(userId);
         }
     }
 } 
