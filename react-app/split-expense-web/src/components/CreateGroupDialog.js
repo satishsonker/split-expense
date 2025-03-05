@@ -18,12 +18,10 @@ import {
     Switch,
     FormControlLabel,
     Grid,
-    Paper,
-    CircularProgress
+    Paper
 } from '@mui/material';
 import {
     Close as CloseIcon,
-    Add as AddIcon,
     Upload as UploadIcon,
     Delete as DeleteIcon,
     PhotoCamera as CameraIcon,
@@ -173,7 +171,6 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
             });
 
             // Set selected group type to show proper controls
-            debugger;
             const currentGroupType = groupTypes.find(t => t.id === group.groupTypeId);
             setSelectedGroupType(currentGroupType);
             

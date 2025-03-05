@@ -15,7 +15,7 @@ import {
     Button,
     CircularProgress
 } from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, CurrencyRupeeIcon RupeeICo } from '@mui/icons-material';
+import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, CurrencyRupee as RupeeIcon } from '@mui/icons-material';
 import { getGroupIcon } from '../utils/groupIcons';
 import CreateGroupDialog from '../components/CreateGroupDialog';
 import { apiService } from '../utils/axios';
@@ -391,7 +391,7 @@ const Groups = () => {
                                             </AvatarGroup>
                                         </Box>
                                         <Typography variant="subtitle1" color="primary">
-                                            ${group.totalExpenses}
+                                           <RupeeIcon fontSize='small'/> {group.totalExpenses}
                                         </Typography>
                                     </Box>
                                 </CardContent>
