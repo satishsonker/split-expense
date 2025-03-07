@@ -151,9 +151,9 @@ namespace SplitExpense.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
         [HttpGet(ApiPaths.GroupGetRecent)]
-        public async Task<List<GroupResponse>> GetRecentGroups([FromRoute] int id)
+        public async Task<List<GroupResponse>> GetRecentGroups()
         {
-            return await _groupLogic.GetRecentGroups(id);
+            return await _groupLogic.GetRecentGroups();
         }
     }
 }

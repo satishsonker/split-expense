@@ -279,9 +279,9 @@ namespace SplitExpense.Data.Factory
                .FirstOrDefaultAsync();
         }
 
-        public async Task<List<ExpenseGroup>> GetRecentGroups(int userId)
+        public async Task<List<ExpenseGroup>> GetRecentGroups()
         {
-            int totalRecentGroups = _configuration.GetValue<int>("TotalRecentGroups");
+            int totalRecentGroups = _configuration.GetValue<int>("Group:TotalRecentGroups");
             return await _context.Groups.Where(x => !x.IsDeleted && x.CreatedBy==userId)
                 .OrderByDescending(x => x.CreatedAt)
                 .Take(totalRecentGroups)

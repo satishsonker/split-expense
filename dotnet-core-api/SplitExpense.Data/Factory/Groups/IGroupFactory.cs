@@ -7,7 +7,7 @@ namespace SplitExpense.Data.Factory
     public interface IGroupFactory
     {
         Task<PagingResponse<ExpenseGroup>> GetAllAsync(PagingRequest request);
-        Task<List<ExpenseGroup>> GetRecentGroups(int userId);
+        Task<List<ExpenseGroup>> GetRecentGroups();
         Task<ExpenseGroup> CreateAsync(ExpenseGroup request,List<int> members);
         Task<int> UpdateAsync(ExpenseGroup request, List<int> members);
         Task<ExpenseGroup?> GetAsync(int id);

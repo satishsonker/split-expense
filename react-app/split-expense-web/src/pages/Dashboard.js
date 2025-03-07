@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Box,
     Typography,
@@ -8,7 +8,9 @@ import {
     IconButton,
     Button,
     useTheme,
-    useMediaQuery
+    useMediaQuery,
+    Skeleton,
+    Avatar
 } from '@mui/material';
 import {
     AccountBalance as AccountBalanceIcon,
@@ -16,19 +18,48 @@ import {
     Receipt as ReceiptIcon,
     Add as AddIcon
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { GROUP_PATHS } from '../constants/apiPaths';
+import { apiService } from '../utils/axios';
+import { getGroupIcon } from '../utils/groupIcons';
+import { getImageUrl } from '../utils/imageUtils';
+import CurrencyIcon from '../components/CurrencyIcon';
 
 const Dashboard = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+    const [recentGroups, setRecentGroups] = useState([]);
 
     const summaryData = {
         totalBalance: 1250.00,
         youOwe: 320.00,
-        youAreOwed: 1570.00,
-        recentGroups: [
-            { id: 1, name: 'Weekend Trip', amount: 450 },
-            { id: 2, name: 'Household', amount: 120 },
-        ]
+        youAreOwed: 1570.00
+    };
+
+    useEffect(() => {
+        fetchRecentGroups();
+    }, []);
+
+    const fetchRecentGroups = async () => {
+        try {
+            setLoading(true);
+            const response = await apiService.get(GROUP_PATHS.GET_RECENTS);
+            setRecentGroups(response || []);
+        } catch (error) {
+            console.error('Error fetching recent groups:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleNavigateToGroup = (groupId) => {
+        navigate(`/groups/${groupId}`);
+    };
+
+    const handleCreateGroup = () => {
+        navigate('/groups');
     };
 
     return (
@@ -93,6 +124,7 @@ const Dashboard = () => {
                             fullWidth
                             variant="outlined"
                             startIcon={<GroupIcon />}
+                            onClick={handleCreateGroup}
                             sx={{ height: '100%' }}
                         >
                             New Group
@@ -107,23 +139,60 @@ const Dashboard = () => {
                     Recent Groups
                 </Typography>
                 <Grid container spacing={2}>
-                    {summaryData.recentGroups.map(group => (
-                        <Grid item xs={12} sm={6} md={4} key={group.id}>
-                            <Card>
-                                <CardContent>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    {loading ? (
+                        // Loading skeletons
+                        [...Array(2)].map((_, index) => (
+                            <Grid item xs={12} sm={6} md={4} key={`skeleton-${index}`}>
+                                <Card>
+                                    <CardContent>
                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                            <GroupIcon sx={{ mr: 1 }} />
-                                            <Typography variant="h6">{group.name}</Typography>
+                                            <Skeleton variant="circular" width={40} height={40} sx={{ mr: 2 }} />
+                                            <Skeleton variant="text" width={120} />
                                         </Box>
-                                        <Typography variant="subtitle1" color="primary">
-                                            ${group.amount}
-                                        </Typography>
-                                    </Box>
-                                </CardContent>
-                            </Card>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        ))
+                    ) : recentGroups.length > 0 ? (
+                        recentGroups.map(group => {
+                            const GroupIconComponent = getGroupIcon(group.name);
+                            return (
+                                <Grid item xs={12} sm={6} md={4} key={group.id}>
+                                    <Card 
+                                        sx={{ 
+                                            cursor: 'pointer',
+                                            '&:hover': { bgcolor: 'action.hover' }
+                                        }}
+                                        onClick={() => handleNavigateToGroup(group.id)}
+                                    >
+                                        <CardContent>
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                {group.thumbImagePath ? (
+                                                    <Avatar
+                                                        src={getImageUrl(group.thumbImagePath)}
+                                                        sx={{ mr: 2 }}
+                                                    />
+                                                ) : (
+                                                    <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
+                                                        <GroupIconComponent />
+                                                    </Avatar>
+                                                )}
+                                                <Typography variant="h6">
+                                                    {group.name}
+                                                </Typography>
+                                            </Box>
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            )
+                        })
+                    ) : (
+                        <Grid item xs={12}>
+                            <Typography color="textSecondary" align="center">
+                                No recent groups found
+                            </Typography>
                         </Grid>
-                    ))}
+                    )}
                 </Grid>
             </Box>
         </Box>
