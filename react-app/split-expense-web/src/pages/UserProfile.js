@@ -108,6 +108,7 @@ const UserProfile = () => {
     });
 
     useEffect(() => {
+        debugger;
         const userData = JSON.parse(localStorage.getItem('user'));
         if (userData) {
             formik.setValues({

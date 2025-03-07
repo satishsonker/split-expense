@@ -6,6 +6,7 @@
         #region Group APIs
         public const string GroupCreate = ApiPrefix + "create";
         public const string GroupGetAll = ApiPrefix + "get/all";
+        public const string GroupGetRecent = ApiPrefix + "get/recent";
         public const string GroupGetById = ApiPrefix + "get/{id}";
         public const string GroupUpdate = ApiPrefix + "update";
         public const string GroupDelete = ApiPrefix + "delete/{id}";

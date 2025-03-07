@@ -11,7 +11,11 @@ using SplitExpense.FileManagement.Service;
 
 namespace SplitExpense.Logic
 {
-    public class GroupsLogic(IMapper mapper, IGroupFactory factory,IEmailLogic emailLogic,ISplitExpenseLogger logger, IFileUploadService fileUploadService) : IGroupLogic
+    public class GroupsLogic(IMapper mapper, 
+        IGroupFactory factory,
+        IEmailLogic emailLogic,
+        ISplitExpenseLogger logger, 
+        IFileUploadService fileUploadService) : IGroupLogic
     {
         private readonly IMapper _mapper = mapper;
         private readonly IGroupFactory _factory=factory;
@@ -46,7 +50,7 @@ namespace SplitExpense.Logic
             try
             {
                 ArgumentNullException.ThrowIfNull(request);
-                var mappedRequest = _mapper.Map<Group>(request);
+                var mappedRequest = _mapper.Map<ExpenseGroup>(request);
                 if(request.GroupImage != null && request.GroupImage.Length>0)
                 {
                     var fileUploadResponse = await _fileUploadService.UploadFileAsync(request.GroupImage);
@@ -89,6 +93,11 @@ namespace SplitExpense.Logic
             return _mapper.Map<GroupResponse>(await _factory.GetAsync(id));
         }
 
+        public async Task<List<GroupResponse>> GetRecentGroups(int userId)
+        {
+            return _mapper.Map<List<GroupResponse>>(await _factory.GetRecentGroups(userId));
+        }
+
         public async Task<UserGroupMappingResponse?> GetUserGroupMappingAsync(int id)
         {
             return _mapper.Map<UserGroupMappingResponse>(await _factory.GetUserGroupMappingAsync(id));
@@ -101,7 +110,7 @@ namespace SplitExpense.Logic
 
         public async Task<int> UpdateAsync(GroupRequest request)
         {
-            var mappedRequest = _mapper.Map<Group>(request);
+            var mappedRequest = _mapper.Map<ExpenseGroup>(request);
             if (request.GroupImage != null && request.GroupImage.Length > 0)
             {
                 var fileUploadResponse = await _fileUploadService.UploadFileAsync(request.GroupImage);

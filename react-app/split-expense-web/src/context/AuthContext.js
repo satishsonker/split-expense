@@ -1,11 +1,12 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import {safeJsonParse} from '../utils/commonUtils'
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(() => {
         const savedUser = localStorage.getItem('user');
-        return savedUser ? JSON.parse(savedUser) : null;
+        return safeJsonParse(savedUser);
     });
     const [loading, setLoading] = useState(true);
 
@@ -13,7 +14,8 @@ export const AuthProvider = ({ children }) => {
         // Check localStorage for existing user session
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            var user=safeJsonParse(storedUser);
+            setUser(user);
         }
         setLoading(false);
     }, []);

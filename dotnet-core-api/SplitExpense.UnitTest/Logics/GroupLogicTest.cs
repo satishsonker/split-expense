@@ -81,11 +81,11 @@ namespace SplitExpense.UnitTest.Logic
         {
             // Arrange
             var request = new GroupRequest { Name = "Test Group" };
-            var group = new Group { Id = id, Name = "Test Group",Icon=string.Empty,UserId=1 };
+            var group = new ExpenseGroup { Id = id, Name = "Test Group",Icon=string.Empty,UserId=1 };
             var response = new GroupResponse { Id = id, Name = "Test Group" };
             var members = new List<int> { 1, 2, 3 };
 
-            _mockMapper.Setup(m => m.Map<Group>(request)).Returns(group);
+            _mockMapper.Setup(m => m.Map<ExpenseGroup>(request)).Returns(group);
             _mockMapper.Setup(m => m.Map<GroupResponse>(group)).Returns(response);
             _mockFactory.Setup(f => f.CreateAsync(group,members)).ReturnsAsync(group);
 
@@ -120,7 +120,7 @@ namespace SplitExpense.UnitTest.Logic
         public async Task GetAsync_WithValidId_ReturnsGroupResponse(int id)
         {
             // Arrange
-            var group = new Group { Id = id, Name = "Test Group", Icon = string.Empty, UserId = 1 };
+            var group = new ExpenseGroup { Id = id, Name = "Test Group", Icon = string.Empty, UserId = 1 };
             var response = new GroupResponse { Id = id, Name = "Test Group" };
 
             _mockFactory.Setup(f => f.GetAsync(id)).ReturnsAsync(group);
@@ -139,9 +139,9 @@ namespace SplitExpense.UnitTest.Logic
         {
             // Arrange
             var request = new PagingRequest { PageNo = 1, PageSize = 10 };
-            var pagedGroups = new PagingResponse<Group>
+            var pagedGroups = new PagingResponse<ExpenseGroup>
             {
-                Data = [new Group() { Icon="",Name="",Id=1,UserId=3}],
+                Data = [new ExpenseGroup() { Icon="",Name="",Id=1,UserId=3}],
                 RecordCounts = 1
             };
             var response = new PagingResponse<GroupResponse>

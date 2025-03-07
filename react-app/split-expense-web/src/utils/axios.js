@@ -1,6 +1,8 @@
 import axios from 'axios';
 import env from '../config/env.config';
 import { toast } from 'react-toastify';
+import { safeJsonParse } from '../utils/commonUtils'
+import { AUTH_PATHS } from '../constants/apiPaths';
 
 class ApiService {
     constructor() {
@@ -29,14 +31,17 @@ class ApiService {
 
     // Request interceptor
     handleRequest = (config) => {
-        const user = JSON.parse(localStorage.getItem('user'));
-        const tokenData = JSON.parse(localStorage.getItem('token')??"{}");
-        if (user?.userId) {
-            config.headers['userId'] = user.userId;
-        }
+        let excludedApiPathForAccessToken = [AUTH_PATHS.LOGIN]
+        if (!excludedApiPathForAccessToken.includes(config.url)) {
+            const user = JSON.parse(localStorage.getItem('user'));
+            const tokenData = JSON.parse(localStorage.getItem('token') ?? "{}");
+            if (user?.userId) {
+                config.headers['userId'] = user.userId;
+            }
 
-        if (tokenData?.token) {
-            config.headers['Authorization'] = `Bearer ${tokenData.token}`;
+            if (tokenData?.token) {
+                config.headers['Authorization'] = `Bearer ${tokenData.token}`;
+            }
         }
         if (env.isDevelopment()) {
             console.log('API Request:', {

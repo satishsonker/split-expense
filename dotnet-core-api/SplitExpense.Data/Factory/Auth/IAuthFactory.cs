@@ -5,7 +5,7 @@ namespace SplitExpense.Data.Factory
 {
     public interface IAuthFactory
     {
-        Task<User?> ValidateUserAsync(string email, string password);
+        Task<(bool  success, string msg, User user)> ValidateUserAsync(string email, string password);
         Task<bool> UpdatePasswordAsync(int userId, string newPassword);
         Task<bool> ValidateResetTokenAsync(string token);
         Task<User?> GetUserByEmailOrPhoneAsync(string email,string phone);

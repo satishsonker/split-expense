@@ -145,5 +145,15 @@ namespace SplitExpense.Controllers
         {
             return await _groupLogic.SearchAsync(request);
         }
+
+        [ProducesResponseType(typeof(List<GroupResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status503ServiceUnavailable)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+        [HttpGet(ApiPaths.GroupGetRecent)]
+        public async Task<List<GroupResponse>> GetRecentGroups([FromRoute] int id)
+        {
+            return await _groupLogic.GetRecentGroups(id);
+        }
     }
 }

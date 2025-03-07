@@ -6,10 +6,11 @@ namespace SplitExpense.Data.Factory
 {
     public interface IGroupFactory
     {
-        Task<PagingResponse<Group>> GetAllAsync(PagingRequest request);
-        Task<Group> CreateAsync(Group request,List<int> members);
-        Task<int> UpdateAsync(Group request, List<int> members);
-        Task<Group?> GetAsync(int id);
+        Task<PagingResponse<ExpenseGroup>> GetAllAsync(PagingRequest request);
+        Task<List<ExpenseGroup>> GetRecentGroups(int userId);
+        Task<ExpenseGroup> CreateAsync(ExpenseGroup request,List<int> members);
+        Task<int> UpdateAsync(ExpenseGroup request, List<int> members);
+        Task<ExpenseGroup?> GetAsync(int id);
         Task<UserGroupMapping?> GetUserGroupMappingAsync(int id);
         Task<bool> DeleteAsync(int id);
         Task<UserGroupMapping> AddFriendInGroupAsync(AddFriendInGroupRequest request);

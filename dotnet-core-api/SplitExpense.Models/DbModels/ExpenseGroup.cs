@@ -3,7 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SplitExpense.Models
 {
-    public class Group : BaseDbModels
+    [Table("Groups")]
+    public class ExpenseGroup : BaseDbModels
     {
         public required int UserId { get; set; }
         public required string Name { get; set; }

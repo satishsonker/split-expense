@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SplitExpense.Logger;
 using SplitExpense.Models.DbModels;
 using SplitExpense.Models.DTO;
+using SplitExpense.SharedResource;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -12,17 +13,22 @@ namespace SplitExpense.Data.Factory
         private readonly SplitExpenseDbContext _context = context;
         private readonly ISplitExpenseLogger _logger = logger;
 
-        public async Task<User?> ValidateUserAsync(string email, string password)
+        public async Task<(bool success, string msg, User user)> ValidateUserAsync(string email, string password)
         {
             try
             {
                 var user = await _context.Users
                     .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
+                if(user == null) {
+                    return new(false, "Invalid user or not found", null);
+                }
+                if (user.PasswordHash == null || user.PasswordSalt == null) {
+                    return new(false, "Password expired. Please reset password", null);
+                }
+                if ( !VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+                    return new (false, "Invalid username/password",null);
 
-                if (user == null || !VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
-                    return null;
-
-                return user;
+                return new(true, "Login success", user); ;
             }
             catch (Exception ex)
             {

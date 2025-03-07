@@ -52,10 +52,14 @@ const Login = () => {
             try {
                 const response = await apiService.post(AUTH_PATHS.LOGIN, values);
                 debugger;
+                if(response?.isSuccess){
                 localStorage.setItem('user', JSON.stringify(response.user));
                 localStorage.setItem('token', JSON.stringify(response));
                 login(response.user);
                 navigate('/');
+                }
+                else
+                setError(response.message || 'An error occurred during login');
             } catch (err) {
                 setError(err.message || 'An error occurred during login');
             } finally {

@@ -9,7 +9,7 @@ namespace SplitExpense.Data
     {
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
-        public DbSet<Group> Groups { get; set; }
+        public DbSet<ExpenseGroup> Groups { get; set; }
         public DbSet<UserGroupMapping> UserGroupMappings { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Friend> Friends { get; set; }

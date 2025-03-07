@@ -13,7 +13,7 @@ namespace SplitExpense.Models.DbModels
         public DateTime? EndDate { get; set; }
 
         [ForeignKey(nameof(GroupId))]
-        public Group? Group { get; set; }
+        public ExpenseGroup? Group { get; set; }
 
 
     }

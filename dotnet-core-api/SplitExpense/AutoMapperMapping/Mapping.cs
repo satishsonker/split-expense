@@ -11,14 +11,14 @@ namespace SplitExpense.AutoMapperMapping
         public Mapping()
         {
             #region Group
-                CreateMap<GroupRequest, Group>()
+                CreateMap<GroupRequest, ExpenseGroup>()
                 .ForMember(dest => dest.Members, opt => opt.Ignore())
                 .ForMember(dest => dest.ImagePath, opt => opt.Ignore())
                 .ForMember(dest => dest.ThumbImagePath, opt => opt.Ignore());
-            CreateMap<Group, GroupResponse>();
+            CreateMap<ExpenseGroup, GroupResponse>();
             CreateMap<GroupDetailRequest, GroupDetail>();
             CreateMap<GroupDetail, GroupDetailResponse>();
-                CreateMap<PagingResponse<Group>, PagingResponse<GroupResponse>>();
+                CreateMap<PagingResponse<ExpenseGroup>, PagingResponse<GroupResponse>>();
             #endregion
 
             #region User Group Mapping

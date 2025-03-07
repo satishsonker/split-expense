@@ -21,7 +21,7 @@ namespace SplitExpense.Controllers
         public async Task<ActionResult<LoginResponse>> LoginAsync([FromBody] LoginRequest request)
         {
             var response= await _authLogic.LoginAsync(request);
-            if(response!=null)
+            if(response.User!=null)
             {
                response.Token= _jwtService.GenerateToken(response.User);
                response.RefreshToken = _jwtService.GenerateRefreshToken();

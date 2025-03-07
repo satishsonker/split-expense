@@ -34,14 +34,20 @@ namespace SplitExpense.Logic
         {
             try
             {
-                var user = await _authFactory.ValidateUserAsync(request.Email, request.Password) ?? throw new BusinessRuleViolationException(ErrorCodes.InvalidCredentials);
-                await _authFactory.UpdateUserLastLoginAsync(user.UserId);
+                var (success, msg, user) = await _authFactory.ValidateUserAsync(request.Email, request.Password);
 
-                return new LoginResponse
+                var loginResponse = new LoginResponse
                 {
+                    IsSuccess = success,
+                    Message = msg,
                     TokenExpiration = DateTime.UtcNow.AddDays(1),
-                    User = _mapper.Map<UserResponse>(user)
                 };
+                if (user != null)
+                {
+                    await _authFactory.UpdateUserLastLoginAsync(user.UserId);
+                    loginResponse.User = _mapper.Map<UserResponse>(user);
+                }
+                return loginResponse;
             }
             catch (Exception ex)
             {

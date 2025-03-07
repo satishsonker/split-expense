@@ -14,6 +14,6 @@ namespace SplitExpense.Models.DbModels
         public User? AddedByUser { get; set; }
 
         [ForeignKey(nameof(GroupId))]
-        public Group? Group { get; set; }
+        public ExpenseGroup? Group { get; set; }
     }
 }

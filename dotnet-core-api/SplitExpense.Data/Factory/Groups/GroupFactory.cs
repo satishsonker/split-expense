@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using SplitExpense.Data.Services;
 using SplitExpense.ExceptionManagement.Exceptions;
 using SplitExpense.FileManagement.Service;
@@ -12,12 +13,17 @@ using System.Linq;
 
 namespace SplitExpense.Data.Factory
 {
-    public class GroupFactory(SplitExpenseDbContext context, ISplitExpenseLogger logger, IUserContextService userContextService, IFileUploadService fileUploadService) : IGroupFactory
+    public class GroupFactory(SplitExpenseDbContext context, 
+        ISplitExpenseLogger logger, 
+        IUserContextService userContextService, 
+        IFileUploadService fileUploadService,
+        IConfiguration configuration) : IGroupFactory
     {
         private readonly SplitExpenseDbContext _context = context;
         private readonly IFileUploadService _fileUploadService = fileUploadService;
         private int userId = userContextService.GetUserId();
         private readonly ISplitExpenseLogger _logger = logger;
+        private readonly IConfiguration _configuration=configuration;
 
         public async Task<UserGroupMapping?> AddFriendInGroupAsync(AddFriendInGroupRequest request)
         {
@@ -48,7 +54,7 @@ namespace SplitExpense.Data.Factory
             }
         }
 
-        public async Task<Group> CreateAsync(Group request,List<int> members)
+        public async Task<ExpenseGroup> CreateAsync(ExpenseGroup request,List<int> members)
         {
             try
             {
@@ -103,7 +109,7 @@ namespace SplitExpense.Data.Factory
 
         }
 
-        public async Task<PagingResponse<Group>> GetAllAsync(PagingRequest request)
+        public async Task<PagingResponse<ExpenseGroup>> GetAllAsync(PagingRequest request)
         {
             var query = _context.Groups
                 .Include(x=>x.GroupDetail)
@@ -113,7 +119,7 @@ namespace SplitExpense.Data.Factory
                 .Include(x => x.User)
                 .Where(x => !x.IsDeleted && x.CreatedBy == userId)
                 .AsQueryable();
-            var response= new PagingResponse<Group>()
+            var response= new PagingResponse<ExpenseGroup>()
             {
                 Data = await query.Skip((request.PageNo - 1) * request.PageSize).Take(request.PageSize).ToListAsync(),
                 RecordCounts = await query.CountAsync(),
@@ -124,7 +130,7 @@ namespace SplitExpense.Data.Factory
             return response;
         }
 
-        public async Task<Group?> GetAsync(int id)
+        public async Task<ExpenseGroup?> GetAsync(int id)
         {
             return await _context.Groups
                 .Include(x => x.GroupDetail)
@@ -154,7 +160,7 @@ namespace SplitExpense.Data.Factory
             };
         }
 
-        public async Task<int> UpdateAsync(Group request,List<int> members)
+        public async Task<int> UpdateAsync(ExpenseGroup request,List<int> members)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             string oldGroupImage, oldThumbImage;
@@ -271,6 +277,15 @@ namespace SplitExpense.Data.Factory
                 .Include(x => x.AddedByUser)
                 .Where(x => !x.IsDeleted && x.Id == id)
                .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<ExpenseGroup>> GetRecentGroups(int userId)
+        {
+            int totalRecentGroups = _configuration.GetValue<int>("TotalRecentGroups");
+            return await _context.Groups.Where(x => !x.IsDeleted && x.CreatedBy==userId)
+                .OrderByDescending(x => x.CreatedAt)
+                .Take(totalRecentGroups)
+                .ToListAsync();
         }
     }
 }

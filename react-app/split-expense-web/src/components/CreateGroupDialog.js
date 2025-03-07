@@ -39,6 +39,7 @@ import {getImageUrl} from '../utils/imageUtils'
 import { capitalizeText } from '../utils/stringUtils';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import CurrencyIcon from './CurrencyIcon';
 
 const validationSchema = Yup.object({
     name: Yup.string()
@@ -557,7 +558,11 @@ const CreateGroupDialog = ({ open, onClose, onSubmit, group }) => {
                                                 value={formik.values.groupDetail.maxGroupBudget || ''}
                                                 onChange={(e) => formik.setFieldValue('groupDetail.maxGroupBudget', parseFloat(e.target.value))}
                                                 InputProps={{
-                                                    startAdornment: <InputAdornment position="start">$</InputAdornment>
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <CurrencyIcon fontSize="small" />
+                                                        </InputAdornment>
+                                                    )
                                                 }}
                                             />
                                         </Box>

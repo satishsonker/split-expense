@@ -28,7 +28,7 @@ namespace SplitExpense.Models.DbModels
         public virtual SplitType SplitType { get; set; }
 
         [ForeignKey(nameof(GroupId))]
-        public Group Group { get; set; }
+        public ExpenseGroup Group { get; set; }
 
         [ForeignKey(nameof(PaidByUserId))]
         public User PaidByUser { get; set; }
