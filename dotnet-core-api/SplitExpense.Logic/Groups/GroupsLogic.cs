@@ -93,9 +93,9 @@ namespace SplitExpense.Logic
             return _mapper.Map<GroupResponse>(await _factory.GetAsync(id));
         }
 
-        public async Task<List<GroupResponse>> GetRecentGroups(int userId)
+        public async Task<List<GroupResponse>> GetRecentGroups()
         {
-            return _mapper.Map<List<GroupResponse>>(await _factory.GetRecentGroups(userId));
+            return _mapper.Map<List<GroupResponse>>(await _factory.GetRecentGroups());
         }
 
         public async Task<UserGroupMappingResponse?> GetUserGroupMappingAsync(int id)
