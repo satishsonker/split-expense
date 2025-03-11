@@ -15,34 +15,74 @@ namespace SplitExpense.Logic
         IGroupFactory factory,
         IEmailLogic emailLogic,
         ISplitExpenseLogger logger, 
-        IFileUploadService fileUploadService) : IGroupLogic
+        IFileUploadService fileUploadService,IExpenseActivityLogic expenseActivityLogic) : IGroupLogic
     {
         private readonly IMapper _mapper = mapper;
         private readonly IGroupFactory _factory=factory;
         private readonly IEmailLogic _emailLogic=emailLogic;
         private readonly ISplitExpenseLogger _logger = logger;
         private readonly IFileUploadService _fileUploadService = fileUploadService;
+        private readonly IExpenseActivityLogic _expenseActivityLogic = expenseActivityLogic;
 
         public async Task<bool> AddFriendInGroupAsync(AddFriendInGroupRequest request)
         {
             var res=await _factory.AddFriendInGroupAsync(request);
-            if(res!=null)
+            if (res==null) return false;
+
+            var groupMappingData = await GetUserGroupMappingAsync(res.Id);
+            if (groupMappingData != null)
             {
-                var groupMappingData = await GetUserGroupMappingAsync(res.Id);
-                if (groupMappingData != null)
-                {
-                    var data = new Dictionary<string, string>
+                var data = new Dictionary<string, string>
                     {
                         { "groupName", groupMappingData.GroupName },
                         { "addedByUserEmail", groupMappingData.AddedUser.Email }
                     };
-                    await _emailLogic.SendEmailOnUserAddedInGroup(groupMappingData.AddedUser.Email,
-                          groupMappingData.AddedByUser,
-                          $"{groupMappingData.AddedUser.FirstName} {groupMappingData.AddedUser.LastName}",
-                          groupMappingData.CreatedAt, data);
-                }
+                await _emailLogic.SendEmailOnUserAddedInGroup(groupMappingData.AddedUser.Email,
+                      groupMappingData.AddedByUser,
+                      $"{groupMappingData.AddedUser.FirstName} {groupMappingData.AddedUser.LastName}",
+                      groupMappingData.CreatedAt, data);
+                await CreateAddMemberInGroupActivity(groupMappingData);
             }
             return res?.Id>0;
+        }
+
+        private async Task CreateAddMemberInGroupActivity(UserGroupMappingResponse? groupMappingData)
+        {
+            List<ExpenseActivityRequest> activityList = [];
+            var addinGroupData = new Dictionary<string, string>
+                    {
+                        { "adder", "You" },
+                        { "addedUser", groupMappingData.AddedUser.FirstName+" "+groupMappingData.AddedUser.LastName },
+                        { "groupName", groupMappingData.GroupName }
+                    };
+            var addinGroup = _expenseActivityLogic.GetActivityMessage(ExpenseActivityTypeEnum.MemberAddedInGroup, addinGroupData);
+            activityList.Add(new ExpenseActivityRequest
+            {
+                ActivityType = (int)ExpenseActivityTypeEnum.MemberAddedInGroup,
+                Activity = addinGroup,
+                UserId = groupMappingData.AddedByUserId
+            });
+
+            var addedByInGroupData = new Dictionary<string, string>
+                    {
+                        { "addedBy", groupMappingData.AddedByUser },
+                        { "addedUser", "You" },
+                        { "groupName", groupMappingData.GroupName }
+                    };
+            var addedByInGroup = _expenseActivityLogic.GetActivityMessage(ExpenseActivityTypeEnum.MemberAddedByGroupMember, addedByInGroupData);
+            activityList.Add(new ExpenseActivityRequest
+            {
+                ActivityType = (int)ExpenseActivityTypeEnum.MemberAddedInGroup,
+                Activity = addedByInGroup,
+                UserId = groupMappingData.AddedByUserId
+            });
+            activityList.Add(new ExpenseActivityRequest
+            {
+                ActivityType = (int)ExpenseActivityTypeEnum.MemberAddedByGroupMember,
+                Activity = addinGroup,
+                UserId = groupMappingData.AddedUserId
+            });
+            await _expenseActivityLogic.CreateRangeAsync(activityList);
         }
 
         public async Task<GroupResponse> CreateAsync(GroupRequest request)

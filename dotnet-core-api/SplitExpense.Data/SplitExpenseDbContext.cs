@@ -27,6 +27,7 @@ namespace SplitExpense.Data
 
         public DbSet<GroupType> GroupTypes { get; set; }
         public DbSet<GroupDetail> GroupDetails { get; set; }
+        public DbSet<ExpenseActivity> ExpenseActivities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

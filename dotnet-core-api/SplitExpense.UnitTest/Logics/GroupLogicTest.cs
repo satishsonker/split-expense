@@ -20,6 +20,7 @@ namespace SplitExpense.UnitTest.Logic
         private readonly Mock<IEmailLogic> _mockEmailLogic;
         private readonly Mock<ISplitExpenseLogger> _mockLogger;
         private readonly Mock<IFileUploadService> _mockFileUploadService;
+        private readonly Mock<IExpenseActivityLogic> _mockExpenseActivityLogic;
         private readonly GroupsLogic _groupsLogic;
 
         public GroupsLogicTests()
@@ -29,7 +30,8 @@ namespace SplitExpense.UnitTest.Logic
             _mockEmailLogic = new Mock<IEmailLogic>();
             _mockLogger = new Mock<ISplitExpenseLogger>();
             _mockFileUploadService = new Mock<IFileUploadService>();
-            _groupsLogic = new GroupsLogic(_mockMapper.Object, _mockFactory.Object, _mockEmailLogic.Object,_mockLogger.Object,_mockFileUploadService.Object);
+            _mockExpenseActivityLogic = new Mock<IExpenseActivityLogic>();
+            _groupsLogic = new GroupsLogic(_mockMapper.Object, _mockFactory.Object, _mockEmailLogic.Object,_mockLogger.Object,_mockFileUploadService.Object,_mockExpenseActivityLogic.Object);
         }
 
         [Fact]

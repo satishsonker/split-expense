@@ -70,6 +70,11 @@ namespace SplitExpense.AutoMapperMapping
                 .ForMember(dest => dest.RefreshToken, opt => opt.Ignore())
                 .ForMember(dest => dest.TokenExpiration, opt => opt.Ignore());
             #endregion
+
+            #region ExpenseActivity
+            CreateMap<ExpenseActivity, ExpenseActivityResponse>();
+            CreateMap<PagingResponse<ExpenseActivity>, PagingResponse<ExpenseActivityResponse>>();
+            #endregion
         }
     }
 }

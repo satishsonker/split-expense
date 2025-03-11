@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SplitExpense.Data;
 
@@ -11,9 +12,11 @@ using SplitExpense.Data;
 namespace SplitExpense.Data.Migrations
 {
     [DbContext(typeof(SplitExpenseDbContext))]
-    partial class SplitExpenseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250307111148_Add_ExpenseActivity")]
+    partial class Add_ExpenseActivity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -848,12 +851,7 @@ namespace SplitExpense.Data.Migrations
                     b.Property<int?>("UpdatedBy")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("ExpenseActivities");
                 });
@@ -1061,17 +1059,6 @@ namespace SplitExpense.Data.Migrations
                     b.Navigation("AddedUser");
 
                     b.Navigation("Group");
-                });
-
-            modelBuilder.Entity("SplitExpense.Models.ExpenseActivity", b =>
-                {
-                    b.HasOne("SplitExpense.Models.DbModels.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SplitExpense.Models.ExpenseGroup", b =>

@@ -66,5 +66,11 @@
         public const string DeleteUserProfilePicture = ApiPrefix + "delete/profile-picture";
         public const string DeleteUserProfile = ApiPrefix + "delete/profile";
         #endregion
+
+        #region ExpenseActivity
+        public const string ExpenseActivityCreate = ApiPrefix + "create";
+        public const string ExpenseActivityGetAll = ApiPrefix + "get/all";
+        public const string ExpenseActivitySearch = ApiPrefix + "search";
+        #endregion
     }
 }
