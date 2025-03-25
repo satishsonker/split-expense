@@ -13,7 +13,8 @@ import {
     Box,
     Divider,
     ListItemIcon,
-    ListItemText
+    ListItemText,
+    Popover
 } from '@mui/material';
 import {
     Menu as MenuIcon,
@@ -32,7 +33,9 @@ const Header = ({ onMenuClick }) => {
     const { user, logout } = useAuth();
     const [profileAnchor, setProfileAnchor] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
-    const [notificationAnchor, setNotificationAnchor] = useState(null);
+    const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
+    const [hasNewNotifications, setHasNewNotifications] = useState(false);
+
     useEffect(() => {
         const userData = JSON.parse(localStorage.getItem('user'));
         if (userData) {
@@ -40,19 +43,39 @@ const Header = ({ onMenuClick }) => {
                 setImagePreview(getImageUrl(userData.thumbProfilePicture ?? userData.profilePicture));
             }
         }
+        checkNewNotifications();
     }, []);
+
+    const checkNewNotifications = () => {
+        const lastRead = localStorage.getItem('lastNotificationRead');
+        if (!lastRead) {
+            setHasNewNotifications(true);
+            return;
+        }
+
+        // Check if there are new notifications since last read
+        // You might want to call an API endpoint here
+        const lastReadDate = new Date(lastRead);
+        // For now, we'll just check if it's been more than an hour
+        const hasNew = new Date() - lastReadDate > 3600000;
+        setHasNewNotifications(hasNew);
+    };
 
     const handleProfileClick = (event) => {
         setProfileAnchor(event.currentTarget);
     };
 
     const handleNotificationClick = (event) => {
-        setNotificationAnchor(event.currentTarget);
+        setNotificationAnchorEl(event.currentTarget);
+    };
+
+    const handleNotificationClose = () => {
+        setNotificationAnchorEl(null);
     };
 
     const handleClose = () => {
         setProfileAnchor(null);
-        setNotificationAnchor(null);
+        handleNotificationClose();
     };
 
     const handleLogout = () => {
@@ -83,13 +106,11 @@ const Header = ({ onMenuClick }) => {
                     Split Expense
                 </Typography>
 
-                {user && (
-                    <IconButton color="inherit" onClick={handleNotificationClick}>
-                        <Badge badgeContent={3} color="error">
-                            <NotificationsIcon />
-                        </Badge>
-                    </IconButton>
-                )}
+                <IconButton color="inherit" onClick={handleNotificationClick}>
+                    <Badge color="error" variant="dot" invisible={!hasNewNotifications}>
+                        <NotificationsIcon />
+                    </Badge>
+                </IconButton>
 
                 <IconButton color="inherit" onClick={handleProfileClick}>
                     {user ? (
@@ -165,11 +186,27 @@ const Header = ({ onMenuClick }) => {
                 </Menu>
 
                 {/* Notifications Menu */}
-                <NotificationList
-                    anchorEl={notificationAnchor}
-                    open={Boolean(notificationAnchor)}
-                    onClose={handleClose}
-                />
+                <Popover
+                    open={Boolean(notificationAnchorEl)}
+                    anchorEl={notificationAnchorEl}
+                    onClose={handleNotificationClose}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right',
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                    }}
+                    PaperProps={{
+                        sx: {
+                            width: { xs: '100%', sm: 360 },
+                            maxHeight: { xs: '100%', sm: '80vh' }
+                        }
+                    }}
+                >
+                    <NotificationList onClose={handleNotificationClose} />
+                </Popover>
             </Toolbar>
         </AppBar>
     );

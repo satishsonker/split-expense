@@ -19,12 +19,6 @@ namespace SplitExpense.Controllers
             _expenseActivityLogic = expenseActivityLogic;
         }
 
-        [HttpPost(ApiPaths.ExpenseActivityCreate)]
-        public async Task<ActionResult<ExpenseActivityResponse>> CreateAsync([FromBody] ExpenseActivityRequest request)
-        {
-            return await _expenseActivityLogic.CreateAsync(request);
-        }
-
         [HttpGet(ApiPaths.ExpenseActivityGetAll)]
         public async Task<ActionResult<PagingResponse<ExpenseActivityResponse>>> GetAllAsync([FromQuery] PagingRequest request)
         {

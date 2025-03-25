@@ -12,6 +12,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Groups from './pages/Groups';
 import Contacts from './pages/Contacts';
 import UserProfile from './pages/UserProfile';
+import Notifications from './pages/Notifications';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -32,6 +33,7 @@ const AppContent = () => {
             <Route path="groups" element={<Groups />} />
             <Route path="contacts" element={<Contacts />} />
             <Route path="profile" element={<UserProfile />} />
+            <Route path="notifications" element={<Notifications />} />
             {/* Add more protected routes here */}
           </Route>
         </Routes>

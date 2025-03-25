@@ -41,3 +41,7 @@ export const CONTACT_PATHS = {
     CREATE: `${API_BASE_URL}/contacts/create`,
     ADD_IN_CONTACT_LIST:`${API_BASE_URL}/contacts/add/in/contact/list/`,
 }; 
+
+export const ACTIVITY_PATHS={
+    LIST:`${API_BASE_URL}/expenseactivity/get/all`,
+}

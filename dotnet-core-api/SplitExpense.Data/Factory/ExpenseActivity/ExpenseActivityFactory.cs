@@ -1,17 +1,16 @@
 using Microsoft.EntityFrameworkCore;
-using SplitExpense.ExceptionManagement.Exceptions;
+using SplitExpense.Data.Services;
 using SplitExpense.Logger;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
-using SplitExpense.SharedResource;
-using System.Diagnostics;
 
 namespace SplitExpense.Data.Factory
 {
-    public class ExpenseActivityFactory(SplitExpenseDbContext context, ISplitExpenseLogger logger) : IExpenseActivityFactory
+    public class ExpenseActivityFactory(SplitExpenseDbContext context, ISplitExpenseLogger logger,IUserContextService userContextService) : IExpenseActivityFactory
     {
         private readonly SplitExpenseDbContext _context = context;
         private readonly ISplitExpenseLogger _logger = logger;
+        private readonly IUserContextService _userContextService = userContextService;
 
         public async Task<ExpenseActivity> CreateAsync(ExpenseActivity activity)
         {
@@ -47,7 +46,7 @@ namespace SplitExpense.Data.Factory
             try
             {
                 var query = _context.ExpenseActivities
-                    .Where(x => !x.IsDeleted)
+                    .Where(x => !x.IsDeleted && x.UserId==_userContextService.GetUserId())
                     .OrderByDescending(x => x.CreatedAt)
                     .AsQueryable();
 
@@ -75,7 +74,8 @@ namespace SplitExpense.Data.Factory
             {
                 var query = _context.ExpenseActivities
                     .Where(x => !x.IsDeleted && 
-                        x.Activity.Contains(request.SearchTerm))
+                        x.Activity.Contains(request.SearchTerm) && 
+                        x.UserId == _userContextService.GetUserId())
                     .OrderBy(x => x.Activity)
                     .AsQueryable();
 

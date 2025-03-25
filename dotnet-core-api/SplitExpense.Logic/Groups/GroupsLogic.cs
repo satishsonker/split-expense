@@ -8,6 +8,8 @@ using SplitExpense.Logger;
 using SplitExpense.ExceptionManagement.Exceptions;
 using SplitExpense.SharedResource;
 using SplitExpense.FileManagement.Service;
+using System.Diagnostics;
+using SplitExpense.Data.Services;
 
 namespace SplitExpense.Logic
 {
@@ -15,7 +17,7 @@ namespace SplitExpense.Logic
         IGroupFactory factory,
         IEmailLogic emailLogic,
         ISplitExpenseLogger logger, 
-        IFileUploadService fileUploadService,IExpenseActivityLogic expenseActivityLogic) : IGroupLogic
+        IFileUploadService fileUploadService,IExpenseActivityLogic expenseActivityLogic,IUserContextService userContextService) : IGroupLogic
     {
         private readonly IMapper _mapper = mapper;
         private readonly IGroupFactory _factory=factory;
@@ -23,6 +25,7 @@ namespace SplitExpense.Logic
         private readonly ISplitExpenseLogger _logger = logger;
         private readonly IFileUploadService _fileUploadService = fileUploadService;
         private readonly IExpenseActivityLogic _expenseActivityLogic = expenseActivityLogic;
+        private readonly IUserContextService _userContextService = userContextService;
 
         public async Task<bool> AddFriendInGroupAsync(AddFriendInGroupRequest request)
         {
@@ -97,10 +100,24 @@ namespace SplitExpense.Logic
                     mappedRequest.ImagePath = fileUploadResponse.FilePath;
                     mappedRequest.ThumbImagePath = fileUploadResponse.ThumbnailPath;
                 }
-                return _mapper.Map<GroupResponse>(await _factory.CreateAsync(mappedRequest,request.Members));
+                var response= _mapper.Map<GroupResponse>(await _factory.CreateAsync(mappedRequest,request.Members));
+                var addinGroupData = new Dictionary<string, string>
+                    {
+                        { "creator", "You" },
+                        { "groupName", request.Name }
+                    };
+                var addinGroup = _expenseActivityLogic.GetActivityMessage(ExpenseActivityTypeEnum.GroupCreated, addinGroupData);
+                await _expenseActivityLogic.CreateAsync(new ExpenseActivityRequest
+                {
+                    ActivityType = (int)ExpenseActivityTypeEnum.MemberAddedInGroup,
+                    Activity = addinGroup,
+                    UserId = _userContextService.GetUserId()
+                });
+                return response;
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message, LogMessage.GeneralError);
                 throw;
             }
         }

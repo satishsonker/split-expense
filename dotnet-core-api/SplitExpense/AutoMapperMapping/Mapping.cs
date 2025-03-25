@@ -75,6 +75,12 @@ namespace SplitExpense.AutoMapperMapping
             CreateMap<ExpenseActivity, ExpenseActivityResponse>();
             CreateMap<PagingResponse<ExpenseActivity>, PagingResponse<ExpenseActivityResponse>>();
             #endregion
+
+            #region Activity
+            CreateMap<ExpenseActivityRequest, ExpenseActivity>();
+            CreateMap<ExpenseActivity, ExpenseActivityResponse>();
+            CreateMap<PagingResponse<ExpenseActivity>, PagingResponse<ExpenseActivityResponse>>();
+            #endregion
         }
     }
 }
