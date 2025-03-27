@@ -11,9 +11,9 @@ namespace SplitExpense.Data.Factory
         Task<ExpenseGroup> CreateAsync(ExpenseGroup request,List<int> members);
         Task<int> UpdateAsync(ExpenseGroup request, List<int> members);
         Task<ExpenseGroup?> GetAsync(int id);
-        Task<UserGroupMapping?> GetUserGroupMappingAsync(int id);
+        Task<List<UserGroupMapping>> GetUserGroupMappingAsync(List<int> ids);
         Task<bool> DeleteAsync(int id);
-        Task<UserGroupMapping> AddFriendInGroupAsync(AddFriendInGroupRequest request);
+        Task<List<UserGroupMapping>> AddFriendInGroupAsync(AddFriendInGroupRequest request);
         Task<PagingResponse<UserGroupMapping>> SearchAsync(SearchRequest request);
     }
 }

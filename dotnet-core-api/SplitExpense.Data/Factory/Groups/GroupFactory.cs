@@ -25,27 +25,35 @@ namespace SplitExpense.Data.Factory
         private readonly ISplitExpenseLogger _logger = logger;
         private readonly IConfiguration _configuration=configuration;
 
-        public async Task<UserGroupMapping?> AddFriendInGroupAsync(AddFriendInGroupRequest request)
+        public async Task<List<UserGroupMapping?>> AddFriendInGroupAsync(AddFriendInGroupRequest request)
         {
             ArgumentNullException.ThrowIfNull(nameof(request));
             var oldData = await _context.UserGroupMappings
-                .Where(x => !x.IsDeleted && x.GroupId == request.GroupId && x.FriendId == request.FriendId)
-                .FirstOrDefaultAsync();
-            if(oldData!=null)
+                .Where(x => !x.IsDeleted && x.GroupId == request.GroupId && request.FriendIds.Contains(x.FriendId))
+                .ToListAsync();
+            if(oldData.Count==request.FriendIds.Count)
             {
-                _logger.LogError(null, LogMessage.UserAlreadyAddedInGroup, "AddFriendInGroupAsync");
-                throw new BusinessRuleViolationException(ErrorCodes.RecordAlreadyExist);
+                _logger.LogError(null, LogMessage.AllUserAlreadyAddedInGroup, "AddFriendInGroupAsync");
+                throw new BusinessRuleViolationException(ErrorCodes.AllRecordAlreadyExist);
             }
 
             try
             {
-                var entity = await _context.UserGroupMappings.AddAsync(new()
+                List<UserGroupMapping> mapList = [];
+                request.FriendIds.ForEach(friendId =>
                 {
-                    GroupId = request.GroupId,
-                    FriendId = request.FriendId
+                    if (friendId>0 && oldData.FirstOrDefault(x => x.FriendId == friendId) == null)
+                    {
+                        mapList.Add(new()
+                        {
+                            GroupId = request.GroupId,
+                            FriendId = friendId
+                        });
+                    }
                 });
+                await _context.UserGroupMappings.AddRangeAsync(mapList);
 
-                return await _context.SaveChangesAsync() > 0 ? entity.Entity : null;
+                return await _context.SaveChangesAsync() > 0 ? mapList : null;
             }
             catch (Exception ex)
             {
@@ -135,6 +143,10 @@ namespace SplitExpense.Data.Factory
             return await _context.Groups
                 .Include(x => x.GroupDetail)
                 .Include(x => x.GroupType)
+                .Include(x=>x.Members)
+                .ThenInclude(x=>x.AddedUser)
+                 .Include(x => x.Members)
+                .ThenInclude(x => x.AddedByUser)
                  .Where(x => !x.IsDeleted && x.Id == id && x.CreatedBy == userId)
                  .FirstOrDefaultAsync();
         }
@@ -266,7 +278,7 @@ namespace SplitExpense.Data.Factory
             }
         }
 
-        public async Task<UserGroupMapping> GetUserGroupMappingAsync(int id)
+        public async Task<List<UserGroupMapping>> GetUserGroupMappingAsync(List<int> ids)
         {
             return await _context.UserGroupMappings
                  .Include(x => x.Group)
@@ -275,8 +287,8 @@ namespace SplitExpense.Data.Factory
                 .ThenInclude(x => x.GroupType)
                 .Include(x => x.AddedUser)
                 .Include(x => x.AddedByUser)
-                .Where(x => !x.IsDeleted && x.Id == id)
-               .FirstOrDefaultAsync();
+                .Where(x => !x.IsDeleted && ids.Contains(x.Id))
+               .ToListAsync();
         }
 
         public async Task<List<ExpenseGroup>> GetRecentGroups()

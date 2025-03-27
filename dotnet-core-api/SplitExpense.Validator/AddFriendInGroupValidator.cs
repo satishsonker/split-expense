@@ -11,8 +11,7 @@ namespace SplitExpense.Validator
             RuleFor(x => x.GroupId)
             .GreaterThan(0).WithMessage("GroupId must be greater than zero.");
 
-            RuleFor(x => x.FriendId)
-                .GreaterThan(0).WithMessage("FriendId must be greater than zero.");
+            RuleFor(x => x.FriendIds).Must(x => x.Count > 0).WithMessage("FriendIds must have at least one item.");
         }
     }
 }

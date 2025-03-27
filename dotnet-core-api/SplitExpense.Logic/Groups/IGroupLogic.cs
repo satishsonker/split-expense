@@ -1,6 +1,7 @@
 ﻿using NLog.Config;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
+using SplitExpense.Models.DbModels;
 using SplitExpense.Models.DTO;
 
 namespace SplitExpense.Logic
@@ -14,7 +15,7 @@ namespace SplitExpense.Logic
         Task<PagingResponse<UserGroupMappingResponse>> SearchAsync(SearchRequest request);
         Task<int> UpdateAsync(GroupRequest request);
         Task<bool> AddFriendInGroupAsync(AddFriendInGroupRequest request);
-        Task<UserGroupMappingResponse?> GetUserGroupMappingAsync(int id);
+        Task<List<UserGroupMappingResponse>> GetUserGroupMappingAsync(List<int> ids);
         Task<List<GroupResponse>> GetRecentGroups();
     }
 }

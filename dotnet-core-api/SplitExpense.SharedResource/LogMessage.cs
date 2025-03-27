@@ -11,6 +11,7 @@
         public const string NotFoundEmailDefaultSmtpConfig = "NotFoundEmailDefaultSmtpConfig";
         public const string NotFoundEmailTemplate = "NotFoundEmailTemplate";
         public const string UserAlreadyAddedInGroup = "UserAlreadyAddedInGroup";
+        public const string AllUserAlreadyAddedInGroup = "AllUserAlreadyAddedInGroup";
         public const string UserAlreadyAddedInContact = "UserAlreadyAddedInContact";
         public const string RecordNotExist = "RecordNotExist";
         public const string RecordAlreadyExist = "RecordAlreadyExist";

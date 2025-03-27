@@ -4,12 +4,14 @@ export const API_BASE_URL = env.API_URL;
 
 export const GROUP_PATHS = {
     CREATE: `${API_BASE_URL}/group/create`,
+    GET: `${API_BASE_URL}/group/get/`,
     LIST: `${API_BASE_URL}/group/get/all`,
     GET_RECENTS: `${API_BASE_URL}/group/get/recent`,
     UPDATE: `${API_BASE_URL}/group/update`,
     DELETE: `${API_BASE_URL}/group/delete`,
     SEARCH: `${API_BASE_URL}/group/search`,
-    MEMBERS: `${API_BASE_URL}/contacts/get/all?pageno=1&pageSize=500`
+    MEMBERS: `${API_BASE_URL}/contacts/get/all?pageno=1&pageSize=500`,
+    ADD_MEMBERS: `${API_BASE_URL}/group/add/friend`,
 };
 
 export const GROUP_TYPES_PATHS={

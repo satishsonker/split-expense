@@ -17,6 +17,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import GroupDetails from './pages/GroupDetails';
+import GroupSettings from './pages/GroupSettings';
 
 const AppContent = () => {
   const { trackError } = usePerformance();
@@ -34,6 +36,8 @@ const AppContent = () => {
             <Route path="contacts" element={<Contacts />} />
             <Route path="profile" element={<UserProfile />} />
             <Route path="notifications" element={<Notifications />} />
+            <Route path="groups/:id" element={<GroupDetails />} />
+            <Route path="groups/:id/settings" element={<GroupSettings />} />
             {/* Add more protected routes here */}
           </Route>
         </Routes>

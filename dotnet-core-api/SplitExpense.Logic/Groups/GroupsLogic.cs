@@ -1,15 +1,13 @@
 ﻿using AutoMapper;
 using SplitExpense.Data.Factory;
-using SplitExpense.Logic.Email;
+using SplitExpense.Data.Services;
+using SplitExpense.ExceptionManagement.Exceptions;
+using SplitExpense.FileManagement.Service;
+using SplitExpense.Logger;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
 using SplitExpense.Models.DTO;
-using SplitExpense.Logger;
-using SplitExpense.ExceptionManagement.Exceptions;
 using SplitExpense.SharedResource;
-using SplitExpense.FileManagement.Service;
-using System.Diagnostics;
-using SplitExpense.Data.Services;
 
 namespace SplitExpense.Logic
 {
@@ -30,23 +28,27 @@ namespace SplitExpense.Logic
         public async Task<bool> AddFriendInGroupAsync(AddFriendInGroupRequest request)
         {
             var res=await _factory.AddFriendInGroupAsync(request);
-            if (res==null) return false;
+            if (res.Count==0) return false;
+            var ids = res.Select(x => x.Id).ToList();
 
-            var groupMappingData = await GetUserGroupMappingAsync(res.Id);
-            if (groupMappingData != null)
+            var groupMappings = await GetUserGroupMappingAsync(ids);
+            groupMappings.ForEach(groupMappingData =>
             {
-                var data = new Dictionary<string, string>
+                if (groupMappingData != null)
+                {
+                    var data = new Dictionary<string, string>
                     {
                         { "groupName", groupMappingData.GroupName },
                         { "addedByUserEmail", groupMappingData.AddedUser.Email }
                     };
-                await _emailLogic.SendEmailOnUserAddedInGroup(groupMappingData.AddedUser.Email,
-                      groupMappingData.AddedByUser,
-                      $"{groupMappingData.AddedUser.FirstName} {groupMappingData.AddedUser.LastName}",
-                      groupMappingData.CreatedAt, data);
-                await CreateAddMemberInGroupActivity(groupMappingData);
-            }
-            return res?.Id>0;
+                    _emailLogic.SendEmailOnUserAddedInGroup(groupMappingData.AddedUser.Email,
+                          groupMappingData.AddedByUser,
+                          $"{groupMappingData.AddedUser.FirstName} {groupMappingData.AddedUser.LastName}",
+                          groupMappingData.CreatedAt, data);
+                    CreateAddMemberInGroupActivity(groupMappingData);
+                }
+            });
+            return res.Count>0;
         }
 
         private async Task CreateAddMemberInGroupActivity(UserGroupMappingResponse? groupMappingData)
@@ -107,12 +109,33 @@ namespace SplitExpense.Logic
                         { "groupName", request.Name }
                     };
                 var addinGroup = _expenseActivityLogic.GetActivityMessage(ExpenseActivityTypeEnum.GroupCreated, addinGroupData);
-                await _expenseActivityLogic.CreateAsync(new ExpenseActivityRequest
+                List<ExpenseActivityRequest> expenseActivities = [];
+                expenseActivities.Add(new ExpenseActivityRequest
                 {
                     ActivityType = (int)ExpenseActivityTypeEnum.MemberAddedInGroup,
                     Activity = addinGroup,
                     UserId = _userContextService.GetUserId()
                 });
+
+                if(request.Members.Count != 0)
+                {
+                    request.Members.ForEach(member =>
+                    {
+                        var addinGroupData = new Dictionary<string, string>
+                        {
+                            { "creator", "You" },
+                            { "groupName", request.Name }
+                        };
+                        var addinGroup = _expenseActivityLogic.GetActivityMessage(ExpenseActivityTypeEnum.GroupCreated, addinGroupData);
+                        expenseActivities.Add(new ExpenseActivityRequest
+                        {
+                            ActivityType = (int)ExpenseActivityTypeEnum.MemberAddedInGroup,
+                            Activity = addinGroup,
+                            UserId = member
+                        });
+                    });
+                }
+                await _expenseActivityLogic.CreateRangeAsync(expenseActivities);
                 return response;
             }
             catch (Exception ex)
@@ -155,9 +178,9 @@ namespace SplitExpense.Logic
             return _mapper.Map<List<GroupResponse>>(await _factory.GetRecentGroups());
         }
 
-        public async Task<UserGroupMappingResponse?> GetUserGroupMappingAsync(int id)
+        public async Task<List<UserGroupMappingResponse>> GetUserGroupMappingAsync(List<int> ids)
         {
-            return _mapper.Map<UserGroupMappingResponse>(await _factory.GetUserGroupMappingAsync(id));
+            return _mapper.Map<List<UserGroupMappingResponse>>(await _factory.GetUserGroupMappingAsync(ids));
         }
 
         public async Task<PagingResponse<UserGroupMappingResponse>> SearchAsync(SearchRequest request)
