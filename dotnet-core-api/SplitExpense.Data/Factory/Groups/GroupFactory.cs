@@ -299,5 +299,32 @@ namespace SplitExpense.Data.Factory
                 .Take(totalRecentGroups)
                 .ToListAsync();
         }
+
+        public async Task<bool> RemoveFriendInGroupAsync(RemoveFriendFromGroup request)
+        {
+            ArgumentNullException.ThrowIfNull(nameof(request));
+            var oldData = await _context.UserGroupMappings
+                .Where(x => !x.IsDeleted && x.GroupId == request.GroupId && x.FriendId==request.FriendId)
+                .FirstOrDefaultAsync();
+            if (oldData==null)
+            {
+                _logger.LogError(null, LogMessage.RecordNotExist, "RemoveFriendInGroupAsync");
+                throw new BusinessRuleViolationException(ErrorCodes.RecordNotFound);
+            }
+
+            try
+            {
+
+                oldData.IsDeleted = true;
+                _context.UserGroupMappings.Update(oldData);
+
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message, "RemoveFriendInGroupAsync");
+                throw new BusinessRuleViolationException(ErrorCodes.UnableToUpdateRecord);
+            }
+        }
     }
 }

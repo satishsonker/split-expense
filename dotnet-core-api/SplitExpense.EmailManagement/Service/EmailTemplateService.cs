@@ -1,15 +1,19 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SplitExpense.Data;
+﻿using AutoMapper;
+using SplitExpense.Data.Factory.Email;
 using SplitExpense.ExceptionManagement.Exceptions;
+using SplitExpense.Models;
+using SplitExpense.Models.Common;
 using SplitExpense.Models.DbModels;
+using SplitExpense.Models.DTO;
 using SplitExpense.SharedResource;
 
 namespace SplitExpense.EmailManagement.Service
 {
-    public class EmailTemplateService(SplitExpenseDbContext context) : IEmailTemplateService
-    {
-        private readonly SplitExpenseDbContext _context = context;
-        public async Task<int> AddTemplateAsync(EmailTemplate template)
+    public class EmailTemplateService(IEmailTemplateFactory emailTemplateFactory, IMapper mapper) : IEmailTemplateService
+    {       
+        private readonly IMapper _mapper=mapper;
+        private readonly IEmailTemplateFactory _emailTemplateFactory = emailTemplateFactory;
+        public async Task<int> AddTemplateAsync(EmailTemplateRequest template)
         {
             ArgumentNullException.ThrowIfNull(nameof(template));
 
@@ -23,57 +27,41 @@ namespace SplitExpense.EmailManagement.Service
             {
                 throw new BusinessRuleViolationException(ErrorCodes.RecordAlreadyExist);
             }
-            await _context.EmailTemplates.AddAsync(template);
-            return await _context.SaveChangesAsync();
+            var templateEntity = _mapper.Map<EmailTemplate>(template);
+           return await _emailTemplateFactory.AddTemplateAsync(templateEntity);
         }
 
         public async Task<bool> DeleteTemplateAsync(int templateId)
         {
-            var oldData = await GetTemplateByIdAsync(templateId) ?? throw new BusinessRuleViolationException(ErrorCodes.RecordNotFound);
-            oldData.IsDeleted = true;
-            _context.Update(oldData);
-            return await _context.SaveChangesAsync() > 0;
+            return await _emailTemplateFactory.DeleteTemplateAsync(templateId);
         }
 
-        public async Task<List<EmailTemplate>> GetAllTemplatesAsync()
+        public async Task<PagingResponse<EmailTemplateResponse>> GetAllTemplatesAsync(PagingRequest pagingRequest)
         {
-            return await _context.EmailTemplates
-            .Where(x => !x.IsDeleted)
-            .ToListAsync();
+            return _mapper.Map<PagingResponse<EmailTemplateResponse>>(await _emailTemplateFactory.GetAllTemplatesAsync(pagingRequest));
         }
 
-        public async Task<EmailTemplate?> GetTemplateByCodeAsync(EmailTemplateCode code)
+        public async Task<EmailTemplateResponse?> GetTemplateByCodeAsync(EmailTemplateCode code)
         {
             ArgumentNullException.ThrowIfNull(code);
-            return await _context.EmailTemplates
-                .Where(x => !x.IsDeleted && x.TemplateCode == code.ToString())
-                .FirstOrDefaultAsync()??throw new BusinessRuleViolationException(ErrorCodes.RecordNotFound);
+           return _mapper.Map<EmailTemplateResponse?>(await _emailTemplateFactory.GetTemplateByCodeAsync(code));
         }
 
         public async Task<EmailTemplate?> GetTemplateByIdAsync(int id)
         {
-            return await _context.EmailTemplates
-                .Where(x => !x.IsDeleted && x.Id == id)
-                .FirstOrDefaultAsync();
+            return await _emailTemplateFactory.GetTemplateByIdAsync(id);
         }
 
-        public async Task<List<EmailTemplate>> SearchTemplatesAsync(string subject)
+        public async Task<PagingResponse<EmailTemplateResponse>> SearchTemplatesAsync(SearchRequest searchRequest)
         {
-            return await _context.EmailTemplates
-                .Where(x => !x.IsDeleted && (string.IsNullOrEmpty(subject) || x.Subject.Contains(subject) || x.Body.Contains(subject)))
-                .ToListAsync();
+            return _mapper.Map<PagingResponse<EmailTemplateResponse>>(await _emailTemplateFactory.SearchTemplatesAsync(searchRequest));
         }
 
-        public async Task<bool> UpdateTemplateAsync(EmailTemplate template)
+        public async Task<bool> UpdateTemplateAsync(EmailTemplateRequest template)
         {
             ArgumentNullException.ThrowIfNull(nameof(template));
+            return await _emailTemplateFactory.UpdateTemplateAsync(_mapper.Map<EmailTemplate>(template));
 
-            var oldData = await GetTemplateByIdAsync(template.Id) ?? throw new BusinessRuleViolationException(ErrorCodes.RecordNotFound);
-            oldData.Subject = template.Subject;
-            oldData.Body = template.Body;
-            oldData.IsHtml = template.IsHtml;
-            _context.Update(oldData);
-            return await _context.SaveChangesAsync() > 0;
         }
     }
 }

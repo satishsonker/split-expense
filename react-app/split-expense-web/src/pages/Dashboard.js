@@ -23,7 +23,6 @@ import { GROUP_PATHS } from '../constants/apiPaths';
 import { apiService } from '../utils/axios';
 import { getGroupIcon } from '../utils/groupIcons';
 import { getImageUrl } from '../utils/imageUtils';
-import CurrencyIcon from '../components/CurrencyIcon';
 
 const Dashboard = () => {
     const theme = useTheme();

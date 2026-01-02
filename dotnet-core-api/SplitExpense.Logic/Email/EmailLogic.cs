@@ -67,8 +67,9 @@ namespace SplitExpense.Logic.Email
                 var body = template.Body;
                 foreach (var item in emailData)
                 {
-                    body = body.Replace($"##{item.Key}##", item.Value);
+                    body = body.Replace($"{{{item.Key}}}", item.Value);
                 }
+                body = body.Replace($"{{CurrentYear}}", DateTime.Now.Year.ToString());
 
                 return await _emailQueueService.AddEmailToQueue(toEmail, template.Subject, body);
             }

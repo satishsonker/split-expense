@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Group Deleted</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td style="padding: 20px 0; text-align: center; background-color: #dc3545;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Split Expense</h1>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 40px 20px; background-color: #ffffff; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #333333; margin-top: 0; font-size: 24px;">Group Deleted</h2>
+                <p style="color: #666666; font-size: 16px; line-height: 1.6;">
+                    Hello {{Name}},
+                </p>
+                <p style="color: #666666; font-size: 16px; line-height: 1.6;">
+                    This is to inform you that the group <strong>{{GroupName}}</strong> has been deleted.
+                </p>
+                <div style="background-color: #f8d7da; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc3545;">
+                    <p style="margin: 0; color: #721c24; font-size: 14px;"><strong>Group Information:</strong></p>
+                    <p style="margin: 5px 0; color: #721c24; font-size: 14px;">Group Name: {{GroupName}}</p>
+                    <p style="margin: 5px 0; color: #721c24; font-size: 14px;">Deleted By: {{DeletedBy}}</p>
+                    <p style="margin: 5px 0; color: #721c24; font-size: 14px;">Deleted On: {{DeletedOn}}</p>
+                </div>
+                <p style="color: #666666; font-size: 16px; line-height: 1.6;">
+                    All expenses and data associated with this group have been removed. This action cannot be undone.
+                </p>
+                <p style="color: #999999; font-size: 14px; line-height: 1.6; margin-top: 20px;">
+                    If you didn't expect this deletion, please contact our support team.
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 20px; text-align: center; background-color: #f4f4f4; color: #999999; font-size: 12px;">
+                <p style="margin: 0;">© {{CurrentYear}} Split Expense. All rights reserved.</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+

@@ -14,6 +14,7 @@ namespace SplitExpense.Data.Factory
         Task<List<UserGroupMapping>> GetUserGroupMappingAsync(List<int> ids);
         Task<bool> DeleteAsync(int id);
         Task<List<UserGroupMapping>> AddFriendInGroupAsync(AddFriendInGroupRequest request);
+        Task<bool> RemoveFriendInGroupAsync(RemoveFriendFromGroup request);
         Task<PagingResponse<UserGroupMapping>> SearchAsync(SearchRequest request);
     }
 }

@@ -72,5 +72,13 @@
         public const string ExpenseActivityGetAll = ApiPrefix + "get/all";
         public const string ExpenseActivitySearch = ApiPrefix + "search";
         #endregion
+
+        #region Email Template API
+        public const string EmailTemplateCreate = ApiPrefix + "create";
+        public const string EmailTemplateGetAll = ApiPrefix + "get/all";
+        public const string EmailTemplateSearch = ApiPrefix + "search";
+        public const string EmailTemplateUpdate = ApiPrefix + "update";
+        public const string EmailTemplateDelete = ApiPrefix + "delete/{id}";
+        #endregion
     }
 }

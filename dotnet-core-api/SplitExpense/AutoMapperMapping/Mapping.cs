@@ -52,6 +52,12 @@ namespace SplitExpense.AutoMapperMapping
             CreateMap<UserRequest, User>();
             #endregion
 
+            #region Email
+            CreateMap<EmailTemplateRequest, EmailTemplate>();
+            CreateMap<EmailTemplate, EmailTemplateResponse>();
+            CreateMap<PagingResponse<EmailTemplate>, PagingResponse<EmailTemplateResponse>>();
+            #endregion
+
             #region Contact
             CreateMap<ContactRequest, Contact>();
             CreateMap<Contact, ContactResponse>();

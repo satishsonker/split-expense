@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SplitExpense.Data.Factory;
+using SplitExpense.Data.Factory.Email;
 using SplitExpense.Data.Services;
 using SplitExpense.EmailManagement.Service;
 using SplitExpense.FileManagement.Service;
@@ -37,6 +38,7 @@ namespace SplitExpense.Middleware
                  .AddScoped<IEmailTemplateService, EmailTemplateService>()
                  .AddScoped<IContactFactory,ContactFactory>()
                  .AddScoped<IContactLogic,ContactLogic>()
+                 .AddScoped<IEmailTemplateFactory, EmailTemplateFactory>()
                  .AddScoped<EmailSmtpService>()
                  .AddScoped<EmailApiService>()
                  .AddScoped<EmailServiceFactory>()

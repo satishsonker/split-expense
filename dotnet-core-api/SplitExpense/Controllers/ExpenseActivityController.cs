@@ -10,14 +10,9 @@ namespace SplitExpense.Controllers
 {
     [Authorize]
     [ApiController]
-    public class ExpenseActivityController : ControllerBase
+    public class ExpenseActivityController(IExpenseActivityLogic expenseActivityLogic) : ControllerBase
     {
-        private readonly IExpenseActivityLogic _expenseActivityLogic;
-
-        public ExpenseActivityController(IExpenseActivityLogic expenseActivityLogic)
-        {
-            _expenseActivityLogic = expenseActivityLogic;
-        }
+        private readonly IExpenseActivityLogic _expenseActivityLogic = expenseActivityLogic;
 
         [HttpGet(ApiPaths.ExpenseActivityGetAll)]
         public async Task<ActionResult<PagingResponse<ExpenseActivityResponse>>> GetAllAsync([FromQuery] PagingRequest request)

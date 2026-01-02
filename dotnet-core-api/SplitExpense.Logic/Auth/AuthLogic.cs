@@ -90,6 +90,8 @@ namespace SplitExpense.Logic
                 var emailData = new Dictionary<string, string>
                 {
                     { "userName", $"{user.FirstName} {user.LastName}" },
+                    { "userEmail", $"{user.Email}" },
+                    { "requestTime", $"{DateTime.UtcNow.ToString("G")}" },
                     { "resetToken", resetToken },
                     { "resetLink", resetLink }
                 };

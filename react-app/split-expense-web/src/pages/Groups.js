@@ -28,6 +28,7 @@ import ImageViewDialog from '../components/ImageViewDialog';
 import { getImageUrl } from '../utils/imageUtils';
 import { capitalizeText } from '../utils/stringUtils';
 import CurrencyIcon from '../components/CurrencyIcon';
+import { useNavigate } from 'react-router-dom';
 
 const GROUPS_PER_PAGE = 10;
 
@@ -46,7 +47,7 @@ const Groups = () => {
     const [groupToDelete, setGroupToDelete] = useState(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
-
+    const navigate = useNavigate();
     const fetchGroups = async (pageNum = 1) => {
         try {
             setLoading(true);
@@ -279,7 +280,9 @@ const Groups = () => {
     const isGroupCreator = (group) => {
         return group.createdBy === user.id;
     };
-
+    const handleNavigateToGroup = (groupId) => {
+        navigate(`/groups/${groupId}`);
+    };
     return (
         <Box sx={{ p: { xs: 2, sm: 3 } }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -311,6 +314,7 @@ const Groups = () => {
                                     cursor: 'pointer',
                                     '&:hover': { boxShadow: 6 }
                                 }}
+                                onClick={() => handleNavigateToGroup(group.id)}
                             >
                                 <CardContent>
                                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, justifyContent: 'space-between' }}>

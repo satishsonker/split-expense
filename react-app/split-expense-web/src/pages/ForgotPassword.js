@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { AUTH_PATHS } from '../constants/apiPaths';
 import axios from 'axios';
+import { apiService } from '../utils/axios';
 
 const validationSchema = Yup.object({
     email: Yup.string()
@@ -48,6 +49,17 @@ const ForgotPassword = () => {
         },
     });
 
+    const sendForgotPasswordRequest = async () => {
+        try {
+            setIsLoading(true);
+            await apiService.post(AUTH_PATHS.FORGOT_PASSWORD, { email: formik.values.email });
+            setSuccess('Password reset instructions have been sent to your email');
+        } catch (error) {
+            setError(error.response?.data?.message || 'An error occurred');
+        } finally {
+            setIsLoading(false);
+        }
+    };
     return (
         <Box className="auth-container">
             <Card className="auth-form">
@@ -83,6 +95,7 @@ const ForgotPassword = () => {
                             size="large"
                             sx={{ mt: 3 }}
                             disabled={isLoading}
+                            onClick={()=>sendForgotPasswordRequest()}
                         >
                             {isLoading ? (
                                 <CircularProgress size={24} color="inherit" />

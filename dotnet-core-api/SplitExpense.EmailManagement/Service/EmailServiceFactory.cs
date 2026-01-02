@@ -4,16 +4,10 @@ using SplitExpense.Models.ConfigModels;
 
 namespace SplitExpense.EmailManagement.Service
 {
-    public class EmailServiceFactory
+    public class EmailServiceFactory(IServiceProvider serviceProvider, IOptions<EmailSettings> options)
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly EmailSettings _emailSettings;
-
-        public EmailServiceFactory(IServiceProvider serviceProvider, IOptions<EmailSettings> options)
-        {
-            _serviceProvider = serviceProvider;
-            _emailSettings = options.Value;
-        }
+        private readonly IServiceProvider _serviceProvider = serviceProvider;
+        private readonly EmailSettings _emailSettings = options.Value;
 
         public IEmailService GetEmailService()
         {
