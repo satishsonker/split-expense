@@ -10,5 +10,6 @@ namespace SplitExpense.Models.DTO
         public decimal? ExactAmount { get; set; } // For Exact Amount-based splitting
         public decimal? AdjustedAmount { get; set; }
         public decimal AmountOwed { get; set; }
+        public int UserId { get; set; }  // User who owes this share
     }
 }

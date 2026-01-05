@@ -16,6 +16,7 @@
     <ProjectReference Include="..\SplitExpense.FileManagement\SplitExpense.FileManagement.csproj" />
     <ProjectReference Include="..\SplitExpense.Logger\SplitExpense.Logger.csproj" />
     <ProjectReference Include="..\SplitExpense.Models\SplitExpense.Models.csproj" />
+    <ProjectReference Include="..\SplitExpense.Services\SplitExpense.Services.csproj" />
   </ItemGroup>
 
 </Project>

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SplitExpense.Data.Services;
 using SplitExpense.Logic;
 using SplitExpense.Models.DTO;
+using SplitExpense.Models.DTO.Response;
 using SplitExpense.Services;
 using SplitExpense.SharedResource;
 
@@ -59,7 +60,7 @@ namespace SplitExpense.Controllers
 
         [HttpPost(ApiPaths.ResetPassword)]
         [AllowAnonymous]
-        public async Task<ActionResult<bool>> ResetPasswordAsync([FromBody] ResetPasswordRequest request)
+        public async Task<ActionResult<ResetPasswordResponse>> ResetPasswordAsync([FromBody] ResetPasswordRequest request)
         {
             return await _authLogic.ResetPasswordAsync(request);
         }

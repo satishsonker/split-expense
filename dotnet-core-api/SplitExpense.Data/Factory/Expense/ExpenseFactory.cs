@@ -1,4 +1,4 @@
-﻿
+﻿using Microsoft.EntityFrameworkCore;
 using SplitExpense.Models.DbModels;
 
 namespace SplitExpense.Data.Factory
@@ -8,9 +8,31 @@ namespace SplitExpense.Data.Factory
         private readonly SplitExpenseDbContext _context = context;
         public async Task<Expense> AddExpense(Expense request)
         {
-            _context.Expenses.Add(request);
-            await _context.SaveChangesAsync();
-            return request;
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                _context.Expenses.Add(request);
+                await _context.SaveChangesAsync();
+
+                // Add expense shares if provided
+                if (request.ExpenseShares != null && request.ExpenseShares.Any())
+                {
+                    foreach (var share in request.ExpenseShares)
+                    {
+                        share.ExpenseId = request.Id;
+                    }
+                    await _context.ExpenseShares.AddRangeAsync(request.ExpenseShares);
+                    await _context.SaveChangesAsync();
+                }
+
+                await transaction.CommitAsync();
+                return request;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task<bool> DeleteExpense(int expenseId)

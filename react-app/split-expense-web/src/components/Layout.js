@@ -22,7 +22,7 @@ const Layout = () => {
                 <LeftMenu onClose={() => setMenuOpen(false)} />
             </Drawer>
 
-            <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+            <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, sm: 3, md: 4 } }}>
                 <Outlet />
             </Box>
 

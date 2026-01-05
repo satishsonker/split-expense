@@ -9,7 +9,11 @@ using SplitExpense.SharedResource;
 
 namespace SplitExpense.Logic.Email
 {
-    public class EmailLogic(IEmailTemplateService emailTemplateService,IEmailQueueService emailQueueService,IMapper mapper,ISplitExpenseLogger logger) : IEmailLogic
+    public class EmailLogic(IEmailTemplateService emailTemplateService,
+        IEmailQueueService emailQueueService,
+        IMapper mapper,
+        ISplitExpenseLogger logger
+        ) : IEmailLogic
     {
         private readonly IEmailTemplateService _emailTemplateService = emailTemplateService;
         private readonly IEmailQueueService _emailQueueService = emailQueueService;
@@ -57,7 +61,7 @@ namespace SplitExpense.Logic.Email
         {
             try
             {
-                var template = await _emailTemplateService.GetTemplateByCodeAsync(EmailTemplateCode.PasswordReset);
+                var template = await _emailTemplateService.GetTemplateByCodeAsync(EmailTemplateCode.ForgetPassword);
                 if (template == null)
                 {
                     _logger.LogError("Password reset email template not found");
@@ -67,7 +71,7 @@ namespace SplitExpense.Logic.Email
                 var body = template.Body;
                 foreach (var item in emailData)
                 {
-                    body = body.Replace($"{{{item.Key}}}", item.Value);
+                    body = body.Replace($"{{{{{item.Key}}}}}", item.Value);
                 }
                 body = body.Replace($"{{CurrentYear}}", DateTime.Now.Year.ToString());
 
@@ -105,6 +109,33 @@ namespace SplitExpense.Logic.Email
                 return false;
             }
             throw new NotImplementedException();
+        }
+
+        public async Task<bool> SendEmailOnPasswordResetSuccessAsync(string toEmail, string userName, DateTime requestTime, Dictionary<string, string> emailData)
+        {
+            try
+            {
+                var template = await _emailTemplateService.GetTemplateByCodeAsync(EmailTemplateCode.PasswordResetSuccessful);
+                if (template == null)
+                {
+                    _logger.LogError("Password reset successful email template not found");
+                    return false;
+                }
+
+                var body = template.Body;
+                foreach (var item in emailData)
+                {
+                    body = body.Replace($"{{{{{item.Key}}}}}", item.Value);
+                }
+                body = body.Replace($"{{CurrentYear}}", DateTime.Now.Year.ToString());
+
+                return await _emailQueueService.AddEmailToQueue(toEmail, template.Subject, body);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error sending password reset successful email to {toEmail}");
+                return false;
+            }
         }
     }
 }

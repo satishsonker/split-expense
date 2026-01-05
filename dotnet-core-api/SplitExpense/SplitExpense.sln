@@ -27,6 +27,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SplitExpense.ExceptionManag
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.FileManagement", "..\SplitExpense.FileManagement\SplitExpense.FileManagement.csproj", "{2CDF6E86-A05B-4ABA-95BE-75EB3345FA6C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitExpense.Services", "..\SplitExpense.Services\SplitExpense.Services.csproj", "{FBF67409-70AA-495F-9B0C-E7B9934748B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{2CDF6E86-A05B-4ABA-95BE-75EB3345FA6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CDF6E86-A05B-4ABA-95BE-75EB3345FA6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CDF6E86-A05B-4ABA-95BE-75EB3345FA6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBF67409-70AA-495F-9B0C-E7B9934748B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBF67409-70AA-495F-9B0C-E7B9934748B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBF67409-70AA-495F-9B0C-E7B9934748B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBF67409-70AA-495F-9B0C-E7B9934748B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -16,5 +16,7 @@ namespace SplitExpense.Models.DTO
         public int? GroupId { get; set; }
 
         public int SplitTypeId { get; set; }
+
+        public List<ExpenseShareResponse> ExpenseShares { get; set; }
     }
 }

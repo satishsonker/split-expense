@@ -55,9 +55,9 @@ namespace SplitExpense.Data
 
                 if (entityEntry.Entity is not BaseDbModels baseModel) continue;
 
-                var now = DateTime.Now;
+                var now = DateTime.UtcNow;
                 int userId = 0;
-                if ((bool)_httpContextAccessor.HttpContext?.Request.Headers.ContainsKey("userId"))
+                if (_httpContextAccessor.HttpContext?.Request.Headers.ContainsKey("userId")??false)
                 {
                     string value = _httpContextAccessor.HttpContext?.Request.Headers["userId"].ToString();
                     if (string.IsNullOrEmpty(value))

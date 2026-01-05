@@ -1,15 +1,17 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using SplitExpense.Data.Factory;
 using SplitExpense.ExceptionManagement.Exceptions;
+using SplitExpense.FileManagement.Service;
 using SplitExpense.Logger;
 using SplitExpense.Models.DbModels;
 using SplitExpense.Models.DTO;
+using SplitExpense.Models.DTO.Response;
+using SplitExpense.Services;
 using SplitExpense.SharedResource;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.AspNetCore.Http;
-using SplitExpense.FileManagement.Service;
 
 namespace SplitExpense.Logic
 {
@@ -20,7 +22,9 @@ namespace SplitExpense.Logic
         IEmailLogic emailLogic,
         ISplitExpenseLogger logger,
         IConfiguration configuration,
-        IFileUploadService fileUploadService) : IAuthLogic
+        IFileUploadService fileUploadService,
+        IRequestInfoService requestInfoService
+        ) : IAuthLogic
     {
         private readonly IAuthFactory _authFactory = authFactory;
         private readonly IMapper _mapper = mapper;
@@ -29,6 +33,7 @@ namespace SplitExpense.Logic
         private readonly IConfiguration _configuration = configuration;
         private readonly IUserFactory _userFactory = userFactory;
         private readonly IFileUploadService _fileUploadService = fileUploadService;
+        private readonly IRequestInfoService _requestInfoService = requestInfoService;
 
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
@@ -89,11 +94,12 @@ namespace SplitExpense.Logic
                 // Send reset email
                 var emailData = new Dictionary<string, string>
                 {
-                    { "userName", $"{user.FirstName} {user.LastName}" },
-                    { "userEmail", $"{user.Email}" },
-                    { "requestTime", $"{DateTime.UtcNow.ToString("G")}" },
-                    { "resetToken", resetToken },
-                    { "resetLink", resetLink }
+                    { "Name", $"{user.FirstName} {user.LastName}" },
+                    { "UserEmail", $"{user.Email}" },
+                    { "RequestTime", $"{DateTime.UtcNow.ToString("G")}" },
+                    { "ResetToken", resetToken },
+                    { "ResetLink", resetLink },
+                    { "ExpirationTime", expiry.ToString("G") }
                 };
 
                 await _emailLogic.SendEmailOnPasswordResetAsync(user.Email, user.FirstName, DateTime.UtcNow, emailData);
@@ -107,23 +113,53 @@ namespace SplitExpense.Logic
             }
         }
 
-        public async Task<bool> ResetPasswordAsync(ResetPasswordRequest request)
+        public async Task<ResetPasswordResponse> ResetPasswordAsync(ResetPasswordRequest request)
         {
+            ResetPasswordResponse response = new();
             try
             {
                 if (!await _authFactory.ValidateResetTokenAsync(request.Token))
+                {
+                    response.Success = false;
+                    response.Message = "This link either expired or invalid.";
                     throw new BusinessRuleViolationException(ErrorCodes.InvalidResetToken);
+                }
 
-                var user =_userFactory.GetUserByResetTokenAsync(request.Token);
+                var user = await _userFactory.GetUserByResetTokenAsync(request.Token);
 
-                return user == null
-                    ? throw new BusinessRuleViolationException(ErrorCodes.InvalidResetToken)
-                    : await _authFactory.UpdatePasswordAsync(user.Id, request.NewPassword);
+                if (user == null)
+                {
+                    response.Success = false;
+                    response.Message = "User not found.";
+                }
+                else
+                {
+                   var result= await _authFactory.UpdatePasswordAsync(user.UserId, request.NewPassword);
+                    if (result)
+                    {
+                        var emailData = new Dictionary<string, string>
+                        {
+                            { "Name", $"{user.FirstName} {user.LastName}" },
+                            { "ResetOn", $"{DateTime.UtcNow:G}" },
+                            { "IPAddress", $"{DateTime.UtcNow:G}" },
+                            { "DeviceInfo", $"{_requestInfoService.GetDeviceInfo}" },
+                            { "LoginUrl", $"{_requestInfoService.GetClientIpAddress}" }
+                        };
+
+                        await _emailLogic.SendEmailOnPasswordResetSuccessAsync(user.Email, user.FirstName, DateTime.UtcNow, emailData);
+                    }
+                    response.Success = true;
+                    response.Message = "Password has been successfully reset.";
+                }
+                
+
+                return response;
+
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error resetting password");
-                throw;
+                return response;
             }
         }
 

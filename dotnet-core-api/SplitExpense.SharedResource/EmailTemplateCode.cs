@@ -6,5 +6,8 @@
         PasswordReset,
         UsernameReminder,
         WelcomeEmail,
+        ForgetPassword,
+        PasswordResetSuccessful,
+
     }
 }

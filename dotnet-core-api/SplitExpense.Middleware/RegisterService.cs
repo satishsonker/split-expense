@@ -4,11 +4,11 @@ using SplitExpense.Data.Factory.Email;
 using SplitExpense.Data.Services;
 using SplitExpense.EmailManagement.Service;
 using SplitExpense.FileManagement.Service;
-using SplitExpense.FileManagement.Storage;
 using SplitExpense.Logger;
 using SplitExpense.Logic;
 using SplitExpense.Logic.Email;
 using SplitExpense.Logic.Masters;
+using SplitExpense.Services;
 
 namespace SplitExpense.Middleware
 {
@@ -17,6 +17,7 @@ namespace SplitExpense.Middleware
         public static IServiceCollection RegisterService(this IServiceCollection services)
         {
             services.AddHttpClient<EmailApiService>();
+            services.AddHttpContextAccessor();
             return services.AddScoped<ISplitExpenseLogger, SplitExpenseLogger>()
                 .AddSingleton<IUserContextService, UserContextService>()
                 .AddScoped<IGroupFactory, GroupFactory>()
@@ -43,7 +44,8 @@ namespace SplitExpense.Middleware
                  .AddScoped<EmailApiService>()
                  .AddScoped<EmailServiceFactory>()
                 #endregion
-                .AddScoped<IErrorLogFactory, ErrorLogFactory>();
+                .AddScoped<IErrorLogFactory, ErrorLogFactory>()
+                .AddScoped<IRequestInfoService, RequestInfoService>();
         }
     }
 }

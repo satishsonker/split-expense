@@ -19,6 +19,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import GroupDetails from './pages/GroupDetails';
 import GroupSettings from './pages/GroupSettings';
+import AddExpense from './pages/AddExpense';
 
 const AppContent = () => {
   const { trackError } = usePerformance();
@@ -38,6 +39,8 @@ const AppContent = () => {
             <Route path="notifications" element={<Notifications />} />
             <Route path="groups/:id" element={<GroupDetails />} />
             <Route path="groups/:id/settings" element={<GroupSettings />} />
+            <Route path="expenses/new" element={<AddExpense />} />
+            <Route path="groups/:groupId/expenses/new" element={<AddExpense />} />
             {/* Add more protected routes here */}
           </Route>
         </Routes>

@@ -45,3 +45,5 @@
 /dotnet-core-api/SplitExpense.FileManagement/bin/Debug/net8.0
 /dotnet-core-api/SplitExpense/uploads
 node_modules
+/dotnet-core-api/SplitExpense.Services/bin/Debug/net8.0
+/dotnet-core-api/SplitExpense.Services/obj

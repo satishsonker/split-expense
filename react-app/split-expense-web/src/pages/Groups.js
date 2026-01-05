@@ -284,23 +284,23 @@ const Groups = () => {
         navigate(`/groups/${groupId}`);
     };
     return (
-        <Box sx={{ p: { xs: 2, sm: 3 } }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h5" component="h1">
+        <Box sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 2, sm: 3 }, gap: 1 }}>
+                <Typography variant="h5" component="h1" sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
                     Groups ({totalGroups})
                 </Typography>
                 {!isMobile && (
                     <IconButton
                         color="primary"
                         onClick={() => setOpenCreateDialog(true)}
-                        sx={{ bgcolor: 'primary.light', '&:hover': { bgcolor: 'primary.main' } }}
+                        sx={{ bgcolor: 'primary.light', '&:hover': { bgcolor: 'primary.main' }, flexShrink: 0 }}
                     >
                         <AddIcon />
                     </IconButton>
                 )}
             </Box>
 
-            <Grid container spacing={2}>
+            <Grid container spacing={{ xs: 1.5, sm: 2 }}>
                 {groups.map(group => {
                     const GroupIcon = getGroupIcon(group.name);
                     const canManageGroup = isGroupCreator(group);
@@ -312,21 +312,24 @@ const Groups = () => {
                             <Card
                                 sx={{
                                     cursor: 'pointer',
-                                    '&:hover': { boxShadow: 6 }
+                                    height: '100%',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': { boxShadow: { xs: 3, sm: 6 } }
                                 }}
                                 onClick={() => handleNavigateToGroup(group.id)}
                             >
-                                <CardContent>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, justifyContent: 'space-between' }}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, justifyContent: 'space-between', gap: 1 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0, flex: 1 }}>
                                             {thumbUrl ? (
                                                 <Avatar
                                                     src={thumbUrl}
                                                     sx={{
-                                                        width: 40,
-                                                        height: 40,
-                                                        mr: 2,
+                                                        width: { xs: 40, sm: 48 },
+                                                        height: { xs: 40, sm: 48 },
+                                                        mr: 1.5,
                                                         cursor: group.imagePath ? 'pointer' : 'default',
+                                                        flexShrink: 0,
                                                         '&:hover': {
                                                             opacity: group.imagePath ? 0.8 : 1
                                                         }
@@ -337,18 +340,21 @@ const Groups = () => {
                                                 <Avatar
                                                     sx={{
                                                         bgcolor: 'primary.main',
-                                                        mr: 2
+                                                        mr: 1.5,
+                                                        width: { xs: 40, sm: 48 },
+                                                        height: { xs: 40, sm: 48 },
+                                                        flexShrink: 0
                                                     }}
                                                 >
                                                     <GroupIcon />
                                                 </Avatar>
                                             )}
-                                            <Typography variant="h6" noWrap>
+                                            <Typography variant="h6" noWrap sx={{ fontSize: { xs: '0.95rem', sm: '1.1rem' } }}>
                                                 {capitalizeText(group.name)}
                                             </Typography>
                                         </Box>
                                         {canManageGroup && (
-                                            <Box>
+                                            <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0 }}>
                                                 <IconButton
                                                     size="small"
                                                     onClick={(e) => {
@@ -356,6 +362,7 @@ const Groups = () => {
                                                         handleEditGroup(group);
                                                     }}
                                                     title="Edit Group"
+                                                    sx={{ p: { xs: 0.5, sm: 1 } }}
                                                 >
                                                     <EditIcon fontSize="small" />
                                                 </IconButton>
@@ -367,6 +374,7 @@ const Groups = () => {
                                                         handleDeleteGroup(group);
                                                     }}
                                                     title="Delete Group"
+                                                    sx={{ p: { xs: 0.5, sm: 1 } }}
                                                 >
                                                     <DeleteIcon fontSize="small" />
                                                 </IconButton>
@@ -374,9 +382,9 @@ const Groups = () => {
                                         )}
                                     </Box>
 
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                            <AvatarGroup max={3}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+                                            <AvatarGroup max={3} sx={{ '& .MuiAvatar-root': { width: { xs: 28, sm: 32 }, height: { xs: 28, sm: 32 }, fontSize: { xs: '0.7rem', sm: '0.8rem' } } }}>
                                                 {group?.members?.map(member => (
                                                     <Tooltip
                                                         key={member.id}
@@ -384,7 +392,7 @@ const Groups = () => {
                                                     >
                                                         <Avatar
                                                             {...stringAvatar(`${member.addedUser.firstName} ${member.addedUser.lastName}`)}
-                                                            src={ getImageUrl(member.addedUser.profilePicture)}
+                                                            src={getImageUrl(member.addedUser.profilePicture)}
                                                             sx={member.addedUser.userId === group.createdBy ? {
                                                                 border: '2px solid gold'
                                                             } : undefined}
@@ -395,7 +403,7 @@ const Groups = () => {
                                                 ))}
                                             </AvatarGroup>
                                         </Box>
-                                        <Typography variant="subtitle1" color="primary">
+                                        <Typography variant="subtitle1" color="primary" sx={{ fontSize: { xs: '0.85rem', sm: '1rem' } }}>
                                             <CurrencyIcon 
                                                 fontSize="small" 
                                                 amount={group.totalExpenses ?? 0.00}
@@ -410,12 +418,13 @@ const Groups = () => {
             </Grid>
 
             {hasMore && (
-                <Box sx={{ mt: 3, textAlign: 'center' }}>
+                <Box sx={{ mt: { xs: 2, sm: 3 }, textAlign: 'center' }}>
                     <Button
                         variant="outlined"
                         onClick={handleLoadMore}
                         disabled={loading}
                         startIcon={loading && <CircularProgress size={20} />}
+                        sx={{ py: { xs: 1, sm: 1.25 } }}
                     >
                         {loading ? 'Loading...' : 'Load More'}
                     </Button>
@@ -425,7 +434,7 @@ const Groups = () => {
             {isMobile && (
                 <Fab
                     color="primary"
-                    sx={{ position: 'fixed', bottom: 16, right: 16 }}
+                    sx={{ position: 'fixed', bottom: { xs: 16, sm: 24 }, right: { xs: 16, sm: 24 } }}
                     onClick={() => setOpenCreateDialog(true)}
                 >
                     <AddIcon />

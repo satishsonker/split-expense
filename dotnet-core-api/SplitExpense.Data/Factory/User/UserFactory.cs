@@ -45,7 +45,8 @@ namespace SplitExpense.Data.Factory
                 return await _context.Users
                     .FirstOrDefaultAsync(u => u.ResetToken == token && 
                                             !u.IsDeleted && 
-                                            u.ResetTokenExpiry > DateTime.UtcNow);
+                                            u.ResetTokenExpiry.HasValue &&
+                                            u.ResetTokenExpiry.Value > DateTime.UtcNow);
             }
             catch (Exception ex)
             {

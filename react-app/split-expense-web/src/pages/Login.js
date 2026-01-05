@@ -74,17 +74,17 @@ const Login = () => {
     };
 
     return (
-        <Box className="auth-container">
-            <Card className="auth-form">
-                <CardContent>
+        <Box className="auth-container" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', p: { xs: 1, sm: 2 } }}>
+            <Card className="auth-form" sx={{ width: { xs: '100%', sm: '90%', md: '420px' }, maxWidth: '100%' }}>
+                <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                     {/* Logo and App Name */}
                     <Box sx={{ textAlign: 'center', mb: 3 }}>
                         <img 
                             src="/logo.png" 
                             alt="Split Expense Logo" 
-                            style={{ width: 80, height: 80, marginBottom: 16 }}
+                            style={{ width: 'min(80px, 20vw)', height: 'auto', marginBottom: 16 }}
                         />
-                        <Typography variant="h5" component="h1" gutterBottom>
+                        <Typography variant="h5" component="h1" gutterBottom sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
                             Split Expense
                         </Typography>
                     </Box>
@@ -102,6 +102,7 @@ const Login = () => {
                             onBlur={formik.handleBlur}
                             error={formik.touched.email && Boolean(formik.errors.email)}
                             helperText={formik.touched.email && formik.errors.email}
+                            inputProps={{ style: { fontSize: { xs: '14px', sm: '16px' } } }}
                         />
 
                         <TextField
@@ -117,12 +118,14 @@ const Login = () => {
                             onBlur={formik.handleBlur}
                             error={formik.touched.password && Boolean(formik.errors.password)}
                             helperText={formik.touched.password && formik.errors.password}
+                            inputProps={{ style: { fontSize: { xs: '14px', sm: '16px' } } }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
                                         <IconButton
                                             onClick={() => setShowPassword(!showPassword)}
                                             edge="end"
+                                            size="large"
                                         >
                                             {showPassword ? <VisibilityOff /> : <Visibility />}
                                         </IconButton>
@@ -136,7 +139,7 @@ const Login = () => {
                                 to="/forgot-password"
                                 style={{ textDecoration: 'none', color: 'primary.main' }}
                             >
-                                <Typography variant="body2" color="primary">
+                                <Typography variant="body2" color="primary" sx={{ fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                     Forgot Password?
                                 </Typography>
                             </Link>
@@ -147,7 +150,7 @@ const Login = () => {
                             type="submit"
                             variant="contained"
                             size="large"
-                            sx={{ mt: 3 }}
+                            sx={{ mt: 3, py: { xs: 1.2, sm: 1.5 } }}
                             disabled={isLoading}
                         >
                             {isLoading ? (
@@ -158,12 +161,12 @@ const Login = () => {
                         </Button>
 
                         {error && (
-                            <Alert severity="error" sx={{ mt: 2 }}>
+                            <Alert severity="error" sx={{ mt: 2, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                 {error}
                             </Alert>
                         )}
 
-                        <Divider sx={{ my: 3 }}>OR</Divider>
+                        <Divider sx={{ my: { xs: 2, sm: 3 } }}>OR</Divider>
 
                         <Button
                             fullWidth
@@ -171,12 +174,13 @@ const Login = () => {
                             size="large"
                             onClick={handleGoogleLogin}
                             startIcon={<GoogleIcon />}
+                            sx={{ py: { xs: 1.2, sm: 1.5 } }}
                         >
                             Continue with Google
                         </Button>
 
                         <Box sx={{ mt: 3, textAlign: 'center' }}>
-                            <Typography variant="body2">
+                            <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                 Don't have an account?{' '}
                                 <Link 
                                     to="/register"

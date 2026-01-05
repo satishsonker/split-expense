@@ -37,7 +37,8 @@ const validationSchema = Yup.object({
 const ResetPassword = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const token = searchParams.get('token');
+    // Replace spaces back with + signs (URL encoding converts + to space)
+    const token = searchParams.get('token')?.replace(/\s/g, '+');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -63,10 +64,17 @@ const ResetPassword = () => {
             try {
                 await axios.post(AUTH_PATHS.RESET_PASSWORD, {
                     token,
-                    password: values.password,
+                    NewPassword: values.password,
+                    ConfirmPassword: values.confirmPassword
+                }).then(res => {
+                    if(res.data.success){
+                    setSuccess(res.data.message || 'Password has been reset successfully');
+                    setTimeout(() => navigate('/login'), 3000);
+                    }else{
+                    setError(res.data.message || 'An error occurred');
+                    }
                 });
-                setSuccess('Password has been successfully reset');
-                setTimeout(() => navigate('/login'), 3000);
+
             } catch (err) {
                 setError(err.response?.data?.message || 'An error occurred');
             } finally {
@@ -77,9 +85,9 @@ const ResetPassword = () => {
 
     if (!token) {
         return (
-            <Box className="auth-container">
-                <Card className="auth-form">
-                    <CardContent>
+            <Box className="auth-container" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', p: { xs: 1, sm: 2 } }}>
+                <Card className="auth-form" sx={{ width: { xs: '100%', sm: '90%', md: '420px' }, maxWidth: '100%' }}>
+                    <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                         <Alert severity="error">
                             Invalid reset token. Please request a new password reset.
                         </Alert>
@@ -90,14 +98,14 @@ const ResetPassword = () => {
     }
 
     return (
-        <Box className="auth-container">
-            <Card className="auth-form">
-                <CardContent>
+        <Box className="auth-container" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', p: { xs: 1, sm: 2 } }}>
+            <Card className="auth-form" sx={{ width: { xs: '100%', sm: '90%', md: '420px' }, maxWidth: '100%' }}>
+                <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                     <Box sx={{ textAlign: 'center', mb: 3 }}>
-                        <Typography variant="h5" component="h1" gutterBottom>
+                        <Typography variant="h5" component="h1" gutterBottom sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
                             Reset Password
                         </Typography>
-                        <Typography variant="body2" color="textSecondary">
+                        <Typography variant="body2" color="textSecondary" sx={{ fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                             Enter your new password below
                         </Typography>
                     </Box>
@@ -116,12 +124,14 @@ const ResetPassword = () => {
                             onBlur={formik.handleBlur}
                             error={formik.touched.password && Boolean(formik.errors.password)}
                             helperText={formik.touched.password && formik.errors.password}
+                            inputProps={{ style: { fontSize: { xs: '14px', sm: '16px' } } }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
                                         <IconButton
                                             onClick={() => setShowPassword(!showPassword)}
                                             edge="end"
+                                            size="large"
                                         >
                                             {showPassword ? <VisibilityOff /> : <Visibility />}
                                         </IconButton>
@@ -143,12 +153,14 @@ const ResetPassword = () => {
                             onBlur={formik.handleBlur}
                             error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
                             helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
+                            inputProps={{ style: { fontSize: { xs: '14px', sm: '16px' } } }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
                                         <IconButton
                                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                             edge="end"
+                                            size="large"
                                         >
                                             {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                                         </IconButton>
@@ -162,7 +174,7 @@ const ResetPassword = () => {
                             type="submit"
                             variant="contained"
                             size="large"
-                            sx={{ mt: 3 }}
+                            sx={{ mt: 3, py: { xs: 1.2, sm: 1.5 } }}
                             disabled={isLoading}
                         >
                             {isLoading ? (
@@ -173,17 +185,29 @@ const ResetPassword = () => {
                         </Button>
 
                         {error && (
-                            <Alert severity="error" sx={{ mt: 2 }}>
+                            <Alert severity="error" sx={{ mt: 2, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                 {error}
                             </Alert>
                         )}
 
                         {success && (
-                            <Alert severity="success" sx={{ mt: 2 }}>
+                            <Alert severity="success" sx={{ mt: 2, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                 {success}
                             </Alert>
                         )}
                     </form>
+
+                    <Box sx={{ mt: 2, textAlign: 'center' }}>
+                        <Button
+                            fullWidth
+                            variant="outlined"
+                            size="large"
+                            onClick={() => navigate('/login')}
+                            sx={{ py: { xs: 1.2, sm: 1.5 } }}
+                        >
+                            Back to Login
+                        </Button>
+                    </Box>
                 </CardContent>
             </Card>
         </Box>

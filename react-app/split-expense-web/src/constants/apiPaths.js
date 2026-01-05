@@ -47,3 +47,13 @@ export const CONTACT_PATHS = {
 export const ACTIVITY_PATHS={
     LIST:`${API_BASE_URL}/expenseactivity/get/all`,
 }
+
+export const EXPENSE_PATHS = {
+    CREATE: `${API_BASE_URL}/expense/create`,
+    UPDATE: `${API_BASE_URL}/expense/update`,
+    DELETE: `${API_BASE_URL}/expense/delete/`,
+};
+
+export const SPLIT_TYPE_PATHS = {
+    LIST: `${API_BASE_URL}/splittype/get/all`,
+};

@@ -91,30 +91,30 @@ const Header = ({ onMenuClick }) => {
 
     return (
         <AppBar position="static">
-            <Toolbar>
+            <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', minHeight: { xs: 56, sm: 64 }, px: { xs: 1, sm: 2 } }}>
                 <IconButton
                     edge="start"
                     color="inherit"
                     aria-label="menu"
                     onClick={onMenuClick}
-                    sx={{ mr: 2 }}
+                    sx={{ mr: 1 }}
                 >
                     <MenuIcon />
                 </IconButton>
 
-                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
                     Split Expense
                 </Typography>
 
-                <IconButton color="inherit" onClick={handleNotificationClick}>
+                <IconButton color="inherit" onClick={handleNotificationClick} size="large">
                     <Badge color="error" variant="dot" invisible={!hasNewNotifications}>
                         <NotificationsIcon />
                     </Badge>
                 </IconButton>
 
-                <IconButton color="inherit" onClick={handleProfileClick}>
+                <IconButton color="inherit" onClick={handleProfileClick} size="large">
                     {user ? (
-                        <Avatar sx={{ width: 32, height: 32 }}
+                        <Avatar sx={{ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 } }}
                             src={imagePreview}
                         >
                             {user.name?.charAt(0) || 'U'}
@@ -131,6 +131,12 @@ const Header = ({ onMenuClick }) => {
                     onClose={handleClose}
                     transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                     anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                    PaperProps={{
+                        sx: {
+                            width: { xs: '100vw', sm: 300 },
+                            maxHeight: '80vh'
+                        }
+                    }}
                 >
                     {user ? (
                         <>
@@ -200,8 +206,8 @@ const Header = ({ onMenuClick }) => {
                     }}
                     PaperProps={{
                         sx: {
-                            width: { xs: '100%', sm: 360 },
-                            maxHeight: { xs: '100%', sm: '80vh' }
+                            width: { xs: '100vw', sm: 360 },
+                            maxHeight: { xs: '100vh', sm: '80vh' }
                         }
                     }}
                 >

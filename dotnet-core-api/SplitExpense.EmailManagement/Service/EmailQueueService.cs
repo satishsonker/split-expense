@@ -86,6 +86,9 @@ namespace SplitExpense.EmailManagement.Service
                         email.Status = EmailStatus.Sent;
                         email.SentAt = DateTime.UtcNow;
                         email.Status=EmailStatus.Sent;
+                        email.UpdatedAt = DateTime.UtcNow;
+                        email.UpdatedBy = 0;
+                        await _context.SaveChangesAsync();
                     }
                 }
                 catch (Exception ex)
@@ -93,8 +96,8 @@ namespace SplitExpense.EmailManagement.Service
                     email.RetryCount++;
                     if (email.RetryCount >= 3) email.Status = EmailStatus.Failed;
                     _logger.LogError(ex, $"Failed to send email {email.Id}");
+                    await _context.SaveChangesAsync();
                 }
-                await _context.SaveChangesAsync();
             }
         }
 

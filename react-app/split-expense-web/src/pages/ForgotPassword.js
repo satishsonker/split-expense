@@ -61,14 +61,14 @@ const ForgotPassword = () => {
         }
     };
     return (
-        <Box className="auth-container">
-            <Card className="auth-form">
-                <CardContent>
+        <Box className="auth-container" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', p: { xs: 1, sm: 2 } }}>
+            <Card className="auth-form" sx={{ width: { xs: '100%', sm: '90%', md: '420px' }, maxWidth: '100%' }}>
+                <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                     <Box sx={{ textAlign: 'center', mb: 3 }}>
-                        <Typography variant="h5" component="h1" gutterBottom>
+                        <Typography variant="h5" component="h1" gutterBottom sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
                             Forgot Password
                         </Typography>
-                        <Typography variant="body2" color="textSecondary">
+                        <Typography variant="body2" color="textSecondary" sx={{ fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                             Enter your email address and we'll send you instructions to reset your password.
                         </Typography>
                     </Box>
@@ -86,6 +86,7 @@ const ForgotPassword = () => {
                             onBlur={formik.handleBlur}
                             error={formik.touched.email && Boolean(formik.errors.email)}
                             helperText={formik.touched.email && formik.errors.email}
+                            inputProps={{ style: { fontSize: { xs: '14px', sm: '16px' } } }}
                         />
 
                         <Button
@@ -93,7 +94,7 @@ const ForgotPassword = () => {
                             type="submit"
                             variant="contained"
                             size="large"
-                            sx={{ mt: 3 }}
+                            sx={{ mt: 3, py: { xs: 1.2, sm: 1.5 } }}
                             disabled={isLoading}
                             onClick={()=>sendForgotPasswordRequest()}
                         >
@@ -105,13 +106,13 @@ const ForgotPassword = () => {
                         </Button>
 
                         {error && (
-                            <Alert severity="error" sx={{ mt: 2 }}>
+                            <Alert severity="error" sx={{ mt: 2, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                 {error}
                             </Alert>
                         )}
 
                         {success && (
-                            <Alert severity="success" sx={{ mt: 2 }}>
+                            <Alert severity="success" sx={{ mt: 2, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                 {success}
                             </Alert>
                         )}
@@ -121,7 +122,7 @@ const ForgotPassword = () => {
                                 to="/login"
                                 style={{ textDecoration: 'none', color: 'primary.main' }}
                             >
-                                <Typography variant="body2" color="primary">
+                                <Typography variant="body2" color="primary" sx={{ fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                     Back to Login
                                 </Typography>
                             </Link>
