@@ -52,6 +52,8 @@ export const EXPENSE_PATHS = {
     CREATE: `${API_BASE_URL}/expense/create`,
     UPDATE: `${API_BASE_URL}/expense/update`,
     DELETE: `${API_BASE_URL}/expense/delete/`,
+    LIST: `${API_BASE_URL}/expense/get/all`,
+    SEARCH: `${API_BASE_URL}/expense/search`,
 };
 
 export const SPLIT_TYPE_PATHS = {

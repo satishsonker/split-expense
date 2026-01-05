@@ -42,8 +42,9 @@ namespace SplitExpense.AutoMapperMapping
             #region Expense
                 CreateMap<ExpenseRequest, Expense>();
                 CreateMap<Expense, ExpenseResponse>();
+            CreateMap<PagingResponse<Expense>,PagingResponse<ExpenseResponse>>();
 
-                CreateMap<ExpenseShareRequest, ExpenseShare>();
+            CreateMap<ExpenseShareRequest, ExpenseShare>();
                 CreateMap<ExpenseShare, ExpenseShareResponse>();
             #endregion
 

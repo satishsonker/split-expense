@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SplitExpense.Models;
+using SplitExpense.Models.Common;
 using SplitExpense.Models.DbModels;
 
 namespace SplitExpense.Data.Factory
@@ -55,6 +57,64 @@ namespace SplitExpense.Data.Factory
             await _context.SaveChangesAsync();
 
             return expense;
+        }
+
+        public async Task<PagingResponse<Expense>> GetAllAsync(PagingRequest request)
+        {
+            try
+            {
+                var query = _context.Expenses
+                    .Where(x => !x.IsDeleted)
+                    .Include(x => x.ExpenseShares)
+                    .OrderByDescending(x => x.ExpenseDate)
+                    .ThenByDescending(x => x.CreatedAt)
+                    .AsQueryable();
+
+                return new PagingResponse<Expense>
+                {
+                    Data = await query
+                        .Skip((request.PageNo - 1) * request.PageSize)
+                        .Take(request.PageSize)
+                        .ToListAsync(),
+                    RecordCounts = await query.CountAsync(),
+                    PageSize = request.PageSize,
+                    PageNo = request.PageNo
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error getting all expenses", ex);
+            }
+        }
+
+        public async Task<PagingResponse<Expense>> SearchAsync(SearchRequest request)
+        {
+            try
+            {
+                var query = _context.Expenses
+                    .Where(x => !x.IsDeleted &&
+                        (x.Description.Contains(request.SearchTerm) ||
+                         x.Amount.ToString().Contains(request.SearchTerm)))
+                    .Include(x => x.ExpenseShares)
+                    .OrderByDescending(x => x.ExpenseDate)
+                    .ThenByDescending(x => x.CreatedAt)
+                    .AsQueryable();
+
+                return new PagingResponse<Expense>
+                {
+                    Data = await query
+                        .Skip((request.PageNo - 1) * request.PageSize)
+                        .Take(request.PageSize)
+                        .ToListAsync(),
+                    RecordCounts = await query.CountAsync(),
+                    PageSize = request.PageSize,
+                    PageNo = request.PageNo
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error searching expenses", ex);
+            }
         }
     }
 }

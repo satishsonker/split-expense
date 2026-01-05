@@ -113,6 +113,7 @@ const Dashboard = () => {
                             fullWidth
                             variant="contained"
                             startIcon={<AddIcon sx={{ fontSize: { xs: 20, sm: 24 } }} />}
+                            onClick={() => navigate('/expenses/new')}
                             sx={{ height: '100%', py: { xs: 1.5, sm: 2 }, fontSize: { xs: '0.8rem', sm: '1rem' } }}
                         >
                             Add Expense

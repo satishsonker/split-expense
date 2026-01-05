@@ -1,4 +1,6 @@
-﻿using SplitExpense.Models.DbModels;
+﻿using SplitExpense.Models;
+using SplitExpense.Models.Common;
+using SplitExpense.Models.DbModels;
 
 namespace SplitExpense.Data.Factory
 {
@@ -7,5 +9,7 @@ namespace SplitExpense.Data.Factory
         Task<Expense> AddExpense(Expense request); 
         Task<Expense> UpdateExpense(Expense request); 
         Task<bool> DeleteExpense(int expenseId);
+        Task<PagingResponse<Expense>> GetAllAsync(PagingRequest request);
+        Task<PagingResponse<Expense>> SearchAsync(SearchRequest request);
     }
 }

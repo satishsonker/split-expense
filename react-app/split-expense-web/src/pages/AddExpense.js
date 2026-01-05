@@ -54,10 +54,7 @@ const validationSchema = Yup.object({
     groupId: Yup.number()
         .nullable(),
     splitTypeId: Yup.number()
-        .required('Split type is required'),
-    expenseShares: Yup.array()
-        .min(1, 'At least one person must be included')
-        .required('Expense shares are required')
+        .required('Split type is required')
 });
 
 const AddExpense = () => {
@@ -81,9 +78,11 @@ const AddExpense = () => {
 
     useEffect(() => {
         if (groupId) {
-            formik.setFieldValue('groupId', parseInt(groupId));
-            fetchGroupMembers(groupId);
+            const parsedGroupId = parseInt(groupId);
+            formik.setFieldValue('groupId', parsedGroupId);
+            fetchGroupMembers(parsedGroupId);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [groupId]);
 
     const fetchGroups = async () => {
@@ -129,12 +128,19 @@ const AddExpense = () => {
         try {
             const response = await apiService.get(`${GROUP_PATHS.GET}${id}`);
             if (response?.members) {
-                const memberIds = response.members.map(m => m.friendId || m.userId);
-                setSelectedContacts(memberIds);
+                // Extract member data properly - members have addedUser property
+                const memberList = response.members.map(m => ({
+                    id: m.addedUser?.userId || m.userId,
+                    firstName: m.addedUser?.firstName || m.firstName || '',
+                    lastName: m.addedUser?.lastName || m.lastName || '',
+                    email: m.addedUser?.email || m.email || '',
+                    isGroupMember: true
+                }));
+                setSelectedContacts(memberList);
                 // Initialize split values for group members
                 const initialSplitValues = {};
-                memberIds.forEach(memberId => {
-                    initialSplitValues[memberId] = 0;
+                memberList.forEach(member => {
+                    initialSplitValues[member.id] = 0;
                 });
                 setSplitValues(initialSplitValues);
             }
@@ -152,9 +158,10 @@ const AddExpense = () => {
         switch (splitType.name?.toLowerCase()) {
             case 'equal':
                 const equalAmount = amount / (selectedContacts.length + 1); // +1 for paid by user
-                selectedContacts.forEach(contactId => {
+                selectedContacts.forEach(contact => {
+                    const contactId = contact?.id || contact?.userId || contact;
                     shares.push({
-                        userId: contactId,
+                        userId: typeof contactId === 'object' ? (contactId?.id || contactId?.userId) : contactId,
                         splitTypeId: splitTypeId,
                         amountOwed: equalAmount,
                         exactAmount: equalAmount
@@ -162,10 +169,12 @@ const AddExpense = () => {
                 });
                 break;
             case 'percentage':
-                selectedContacts.forEach(contactId => {
-                    const percentage = splitValues[contactId] || 0;
+                selectedContacts.forEach(contact => {
+                    const contactId = contact?.id || contact?.userId || contact;
+                    const userId = typeof contactId === 'object' ? (contactId?.id || contactId?.userId) : contactId;
+                    const percentage = splitValues[userId] || 0;
                     shares.push({
-                        userId: contactId,
+                        userId: userId,
                         splitTypeId: splitTypeId,
                         percentage: percentage,
                         amountOwed: (amount * percentage) / 100
@@ -173,10 +182,12 @@ const AddExpense = () => {
                 });
                 break;
             case 'exactamount':
-                selectedContacts.forEach(contactId => {
-                    const exactAmount = splitValues[contactId] || 0;
+                selectedContacts.forEach(contact => {
+                    const contactId = contact?.id || contact?.userId || contact;
+                    const userId = typeof contactId === 'object' ? (contactId?.id || contactId?.userId) : contactId;
+                    const exactAmount = splitValues[userId] || 0;
                     shares.push({
-                        userId: contactId,
+                        userId: userId,
                         splitTypeId: splitTypeId,
                         exactAmount: exactAmount,
                         amountOwed: exactAmount
@@ -185,10 +196,12 @@ const AddExpense = () => {
                 break;
             case 'shares':
                 const totalShares = Object.values(splitValues).reduce((sum, val) => sum + (val || 0), 0);
-                selectedContacts.forEach(contactId => {
-                    const sharesValue = splitValues[contactId] || 0;
+                selectedContacts.forEach(contact => {
+                    const contactId = contact?.id || contact?.userId || contact;
+                    const userId = typeof contactId === 'object' ? (contactId?.id || contactId?.userId) : contactId;
+                    const sharesValue = splitValues[userId] || 0;
                     shares.push({
-                        userId: contactId,
+                        userId: userId,
                         splitTypeId: splitTypeId,
                         shares: sharesValue,
                         amountOwed: totalShares > 0 ? (amount * sharesValue) / totalShares : 0
@@ -197,10 +210,12 @@ const AddExpense = () => {
                 break;
             default:
                 // Unequal or custom
-                selectedContacts.forEach(contactId => {
-                    const exactAmount = splitValues[contactId] || 0;
+                selectedContacts.forEach(contact => {
+                    const contactId = contact?.id || contact?.userId || contact;
+                    const userId = typeof contactId === 'object' ? (contactId?.id || contactId?.userId) : contactId;
+                    const exactAmount = splitValues[userId] || 0;
                     shares.push({
-                        userId: contactId,
+                        userId: userId,
                         splitTypeId: splitTypeId,
                         exactAmount: exactAmount,
                         amountOwed: exactAmount
@@ -224,6 +239,12 @@ const AddExpense = () => {
         validationSchema,
         onSubmit: async (values) => {
             try {
+                // Validate that at least one contact is selected
+                if (!selectedContacts || selectedContacts.length === 0) {
+                    toast.error('Please select at least one person to split with');
+                    return;
+                }
+
                 setLoading(true);
                 
                 const shares = calculateShares(
@@ -232,17 +253,34 @@ const AddExpense = () => {
                     selectedContacts
                 );
 
+                // Validate that shares were calculated
+                if (!shares || shares.length === 0) {
+                    toast.error('Failed to calculate expense shares. Please check your split type and selected contacts.');
+                    setLoading(false);
+                    return;
+                }
+
                 const expenseData = {
                     description: values.description,
                     amount: parseFloat(values.amount),
                     expenseDate: values.expenseDate.toISOString(),
                     paidByUserId: values.paidByUserId,
-                    groupId: values.groupId,
+                    groupId: values.groupId || null,
                     splitTypeId: values.splitTypeId,
-                    expenseShares: shares
+                    expenseShares: shares.map(share => ({
+                        userId: share.userId,
+                        splitTypeId: share.splitTypeId,
+                        percentage: share.percentage || null,
+                        shares: share.shares || null,
+                        exactAmount: share.exactAmount || null,
+                        adjustedAmount: share.adjustedAmount || null,
+                        amountOwed: share.amountOwed || 0
+                    }))
                 };
 
-                await apiService.post(EXPENSE_PATHS.CREATE, expenseData);
+                console.log('Submitting expense data:', JSON.stringify(expenseData, null, 2));
+                const response = await apiService.post(EXPENSE_PATHS.CREATE, expenseData);
+                console.log('Expense created successfully:', response);
                 toast.success('Expense added successfully');
                 
                 if (groupId) {
@@ -252,7 +290,8 @@ const AddExpense = () => {
                 }
             } catch (error) {
                 console.error('Error creating expense:', error);
-                toast.error(error.response?.data?.message || 'Failed to create expense');
+                const errorMessage = error.response?.data?.message || error.message || 'Failed to create expense';
+                toast.error(errorMessage);
             } finally {
                 setLoading(false);
             }
@@ -260,17 +299,48 @@ const AddExpense = () => {
     });
 
     const handleContactToggle = (contactId) => {
+        const contact = contacts.find(c => (c.contactId || c.id || c.userId) === contactId);
+        
         setSelectedContacts(prev => {
-            if (prev.includes(contactId)) {
-                const newList = prev.filter(id => id !== contactId);
+            const existingIndex = prev.findIndex(c => {
+                const cId = c?.id || c?.userId || c;
+                return cId === contactId;
+            });
+            
+            if (existingIndex >= 0) {
+                const newList = prev.filter((c, index) => {
+                    const cId = c?.id || c?.userId || c;
+                    return cId !== contactId;
+                });
                 const newSplitValues = { ...splitValues };
                 delete newSplitValues[contactId];
                 setSplitValues(newSplitValues);
                 return newList;
             } else {
-                return [...prev, contactId];
+                // Only add if contact exists and is not already in the list
+                if (contact && !prev.find(c => {
+                    const cId = c?.id || c?.userId || c;
+                    return cId === contactId;
+                })) {
+                    return [...prev, contact];
+                }
+                return prev;
             }
         });
+    };
+
+    const handleGroupChange = (e) => {
+        const groupId = e.target.value;
+        formik.setFieldValue('groupId', groupId);
+        
+        if (groupId) {
+            // Fetch and set group members only
+            fetchGroupMembers(groupId);
+        } else {
+            // Reset to all contacts
+            setSelectedContacts([]);
+            setSplitValues({});
+        }
     };
 
     const handleSplitValueChange = (contactId, value) => {
@@ -281,8 +351,24 @@ const AddExpense = () => {
     };
 
     const getContactName = (contactId) => {
+        // Check in selectedContacts first (for group members)
+        const selectedContact = Array.isArray(selectedContacts) && selectedContacts.find(c => (c.id || c.userId || c) === contactId);
+        if (selectedContact && typeof selectedContact === 'object') {
+            return `${selectedContact.firstName || ''} ${selectedContact.lastName || ''}`.trim();
+        }
+        
+        // Check in contacts list
         const contact = contacts.find(c => (c.contactId || c.id || c.userId) === contactId);
         return contact ? `${contact.firstName || ''} ${contact.lastName || ''}`.trim() : 'Unknown';
+    };
+
+    const getDisplayContacts = () => {
+        // If group is selected, show selected contacts (group members)
+        if (formik.values.groupId && Array.isArray(selectedContacts) && selectedContacts.length > 0) {
+            return selectedContacts;
+        }
+        // Otherwise show all contacts
+        return contacts;
     };
 
     const getSplitTypeName = (splitTypeId) => {
@@ -295,99 +381,165 @@ const AddExpense = () => {
         if (!splitType || selectedContacts.length === 0) return null;
 
         const splitTypeName = splitType.name?.toLowerCase();
+        const isGroup = formik.values.groupId;
 
         return (
-            <Box sx={{ mt: 2 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                    Split Details
+            <Grid item xs={12}>
+                <Typography variant="subtitle2" sx={{ mb: { xs: 1, sm: 1.5 }, fontWeight: 600 }}>
+                    Split Details ({splitType.name})
                 </Typography>
-                {selectedContacts.map(contactId => (
-                    <Box key={contactId} sx={{ mb: 2 }}>
-                        <Grid container spacing={2} alignItems="center">
-                            <Grid item xs={12} sm={4}>
-                                <Typography variant="body2">
-                                    {getContactName(contactId)}
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={12} sm={8}>
-                                {splitTypeName === 'percentage' && (
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        type="number"
-                                        label="Percentage"
-                                        value={splitValues[contactId] || ''}
-                                        onChange={(e) => handleSplitValueChange(contactId, e.target.value)}
-                                        inputProps={{ min: 0, max: 100, step: 0.01 }}
-                                        InputProps={{
-                                            endAdornment: <Typography variant="body2">%</Typography>
-                                        }}
-                                    />
-                                )}
-                                {splitTypeName === 'exactamount' && (
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        type="number"
-                                        label="Amount"
-                                        value={splitValues[contactId] || ''}
-                                        onChange={(e) => handleSplitValueChange(contactId, e.target.value)}
-                                        inputProps={{ min: 0, step: 0.01 }}
-                                    />
-                                )}
-                                {splitTypeName === 'shares' && (
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        type="number"
-                                        label="Shares"
-                                        value={splitValues[contactId] || ''}
-                                        onChange={(e) => handleSplitValueChange(contactId, e.target.value)}
-                                        inputProps={{ min: 0, step: 0.01 }}
-                                    />
-                                )}
-                                {(splitTypeName === 'unequal' || splitTypeName === 'adjustment') && (
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        type="number"
-                                        label="Amount"
-                                        value={splitValues[contactId] || ''}
-                                        onChange={(e) => handleSplitValueChange(contactId, e.target.value)}
-                                        inputProps={{ min: 0, step: 0.01 }}
-                                    />
-                                )}
-                            </Grid>
-                        </Grid>
-                    </Box>
-                ))}
-            </Box>
+                <Paper variant="outlined" sx={{ p: { xs: 1, sm: 2 }, borderRadius: 1 }}>
+                    <Grid container spacing={{ xs: 1, sm: 2 }}>
+                        {selectedContacts.map((contact, index) => {
+                            const contactId = contact?.id || contact?.userId || contact;
+                            const userId = typeof contactId === 'object' ? (contactId?.id || contactId?.userId) : contactId;
+                            const uniqueKey = `split-input-${userId || index}`;
+                            const contactName = typeof contact === 'object' 
+                                ? `${contact.firstName || ''} ${contact.lastName || ''}`.trim()
+                                : getContactName(contactId);
+                            
+                            let label = '';
+                            let helper = '';
+                            let inputValue = splitValues[userId] || '';
+                            let step = 0.01;
+
+                            if (splitTypeName === 'percentage') {
+                                label = 'Percentage (%)';
+                                helper = 'Total should equal 100%';
+                                step = 0.01;
+                            } else if (splitTypeName === 'exactamount') {
+                                label = 'Amount';
+                                helper = 'Exact amount for this person';
+                                step = 0.01;
+                            } else if (splitTypeName === 'shares') {
+                                label = 'Shares';
+                                helper = 'Number of shares';
+                                step = 0.01;
+                            } else if (splitTypeName === 'equal') {
+                                // Equal split - no input needed
+                                return (
+                                    <Grid item xs={12} key={uniqueKey}>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1, px: 1, backgroundColor: 'action.hover', borderRadius: 1 }}>
+                                            <Typography variant="body2" sx={{ fontSize: { xs: '0.85rem', sm: '0.95rem' } }}>
+                                                {contactName}
+                                            </Typography>
+                                            <Typography variant="caption" sx={{ fontSize: { xs: '0.75rem', sm: '0.85rem' } }}>
+                                                {(formik.values.amount / (selectedContacts.length + 1)).toFixed(2)}
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+                                );
+                            } else {
+                                label = 'Amount';
+                                helper = 'Custom amount';
+                                step = 0.01;
+                            }
+
+                            return (
+                                <Grid item xs={12} sm={6} md={4} key={uniqueKey}>
+                                    <Box sx={{ backgroundColor: 'background.paper', p: { xs: 1, sm: 1.5 }, borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+                                        <Typography variant="caption" sx={{ display: 'block', mb: 1, fontSize: { xs: '0.7rem', sm: '0.8rem' } }}>
+                                            {contactName}
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            type="number"
+                                            label={label}
+                                            value={inputValue}
+                                            onChange={(e) => handleSplitValueChange(userId, e.target.value)}
+                                            inputProps={{ min: 0, step: step }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-input': { fontSize: { xs: '0.85rem', sm: '1rem' } },
+                                                '& .MuiInputBase-sizeSmall': { p: { xs: '0.5rem', sm: '0.75rem' } }
+                                            }}
+                                        />
+                                        <Typography variant="caption" sx={{ display: 'block', mt: 0.5, fontSize: { xs: '0.7rem', sm: '0.75rem' }, color: 'text.secondary' }}>
+                                            {helper}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                            );
+                        })}
+                    </Grid>
+                </Paper>
+            </Grid>
         );
     };
 
     return (
-        <Box sx={{ p: { xs: 2, sm: 3 }, maxWidth: 800, mx: 'auto' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h5">Add Expense</Typography>
-                <IconButton onClick={() => navigate(-1)}>
+        <Box sx={{ p: { xs: 1.5, sm: 2, md: 3 }, maxWidth: { xs: '100%', md: 800 }, mx: 'auto' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 2, sm: 3 }, gap: 1 }}>
+                <Typography variant="h5" sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+                    {formik.values.groupId ? 'Add Group Expense' : 'Add Personal Expense'}
+                </Typography>
+                <IconButton onClick={() => navigate(-1)} size="large">
                     <CloseIcon />
                 </IconButton>
             </Box>
 
             <form onSubmit={formik.handleSubmit}>
                 <Card>
-                    <CardContent>
-                        <Grid container spacing={3}>
+                    <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
+                        <Grid container spacing={{ xs: 1.5, sm: 2, md: 3 }}>
+                            {/* Expense Type and Group Selection */}
+                            <Grid item xs={12} sm={6}>
+                                <FormControl fullWidth>
+                                    <InputLabel>Expense Type</InputLabel>
+                                    <Select
+                                        value={formik.values.groupId ? 'group' : 'personal'}
+                                        onChange={(e) => {
+                                            if (e.target.value === 'group') {
+                                                formik.setFieldValue('groupId', '');
+                                            } else {
+                                                formik.setFieldValue('groupId', null);
+                                                setSelectedContacts([]);
+                                                setSplitValues({});
+                                            }
+                                        }}
+                                        label="Expense Type"
+                                    >
+                                        <MenuItem value="personal">Personal</MenuItem>
+                                        <MenuItem value="group">Group</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+
+                            {formik.values.groupId !== null && (
+                                <Grid item xs={12} sm={6}>
+                                    <FormControl fullWidth>
+                                        <InputLabel>Group</InputLabel>
+                                        <Select
+                                            name="groupId"
+                                            value={formik.values.groupId || ''}
+                                            onChange={handleGroupChange}
+                                            label="Group"
+                                        >
+                                            <MenuItem value="">Select a group...</MenuItem>
+                                            {groups.map(group => (
+                                                <MenuItem key={group.id} value={group.id}>
+                                                    {group.name}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                            )}
+
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
                                     label="Description"
                                     name="description"
+                                    placeholder="e.g., Coffee, Dinner, Movie tickets"
                                     value={formik.values.description}
                                     onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
                                     error={formik.touched.description && Boolean(formik.errors.description)}
                                     helperText={formik.touched.description && formik.errors.description}
                                     required
+                                    multiline
+                                    rows={2}
                                 />
                             </Grid>
 
@@ -399,6 +551,7 @@ const AddExpense = () => {
                                     type="number"
                                     value={formik.values.amount}
                                     onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
                                     error={formik.touched.amount && Boolean(formik.errors.amount)}
                                     helperText={formik.touched.amount && formik.errors.amount}
                                     inputProps={{ min: 0, step: 0.01 }}
@@ -425,20 +578,29 @@ const AddExpense = () => {
                             </Grid>
 
                             <Grid item xs={12} sm={6}>
-                                <FormControl fullWidth>
-                                    <InputLabel>Group (Optional)</InputLabel>
+                                <FormControl fullWidth required>
+                                    <InputLabel>Paid By</InputLabel>
                                     <Select
-                                        name="groupId"
-                                        value={formik.values.groupId || ''}
+                                        name="paidByUserId"
+                                        value={formik.values.paidByUserId}
                                         onChange={formik.handleChange}
-                                        label="Group (Optional)"
+                                        label="Paid By"
+                                        error={formik.touched.paidByUserId && Boolean(formik.errors.paidByUserId)}
                                     >
-                                        <MenuItem value="">None</MenuItem>
-                                        {groups.map(group => (
-                                            <MenuItem key={group.id} value={group.id}>
-                                                {group.name}
-                                            </MenuItem>
-                                        ))}
+                                        <MenuItem value={user?.userId || user?.id}>{user?.name || 'You'}</MenuItem>
+                                        {formik.values.groupId && Array.isArray(selectedContacts) && selectedContacts
+                                            .filter(member => {
+                                                const memberId = member?.id || member?.userId;
+                                                return memberId && memberId !== (user?.userId || user?.id);
+                                            })
+                                            .map(member => {
+                                                const memberId = member?.id || member?.userId;
+                                                return (
+                                                    <MenuItem key={`paid-by-${memberId}`} value={memberId}>
+                                                        {`${member.firstName || ''} ${member.lastName || ''}`.trim()}
+                                                    </MenuItem>
+                                                );
+                                            })}
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -462,73 +624,159 @@ const AddExpense = () => {
                                 </FormControl>
                             </Grid>
 
-                            <Grid item xs={12}>
-                                <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                                    Select People to Split With
-                                </Typography>
-                                <Paper variant="outlined" sx={{ p: 2, maxHeight: 200, overflow: 'auto' }}>
-                                    {contacts.length === 0 ? (
-                                        <Typography variant="body2" color="text.secondary">
-                                            No contacts available
-                                        </Typography>
-                                    ) : (
-                                        <List dense>
-                                            {contacts.map(contact => {
-                                                const contactId = contact.contactId || contact.id || contact.userId;
-                                                const isSelected = selectedContacts.includes(contactId);
+                            {/* Members Selection - Only shown for group expenses */}
+                            {formik.values.groupId && (
+                                <Grid item xs={12}>
+                                    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+                                        Group Members ({selectedContacts.length})
+                                    </Typography>
+                                    <Paper variant="outlined" sx={{ p: { xs: 1, sm: 2 }, maxHeight: { xs: 250, sm: 300 }, overflow: 'auto', borderRadius: 1 }}>
+                                        {selectedContacts.length === 0 ? (
+                                            <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+                                                No members in this group
+                                            </Typography>
+                                        ) : (
+                                            <List dense sx={{ p: 0 }}>
+                                                {selectedContacts.map((member, index) => {
+                                                    const memberId = member?.id || member?.userId;
+                                                    const uniqueKey = `group-member-${memberId || index}`;
+                                                    const memberName = `${member.firstName || ''} ${member.lastName || ''}`.trim();
+                                                    return (
+                                                        <Box key={uniqueKey}>
+                                                            <ListItem
+                                                                sx={{
+                                                                    py: { xs: 1, sm: 1.5 },
+                                                                    px: { xs: 0.5, sm: 1 },
+                                                                    backgroundColor: 'action.hover',
+                                                                    borderRadius: 1,
+                                                                    mb: 0.5
+                                                                }}
+                                                            >
+                                                                <ListItemAvatar>
+                                                                    <Avatar sx={{ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 }, fontSize: { xs: '0.75rem', sm: '1rem' } }}>
+                                                                        {memberName.charAt(0).toUpperCase()}
+                                                                    </Avatar>
+                                                                </ListItemAvatar>
+                                                                <ListItemText
+                                                                    primary={memberName}
+                                                                    secondary={member.email}
+                                                                    primaryTypographyProps={{ sx: { fontSize: { xs: '0.9rem', sm: '1rem' } } }}
+                                                                    secondaryTypographyProps={{ sx: { fontSize: { xs: '0.75rem', sm: '0.875rem' } } }}
+                                                                />
+                                                            </ListItem>
+                                                            {index < selectedContacts.length - 1 && <Divider sx={{ my: 0.5 }} />}
+                                                        </Box>
+                                                    );
+                                                })}
+                                            </List>
+                                        )}
+                                    </Paper>
+                                </Grid>
+                            )}
+
+                            {/* Personal Expense - Show all contacts */}
+                            {!formik.values.groupId && (
+                                <Grid item xs={12}>
+                                    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+                                        Select People to Split With
+                                    </Typography>
+                                    <Paper variant="outlined" sx={{ p: { xs: 1, sm: 2 }, maxHeight: { xs: 250, sm: 300 }, overflow: 'auto', borderRadius: 1 }}>
+                                        {contacts.length === 0 ? (
+                                            <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+                                                No contacts available
+                                            </Typography>
+                                        ) : (
+                                            <List dense sx={{ p: 0 }}>
+                                                {contacts.map((contact, index) => {
+                                                    const contactId = contact.contactId || contact.id || contact.userId;
+                                                    const uniqueKey = `contact-${contactId || index}`;
+                                                    const isSelected = selectedContacts.some(c => {
+                                                        const cId = c?.id || c?.userId || c;
+                                                        return cId === contactId;
+                                                    });
+                                                    const contactName = `${contact.firstName || ''} ${contact.lastName || ''}`.trim();
+                                                    return (
+                                                        <Box key={uniqueKey}>
+                                                            <ListItem
+                                                                button
+                                                                onClick={() => handleContactToggle(contactId)}
+                                                                selected={isSelected}
+                                                                sx={{
+                                                                    py: { xs: 1, sm: 1.5 },
+                                                                    px: { xs: 0.5, sm: 1 },
+                                                                    borderRadius: 1,
+                                                                    mb: 0.5,
+                                                                    backgroundColor: isSelected ? 'action.selected' : 'transparent',
+                                                                    '&:hover': { backgroundColor: 'action.hover' }
+                                                                }}
+                                                            >
+                                                                <ListItemAvatar>
+                                                                    <Avatar sx={{ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 }, fontSize: { xs: '0.75rem', sm: '1rem' } }}>
+                                                                        {contactName.charAt(0).toUpperCase()}
+                                                                    </Avatar>
+                                                                </ListItemAvatar>
+                                                                <ListItemText
+                                                                    primary={contactName}
+                                                                    secondary={contact.email}
+                                                                    primaryTypographyProps={{ sx: { fontSize: { xs: '0.9rem', sm: '1rem' } } }}
+                                                                    secondaryTypographyProps={{ sx: { fontSize: { xs: '0.75rem', sm: '0.875rem' } } }}
+                                                                />
+                                                            </ListItem>
+                                                            {index < contacts.length - 1 && <Divider sx={{ my: 0.5 }} />}
+                                                        </Box>
+                                                    );
+                                                })}
+                                            </List>
+                                        )}
+                                    </Paper>
+                                    {selectedContacts.length > 0 && (
+                                        <Box sx={{ mt: 1.5, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                            {selectedContacts.map((contact, index) => {
+                                                const memberId = contact?.id || contact?.userId || contact;
+                                                const uniqueKey = `selected-chip-${typeof memberId === 'object' ? (memberId?.id || memberId?.userId || index) : (memberId || index)}`;
                                                 return (
-                                                    <ListItem
-                                                        key={contactId}
-                                                        button
-                                                        onClick={() => handleContactToggle(contactId)}
-                                                        selected={isSelected}
-                                                    >
-                                                        <ListItemAvatar>
-                                                            <Avatar>
-                                                                <PersonIcon />
-                                                            </Avatar>
-                                                        </ListItemAvatar>
-                                                        <ListItemText
-                                                            primary={`${contact.firstName || ''} ${contact.lastName || ''}`.trim()}
-                                                            secondary={contact.email}
-                                                        />
-                                                    </ListItem>
+                                                    <Chip
+                                                        key={uniqueKey}
+                                                        label={getContactName(memberId)}
+                                                        onDelete={() => handleContactToggle(memberId)}
+                                                        color="primary"
+                                                        size="small"
+                                                        sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                                                    />
                                                 );
                                             })}
-                                        </List>
+                                        </Box>
                                     )}
-                                </Paper>
-                                {selectedContacts.length > 0 && (
-                                    <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                                        {selectedContacts.map(contactId => (
-                                            <Chip
-                                                key={contactId}
-                                                label={getContactName(contactId)}
-                                                onDelete={() => handleContactToggle(contactId)}
-                                                color="primary"
-                                            />
-                                        ))}
-                                    </Box>
-                                )}
-                            </Grid>
+                                </Grid>
+                            )}
 
                             {formik.values.splitTypeId && selectedContacts.length > 0 && renderSplitInputs()}
 
                             <Grid item xs={12}>
-                                <Divider sx={{ my: 2 }} />
-                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                                <Divider sx={{ my: { xs: 1, sm: 2 } }} />
+                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5, flexWrap: 'wrap' }}>
                                     <Button
                                         variant="outlined"
                                         onClick={() => navigate(-1)}
                                         disabled={loading}
+                                        sx={{ fontSize: { xs: '0.8rem', sm: '1rem' }, py: { xs: 0.75, sm: 1 } }}
                                     >
                                         Cancel
                                     </Button>
                                     <Button
                                         type="submit"
                                         variant="contained"
-                                        disabled={loading}
+                                        disabled={loading || !formik.isValid}
+                                        onClick={() => {
+                                            console.log('Submit button clicked');
+                                            console.log('Form values:', formik.values);
+                                            console.log('Form errors:', formik.errors);
+                                            console.log('Form touched:', formik.touched);
+                                            console.log('Form isValid:', formik.isValid);
+                                            console.log('Selected contacts:', selectedContacts);
+                                        }}
                                         startIcon={loading ? <CircularProgress size={20} /> : null}
+                                        sx={{ fontSize: { xs: '0.8rem', sm: '1rem' }, py: { xs: 0.75, sm: 1 }, minWidth: { xs: 120, sm: 150 } }}
                                     >
                                         {loading ? 'Adding...' : 'Add Expense'}
                                     </Button>

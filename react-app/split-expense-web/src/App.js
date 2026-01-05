@@ -20,6 +20,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import GroupDetails from './pages/GroupDetails';
 import GroupSettings from './pages/GroupSettings';
 import AddExpense from './pages/AddExpense';
+import Expenses from './pages/Expenses';
 
 const AppContent = () => {
   const { trackError } = usePerformance();
@@ -37,6 +38,7 @@ const AppContent = () => {
             <Route path="contacts" element={<Contacts />} />
             <Route path="profile" element={<UserProfile />} />
             <Route path="notifications" element={<Notifications />} />
+            <Route path="expenses" element={<Expenses />} />
             <Route path="groups/:id" element={<GroupDetails />} />
             <Route path="groups/:id/settings" element={<GroupSettings />} />
             <Route path="expenses/new" element={<AddExpense />} />

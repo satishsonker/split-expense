@@ -41,5 +41,25 @@ namespace SplitExpense.Controllers
         {
             return await _expenseLogic.UpdateExpense(request);
         }
+
+        [ProducesResponseType(typeof(PagingResponse<ExpenseResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status503ServiceUnavailable)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+        [HttpGet(ApiPaths.ExpenseGetAll)]
+        public async Task<PagingResponse<ExpenseResponse>> GetAllAsync([FromQuery] PagingRequest request)
+        {
+            return await _expenseLogic.GetAllAsync(request);
+        }
+
+        [ProducesResponseType(typeof(PagingResponse<ExpenseResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status503ServiceUnavailable)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+        [HttpGet(ApiPaths.ExpenseSearch)]
+        public async Task<PagingResponse<ExpenseResponse>> SearchAsync([FromQuery] SearchRequest request)
+        {
+            return await _expenseLogic.SearchAsync(request);
+        }
     }
 }

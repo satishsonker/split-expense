@@ -32,6 +32,8 @@
             public const string ExpenseCreate = ApiPrefix + "create";
             public const string ExpenseUpdate = ApiPrefix + "update";
             public const string ExpenseDelete = ApiPrefix + "delete/{id}";
+            public const string ExpenseGetAll = ApiPrefix + "get/all";
+            public const string ExpenseSearch = ApiPrefix + "search";
         #endregion
 
         #region Contact API Path

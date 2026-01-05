@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using SplitExpense.Data.Factory;
+using SplitExpense.Models;
+using SplitExpense.Models.Common;
 using SplitExpense.Models.DbModels;
 using SplitExpense.Models.DTO;
 
@@ -24,6 +26,18 @@ namespace SplitExpense.Logic
         {
             var mappedRequest = _mapper.Map<Expense>(request);
             return _mapper.Map<ExpenseResponse>(await _expenseFactory.UpdateExpense(mappedRequest));
+        }
+
+        public async Task<PagingResponse<ExpenseResponse>> GetAllAsync(PagingRequest request)
+        {
+            var result = await _expenseFactory.GetAllAsync(request);
+            return _mapper.Map<PagingResponse<ExpenseResponse>>(result);
+        }
+
+        public async Task<PagingResponse<ExpenseResponse>> SearchAsync(SearchRequest request)
+        {
+            var result = await _expenseFactory.SearchAsync(request);
+            return _mapper.Map<PagingResponse<ExpenseResponse>>(result);
         }
     }
 }
