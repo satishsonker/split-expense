@@ -13,18 +13,35 @@ namespace SplitExpense.Data.Factory
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
+                // Store expense shares temporarily and clear them to avoid duplicate tracking
+                var expenseShares = request.ExpenseShares?.ToList() ?? new List<ExpenseShare>();
+                request.ExpenseShares = null;
+
+                // Add expense without shares first
                 _context.Expenses.Add(request);
                 await _context.SaveChangesAsync();
 
-                // Add expense shares if provided
-                if (request.ExpenseShares != null && request.ExpenseShares.Any())
+                // Add expense shares separately if provided
+                if (expenseShares != null && expenseShares.Any())
                 {
-                    foreach (var share in request.ExpenseShares)
+                    // Remove any duplicates based on UserId (since ExpenseId will be set to request.Id for all)
+                    var uniqueShares = expenseShares
+                        .GroupBy(s => s.UserId)
+                        .Select(g => g.First())
+                        .ToList();
+
+                    foreach (var share in uniqueShares)
                     {
                         share.ExpenseId = request.Id;
+                        share.Id = 0;
+                        share.CreatedAt = DateTime.UtcNow;
+                        share.IsDeleted = false;
                     }
-                    await _context.ExpenseShares.AddRangeAsync(request.ExpenseShares);
+                    await _context.ExpenseShares.AddRangeAsync(uniqueShares);
                     await _context.SaveChangesAsync();
+                    
+                    // Restore the shares in the expense object for return
+                    request.ExpenseShares = uniqueShares;
                 }
 
                 await transaction.CommitAsync();

@@ -17,13 +17,14 @@ namespace SplitExpense.Data.Factory
         ISplitExpenseLogger logger, 
         IUserContextService userContextService, 
         IFileUploadService fileUploadService,
-        IConfiguration configuration) : IGroupFactory
+        IConfiguration configuration, IUserContextService userContext) : IGroupFactory
     {
         private readonly SplitExpenseDbContext _context = context;
         private readonly IFileUploadService _fileUploadService = fileUploadService;
         private int userId = userContextService.GetUserId();
         private readonly ISplitExpenseLogger _logger = logger;
         private readonly IConfiguration _configuration=configuration;
+        private readonly IUserContextService _userContext=userContext;
 
         public async Task<List<UserGroupMapping?>> AddFriendInGroupAsync(AddFriendInGroupRequest request)
         {
@@ -68,6 +69,8 @@ namespace SplitExpense.Data.Factory
             {
                 ArgumentNullException.ThrowIfNull(request);
                 var trans = await _context.Database.BeginTransactionAsync();
+                request.UserId=_userContext.GetUserId();
+
                 var entity = await _context.Groups.AddAsync(request);
                 if (await _context.SaveChangesAsync() > 0)
                 {
@@ -324,6 +327,273 @@ namespace SplitExpense.Data.Factory
             {
                 _logger.LogError(ex, ex.Message, "RemoveFriendInGroupAsync");
                 throw new BusinessRuleViolationException(ErrorCodes.UnableToUpdateRecord);
+            }
+        }
+
+        public async Task<GroupSummaryResponse> GetGroupSummaryAsync(int groupId, int userId)
+        {
+            try
+            {
+                // Get all expenses for this group
+                var expenses = await _context.Expenses
+                    .Where(x => !x.IsDeleted && x.GroupId == groupId)
+                    .Include(x => x.ExpenseShares.Where(share => !share.IsDeleted))
+                    .ToListAsync();
+
+                // Get all transactions for this group (if transactions are group-specific)
+                // For now, we'll calculate based on expenses only
+
+                decimal totalExpenses = expenses.Sum(e => e.Amount);
+                decimal youOwe = 0;
+                decimal youAreOwed = 0;
+
+                // Get all member user IDs in this group
+                var memberUserIds = await _context.UserGroupMappings
+                    .Where(m => !m.IsDeleted && m.GroupId == groupId)
+                    .Select(m => m.FriendId)
+                    .ToListAsync();
+
+                // Get user details for members
+                var members = await _context.Users
+                    .Where(u => memberUserIds.Contains(u.UserId) && !u.IsDeleted)
+                    .ToListAsync();
+
+                var memberBalances = new Dictionary<int, GroupMemberBalanceResponse>();
+
+                // Initialize member balances
+                foreach (var member in members)
+                {
+                    memberBalances[member.UserId] = new GroupMemberBalanceResponse
+                    {
+                        UserId = member.UserId,
+                        FirstName = member.FirstName ?? "",
+                        LastName = member.LastName ?? "",
+                        Email = member.Email ?? "",
+                        ProfilePicture = member.ThumbProfilePicture,
+                        Balance = 0
+                    };
+                }
+
+                // Calculate balances from expenses
+                foreach (var expense in expenses)
+                {
+                    var paidByMe = expense.PaidByUserId == userId;
+
+                    if (paidByMe)
+                    {
+                        // I paid - others owe me
+                        if (expense.ExpenseShares != null && expense.ExpenseShares.Any())
+                        {
+                            foreach (var share in expense.ExpenseShares.Where(s => s.UserId != userId))
+                            {
+                                youAreOwed += share.AmountOwed;
+                                if (memberBalances.ContainsKey(share.UserId))
+                                {
+                                    memberBalances[share.UserId].Balance -= share.AmountOwed; // Negative = they owe
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Someone else paid - check if I owe
+                        if (expense.ExpenseShares != null && expense.ExpenseShares.Any())
+                        {
+                            var myShare = expense.ExpenseShares.FirstOrDefault(s => s.UserId == userId);
+                            if (myShare != null)
+                            {
+                                youOwe += myShare.AmountOwed;
+                                if (memberBalances.ContainsKey(expense.PaidByUserId))
+                                {
+                                    memberBalances[expense.PaidByUserId].Balance += myShare.AmountOwed; // Positive = they're owed
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Get transactions for this group (if we track group transactions)
+                // For now, we'll use all transactions between group members
+                var groupTransactions = await _context.Transactions
+                    .Where(t => !t.IsDeleted &&
+                        memberUserIds.Contains(t.FromUserId) &&
+                        memberUserIds.Contains(t.ToUserId))
+                    .ToListAsync();
+
+                // Adjust balances based on transactions
+                foreach (var trans in groupTransactions)
+                {
+                    if (trans.FromUserId == userId)
+                    {
+                        // I paid to someone in the group
+                        if (memberBalances.ContainsKey(trans.ToUserId))
+                        {
+                            if (memberBalances[trans.ToUserId].Balance < 0)
+                            {
+                                // They owe me - reduce what they owe
+                                var reduction = Math.Min(trans.Amount, Math.Abs(memberBalances[trans.ToUserId].Balance));
+                                memberBalances[trans.ToUserId].Balance += reduction;
+                                youAreOwed -= reduction;
+                            }
+                            else
+                            {
+                                // They don't owe me - increase what I owe them
+                                memberBalances[trans.ToUserId].Balance += trans.Amount;
+                                youOwe += trans.Amount;
+                            }
+                        }
+                    }
+                    else if (trans.ToUserId == userId)
+                    {
+                        // Someone in the group paid to me
+                        if (memberBalances.ContainsKey(trans.FromUserId))
+                        {
+                            if (memberBalances[trans.FromUserId].Balance > 0)
+                            {
+                                // I owe them - reduce what I owe
+                                var reduction = Math.Min(trans.Amount, memberBalances[trans.FromUserId].Balance);
+                                memberBalances[trans.FromUserId].Balance -= reduction;
+                                youOwe -= reduction;
+                            }
+                            else
+                            {
+                                // I don't owe them - increase what they owe me
+                                memberBalances[trans.FromUserId].Balance -= trans.Amount;
+                                youAreOwed += trans.Amount;
+                            }
+                        }
+                    }
+                }
+
+                var yourBalance = youAreOwed - youOwe;
+
+                return new GroupSummaryResponse
+                {
+                    GroupId = groupId,
+                    TotalExpenses = totalExpenses,
+                    YouOwe = youOwe,
+                    YouAreOwed = youAreOwed,
+                    YourBalance = yourBalance,
+                    MemberBalances = memberBalances.Values.OrderByDescending(m => m.Balance).ToList()
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message, "GetGroupSummaryAsync");
+                throw new BusinessRuleViolationException(ErrorCodes.GeneralError);
+            }
+        }
+
+        public async Task<Dictionary<int, GroupSummaryResponse>> GetGroupsSummaryAsync(List<int> groupIds, int userId)
+        {
+            try
+            {
+                var summaries = new Dictionary<int, GroupSummaryResponse>();
+
+                foreach (var groupId in groupIds)
+                {
+                    var summary = await GetGroupSummaryAsync(groupId, userId);
+                    summaries[groupId] = summary;
+                }
+
+                return summaries;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message, "GetGroupsSummaryAsync");
+                throw new BusinessRuleViolationException(ErrorCodes.GeneralError);
+            }
+        }
+
+        public async Task<GroupExpenseBreakdownResponse> GetGroupExpenseBreakdownAsync(int groupId, int userId)
+        {
+            try
+            {
+                // Get all expenses for this group
+                var expenses = await _context.Expenses
+                    .Where(x => !x.IsDeleted && x.GroupId == groupId)
+                    .Include(x => x.ExpenseShares.Where(share => !share.IsDeleted))
+                    .ToListAsync();
+
+                // Get all member user IDs in this group
+                var memberUserIds = await _context.UserGroupMappings
+                    .Where(m => !m.IsDeleted && m.GroupId == groupId)
+                    .Select(m => m.FriendId)
+                    .ToListAsync();
+
+                // Get user details for members
+                var members = await _context.Users
+                    .Where(u => memberUserIds.Contains(u.UserId) && !u.IsDeleted)
+                    .ToListAsync();
+
+                var memberBreakdown = new Dictionary<int, MemberExpenseBreakdown>();
+
+                // Initialize member breakdown
+                foreach (var member in members)
+                {
+                    memberBreakdown[member.UserId] = new MemberExpenseBreakdown
+                    {
+                        UserId = member.UserId,
+                        FirstName = member.FirstName ?? "",
+                        LastName = member.LastName ?? "",
+                        Email = member.Email ?? "",
+                        ProfilePicture = member.ThumbProfilePicture,
+                        TotalPaid = 0,
+                        TotalOwed = 0,
+                        NetAmount = 0,
+                        Percentage = 0
+                    };
+                }
+
+                decimal totalSpending = 0;
+
+                // Calculate breakdown from expenses
+                foreach (var expense in expenses)
+                {
+                    totalSpending += expense.Amount;
+
+                    // Track who paid
+                    if (memberBreakdown.ContainsKey(expense.PaidByUserId))
+                    {
+                        memberBreakdown[expense.PaidByUserId].TotalPaid += expense.Amount;
+                    }
+
+                    // Track who owes
+                    if (expense.ExpenseShares != null && expense.ExpenseShares.Any())
+                    {
+                        foreach (var share in expense.ExpenseShares)
+                        {
+                            if (memberBreakdown.ContainsKey(share.UserId))
+                            {
+                                memberBreakdown[share.UserId].TotalOwed += share.AmountOwed;
+                            }
+                        }
+                    }
+                }
+
+                // Calculate net amounts and percentages
+                foreach (var member in memberBreakdown.Values)
+                {
+                    member.NetAmount = member.TotalPaid - member.TotalOwed;
+                    if (totalSpending > 0)
+                    {
+                        member.Percentage = (member.TotalPaid / totalSpending) * 100;
+                    }
+                }
+
+                return new GroupExpenseBreakdownResponse
+                {
+                    GroupId = groupId,
+                    TotalSpending = totalSpending,
+                    MemberBreakdown = memberBreakdown.Values
+                        .OrderByDescending(m => m.TotalPaid)
+                        .ToList()
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message, "GetGroupExpenseBreakdownAsync");
+                throw new BusinessRuleViolationException(ErrorCodes.GeneralError);
             }
         }
     }

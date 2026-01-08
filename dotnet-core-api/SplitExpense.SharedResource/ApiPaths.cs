@@ -12,6 +12,7 @@
         public const string GroupDelete = ApiPrefix + "delete/{id}";
         public const string GroupSearch = ApiPrefix + "search";
         public const string GroupAddUser = ApiPrefix + "add/friend";
+        public const string GroupGetExpenseBreakdown = ApiPrefix + "get/{id}/expense/breakdown";
         #endregion
 
         #region SplitType APIs
@@ -81,6 +82,15 @@
         public const string EmailTemplateSearch = ApiPrefix + "search";
         public const string EmailTemplateUpdate = ApiPrefix + "update";
         public const string EmailTemplateDelete = ApiPrefix + "delete/{id}";
+        #endregion
+
+        #region Dashboard API
+        public const string DashboardGetSummary = ApiPrefix + "get/summary";
+        public const string DashboardGetExpensesYouOwe = ApiPrefix + "get/expenses/you-owe";
+        public const string DashboardGetExpensesYouAreOwed = ApiPrefix + "get/expenses/you-are-owed";
+        public const string DashboardGetMemberBalances = ApiPrefix + "get/member/balances";
+        public const string DashboardSettleAmount = ApiPrefix + "settle/amount";
+        public const string DashboardGetMonthlySummary = ApiPrefix + "get/monthly/summary";
         #endregion
     }
 }

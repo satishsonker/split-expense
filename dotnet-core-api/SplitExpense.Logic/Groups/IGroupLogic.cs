@@ -17,5 +17,8 @@ namespace SplitExpense.Logic
         Task<bool> AddFriendInGroupAsync(AddFriendInGroupRequest request);
         Task<List<UserGroupMappingResponse>> GetUserGroupMappingAsync(List<int> ids);
         Task<List<GroupResponse>> GetRecentGroups();
+        Task<GroupSummaryResponse> GetGroupSummaryAsync(int groupId);
+        Task<Dictionary<int, GroupSummaryResponse>> GetGroupsSummaryAsync(List<int> groupIds);
+        Task<GroupExpenseBreakdownResponse> GetGroupExpenseBreakdownAsync(int groupId);
     }
 }

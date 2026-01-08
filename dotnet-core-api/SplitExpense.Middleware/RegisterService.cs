@@ -35,6 +35,8 @@ namespace SplitExpense.Middleware
                 .AddScoped<IExpenseLogic,ExpenseLogic>()
                 .AddScoped<IExpenseFactory, ExpenseFactory>()
                 .AddScoped<IExpenseActivityFactory, ExpenseActivityFactory>()
+                .AddScoped<IDashboardFactory, DashboardFactory>()
+                .AddScoped<IDashboardLogic, DashboardLogic>()
             #region Email Service
                  .AddScoped<IEmailLogic, EmailLogic>()
                  .AddScoped<IEmailQueueService, EmailQueueService>()

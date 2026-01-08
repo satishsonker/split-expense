@@ -37,6 +37,7 @@ import { toast } from 'react-toastify';
 import { apiService } from '../utils/axios';
 import { EXPENSE_PATHS, GROUP_PATHS, SPLIT_TYPE_PATHS, CONTACT_PATHS } from '../constants/apiPaths';
 import { useAuth } from '../context/AuthContext';
+import { getImageUrl } from '../utils/imageUtils';
 import dayjs from 'dayjs';
 
 const validationSchema = Yup.object({
@@ -155,13 +156,22 @@ const AddExpense = () => {
         
         if (!splitType) return shares;
 
+        // Track unique user IDs to prevent duplicates
+        const processedUserIds = new Set();
+
         switch (splitType.name?.toLowerCase()) {
             case 'equal':
                 const equalAmount = amount / (selectedContacts.length + 1); // +1 for paid by user
                 selectedContacts.forEach(contact => {
                     const contactId = contact?.id || contact?.userId || contact;
+                    const userId = typeof contactId === 'object' ? (contactId?.id || contactId?.userId) : contactId;
+                    
+                    // Skip if already processed
+                    if (processedUserIds.has(userId)) return;
+                    processedUserIds.add(userId);
+                    
                     shares.push({
-                        userId: typeof contactId === 'object' ? (contactId?.id || contactId?.userId) : contactId,
+                        userId: userId,
                         splitTypeId: splitTypeId,
                         amountOwed: equalAmount,
                         exactAmount: equalAmount
@@ -172,6 +182,11 @@ const AddExpense = () => {
                 selectedContacts.forEach(contact => {
                     const contactId = contact?.id || contact?.userId || contact;
                     const userId = typeof contactId === 'object' ? (contactId?.id || contactId?.userId) : contactId;
+                    
+                    // Skip if already processed
+                    if (processedUserIds.has(userId)) return;
+                    processedUserIds.add(userId);
+                    
                     const percentage = splitValues[userId] || 0;
                     shares.push({
                         userId: userId,
@@ -185,6 +200,11 @@ const AddExpense = () => {
                 selectedContacts.forEach(contact => {
                     const contactId = contact?.id || contact?.userId || contact;
                     const userId = typeof contactId === 'object' ? (contactId?.id || contactId?.userId) : contactId;
+                    
+                    // Skip if already processed
+                    if (processedUserIds.has(userId)) return;
+                    processedUserIds.add(userId);
+                    
                     const exactAmount = splitValues[userId] || 0;
                     shares.push({
                         userId: userId,
@@ -199,6 +219,11 @@ const AddExpense = () => {
                 selectedContacts.forEach(contact => {
                     const contactId = contact?.id || contact?.userId || contact;
                     const userId = typeof contactId === 'object' ? (contactId?.id || contactId?.userId) : contactId;
+                    
+                    // Skip if already processed
+                    if (processedUserIds.has(userId)) return;
+                    processedUserIds.add(userId);
+                    
                     const sharesValue = splitValues[userId] || 0;
                     shares.push({
                         userId: userId,
@@ -213,6 +238,11 @@ const AddExpense = () => {
                 selectedContacts.forEach(contact => {
                     const contactId = contact?.id || contact?.userId || contact;
                     const userId = typeof contactId === 'object' ? (contactId?.id || contactId?.userId) : contactId;
+                    
+                    // Skip if already processed
+                    if (processedUserIds.has(userId)) return;
+                    processedUserIds.add(userId);
+                    
                     const exactAmount = splitValues[userId] || 0;
                     shares.push({
                         userId: userId,
@@ -260,6 +290,15 @@ const AddExpense = () => {
                     return;
                 }
 
+                // Remove duplicate shares based on userId to prevent duplicates
+                const uniqueShares = shares.reduce((acc, share) => {
+                    const existingIndex = acc.findIndex(s => s.userId === share.userId);
+                    if (existingIndex === -1) {
+                        acc.push(share);
+                    }
+                    return acc;
+                }, []);
+
                 const expenseData = {
                     description: values.description,
                     amount: parseFloat(values.amount),
@@ -267,7 +306,7 @@ const AddExpense = () => {
                     paidByUserId: values.paidByUserId,
                     groupId: values.groupId || null,
                     splitTypeId: values.splitTypeId,
-                    expenseShares: shares.map(share => ({
+                    expenseShares: uniqueShares.map(share => ({
                         userId: share.userId,
                         splitTypeId: share.splitTypeId,
                         percentage: share.percentage || null,
@@ -299,7 +338,11 @@ const AddExpense = () => {
     });
 
     const handleContactToggle = (contactId) => {
-        const contact = contacts.find(c => (c.contactId || c.id || c.userId) === contactId);
+        const contact = contacts.find(c => {
+            const contactUser = c.contactUser || c;
+            const cId = contactUser?.userId || c.userId || c.contactId || c.id;
+            return cId === contactId;
+        });
         
         setSelectedContacts(prev => {
             const existingIndex = prev.findIndex(c => {
@@ -318,11 +361,24 @@ const AddExpense = () => {
                 return newList;
             } else {
                 // Only add if contact exists and is not already in the list
-                if (contact && !prev.find(c => {
-                    const cId = c?.id || c?.userId || c;
-                    return cId === contactId;
-                })) {
-                    return [...prev, contact];
+                if (contact) {
+                    const contactUser = contact.contactUser || contact;
+                    const userId = contactUser?.userId || contact.userId || contact.contactId || contact.id;
+                    const contactToAdd = {
+                        id: userId,
+                        userId: userId,
+                        firstName: contactUser?.firstName || '',
+                        lastName: contactUser?.lastName || '',
+                        email: contactUser?.email || '',
+                        profilePicture: contactUser?.profilePicture || contactUser?.thumbProfilePicture
+                    };
+                    
+                    if (!prev.find(c => {
+                        const cId = c?.id || c?.userId || c;
+                        return cId === contactId;
+                    })) {
+                        return [...prev, contactToAdd];
+                    }
                 }
                 return prev;
             }
@@ -354,12 +410,24 @@ const AddExpense = () => {
         // Check in selectedContacts first (for group members)
         const selectedContact = Array.isArray(selectedContacts) && selectedContacts.find(c => (c.id || c.userId || c) === contactId);
         if (selectedContact && typeof selectedContact === 'object') {
-            return `${selectedContact.firstName || ''} ${selectedContact.lastName || ''}`.trim();
+            return `${selectedContact.firstName || ''} ${selectedContact.lastName || ''}`.trim() || 'Unknown';
         }
         
         // Check in contacts list
-        const contact = contacts.find(c => (c.contactId || c.id || c.userId) === contactId);
-        return contact ? `${contact.firstName || ''} ${contact.lastName || ''}`.trim() : 'Unknown';
+        const contact = contacts.find(c => {
+            const contactUser = c.contactUser || c;
+            const cId = contactUser?.userId || c.userId || c.contactId || c.id;
+            return cId === contactId;
+        });
+        
+        if (contact) {
+            const contactUser = contact.contactUser || contact;
+            const firstName = contactUser?.firstName || '';
+            const lastName = contactUser?.lastName || '';
+            return `${firstName} ${lastName}`.trim() || 'Unknown';
+        }
+        
+        return 'Unknown';
     };
 
     const getDisplayContacts = () => {
@@ -395,7 +463,7 @@ const AddExpense = () => {
                             const userId = typeof contactId === 'object' ? (contactId?.id || contactId?.userId) : contactId;
                             const uniqueKey = `split-input-${userId || index}`;
                             const contactName = typeof contact === 'object' 
-                                ? `${contact.firstName || ''} ${contact.lastName || ''}`.trim()
+                                ? `${contact.firstName || ''} ${contact.lastName || ''}`.trim() || 'Unknown'
                                 : getContactName(contactId);
                             
                             let label = '';
@@ -688,13 +756,18 @@ const AddExpense = () => {
                                         ) : (
                                             <List dense sx={{ p: 0 }}>
                                                 {contacts.map((contact, index) => {
-                                                    const contactId = contact.contactId || contact.id || contact.userId;
+                                                    const contactUser = contact.contactUser || contact;
+                                                    const contactId = contactUser?.userId || contact.userId || contact.contactId || contact.id;
                                                     const uniqueKey = `contact-${contactId || index}`;
                                                     const isSelected = selectedContacts.some(c => {
                                                         const cId = c?.id || c?.userId || c;
                                                         return cId === contactId;
                                                     });
-                                                    const contactName = `${contact.firstName || ''} ${contact.lastName || ''}`.trim();
+                                                    const firstName = contactUser?.firstName || '';
+                                                    const lastName = contactUser?.lastName || '';
+                                                    const contactName = `${firstName} ${lastName}`.trim() || 'Unknown';
+                                                    const email = contactUser?.email || '';
+                                                    const profilePicture = contactUser?.profilePicture || contactUser?.thumbProfilePicture;
                                                     return (
                                                         <Box key={uniqueKey}>
                                                             <ListItem
@@ -711,13 +784,16 @@ const AddExpense = () => {
                                                                 }}
                                                             >
                                                                 <ListItemAvatar>
-                                                                    <Avatar sx={{ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 }, fontSize: { xs: '0.75rem', sm: '1rem' } }}>
+                                                                    <Avatar 
+                                                                        src={profilePicture ? getImageUrl(profilePicture) : undefined}
+                                                                        sx={{ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 }, fontSize: { xs: '0.75rem', sm: '1rem' } }}
+                                                                    >
                                                                         {contactName.charAt(0).toUpperCase()}
                                                                     </Avatar>
                                                                 </ListItemAvatar>
                                                                 <ListItemText
                                                                     primary={contactName}
-                                                                    secondary={contact.email}
+                                                                    secondary={email}
                                                                     primaryTypographyProps={{ sx: { fontSize: { xs: '0.9rem', sm: '1rem' } } }}
                                                                     secondaryTypographyProps={{ sx: { fontSize: { xs: '0.75rem', sm: '0.875rem' } } }}
                                                                 />

@@ -16,5 +16,8 @@ namespace SplitExpense.Data.Factory
         Task<List<UserGroupMapping>> AddFriendInGroupAsync(AddFriendInGroupRequest request);
         Task<bool> RemoveFriendInGroupAsync(RemoveFriendFromGroup request);
         Task<PagingResponse<UserGroupMapping>> SearchAsync(SearchRequest request);
+        Task<GroupSummaryResponse> GetGroupSummaryAsync(int groupId, int userId);
+        Task<Dictionary<int, GroupSummaryResponse>> GetGroupsSummaryAsync(List<int> groupIds, int userId);
+        Task<GroupExpenseBreakdownResponse> GetGroupExpenseBreakdownAsync(int groupId, int userId);
     }
 }

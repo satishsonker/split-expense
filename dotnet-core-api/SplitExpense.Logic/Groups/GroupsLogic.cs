@@ -159,6 +159,27 @@ namespace SplitExpense.Logic
                 if (request.PageNo <= 0)
                     throw new ArgumentException("InvalidPageNo");
                 var res = _mapper.Map<PagingResponse<GroupResponse>>(await _factory.GetAllAsync(request));
+                
+                // Add balance information to each group
+                if (res?.Data != null && res.Data.Any())
+                {
+                    var userId = _userContextService.GetUserId();
+                    var groupIds = res.Data.Select(g => g.Id).ToList();
+                    var summaries = await _factory.GetGroupsSummaryAsync(groupIds, userId);
+                    
+                    foreach (var group in res.Data)
+                    {
+                        if (summaries.ContainsKey(group.Id))
+                        {
+                            var summary = summaries[group.Id];
+                            group.TotalExpenses = summary.TotalExpenses;
+                            group.YouOwe = summary.YouOwe;
+                            group.YouAreOwed = summary.YouAreOwed;
+                            group.YourBalance = summary.YourBalance;
+                        }
+                    }
+                }
+                
                 return res;
             }
             catch (Exception ex)
@@ -170,12 +191,78 @@ namespace SplitExpense.Logic
 
         public async Task<GroupResponse> GetAsync(int id)
         {
-            return _mapper.Map<GroupResponse>(await _factory.GetAsync(id));
+            var group = _mapper.Map<GroupResponse>(await _factory.GetAsync(id));
+            
+            // Add balance information
+            if (group != null)
+            {
+                var userId = _userContextService.GetUserId();
+                var summary = await _factory.GetGroupSummaryAsync(id, userId);
+                group.TotalExpenses = summary.TotalExpenses;
+                group.YouOwe = summary.YouOwe;
+                group.YouAreOwed = summary.YouAreOwed;
+                group.YourBalance = summary.YourBalance;
+                
+                // Add member balances
+                if (group.Members != null && summary.MemberBalances != null)
+                {
+                    foreach (var member in group.Members)
+                    {
+                        var memberBalance = summary.MemberBalances.FirstOrDefault(m => m.UserId == member.AddedUserId);
+                        if (memberBalance != null)
+                        {
+                            member.Balance = memberBalance.Balance;
+                        }
+                    }
+                }
+            }
+            
+            return group;
+        }
+
+        public async Task<GroupSummaryResponse> GetGroupSummaryAsync(int groupId)
+        {
+            var userId = _userContextService.GetUserId();
+            return await _factory.GetGroupSummaryAsync(groupId, userId);
+        }
+
+        public async Task<Dictionary<int, GroupSummaryResponse>> GetGroupsSummaryAsync(List<int> groupIds)
+        {
+            var userId = _userContextService.GetUserId();
+            return await _factory.GetGroupsSummaryAsync(groupIds, userId);
+        }
+
+        public async Task<GroupExpenseBreakdownResponse> GetGroupExpenseBreakdownAsync(int groupId)
+        {
+            var userId = _userContextService.GetUserId();
+            return await _factory.GetGroupExpenseBreakdownAsync(groupId, userId);
         }
 
         public async Task<List<GroupResponse>> GetRecentGroups()
         {
-            return _mapper.Map<List<GroupResponse>>(await _factory.GetRecentGroups());
+            var groups = _mapper.Map<List<GroupResponse>>(await _factory.GetRecentGroups());
+            
+            // Add balance information to each group
+            if (groups != null && groups.Any())
+            {
+                var userId = _userContextService.GetUserId();
+                var groupIds = groups.Select(g => g.Id).ToList();
+                var summaries = await _factory.GetGroupsSummaryAsync(groupIds, userId);
+                
+                foreach (var group in groups)
+                {
+                    if (summaries.ContainsKey(group.Id))
+                    {
+                        var summary = summaries[group.Id];
+                        group.TotalExpenses = summary.TotalExpenses;
+                        group.YouOwe = summary.YouOwe;
+                        group.YouAreOwed = summary.YouAreOwed;
+                        group.YourBalance = summary.YourBalance;
+                    }
+                }
+            }
+            
+            return groups;
         }
 
         public async Task<List<UserGroupMappingResponse>> GetUserGroupMappingAsync(List<int> ids)

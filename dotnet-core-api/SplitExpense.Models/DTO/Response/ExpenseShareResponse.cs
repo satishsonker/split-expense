@@ -12,5 +12,6 @@ namespace SplitExpense.Models.DTO
         public decimal AmountOwed { get; set; }
         public int ExpenseId { get; set; }
         public int UserId { get; set; }
+        public string? UserName { get; set; }
     }
 }

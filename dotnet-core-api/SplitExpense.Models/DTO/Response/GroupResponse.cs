@@ -14,5 +14,9 @@ namespace SplitExpense.Models
         public List<UserGroupMappingResponse>? Members { get; set; }
         public GroupTypeResponse? GroupType { get; set; }
         public GroupDetailResponse? GroupDetail { get; set; }
+        public decimal? TotalExpenses { get; set; }
+        public decimal? YouOwe { get; set; }
+        public decimal? YouAreOwed { get; set; }
+        public decimal? YourBalance { get; set; }
     }
 }

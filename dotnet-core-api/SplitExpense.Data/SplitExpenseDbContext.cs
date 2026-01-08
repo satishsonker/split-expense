@@ -75,10 +75,6 @@ namespace SplitExpense.Data
                     baseModel.CreatedBy = userId;
                     baseModel.CreatedAt = now;
                     var userIdProperty = entityEntry.Entity.GetType().GetProperty("UserId");
-                    if (userIdProperty != null && userIdProperty.PropertyType == typeof(int))
-                    {
-                        userIdProperty.SetValue(entityEntry.Entity, userId);
-                    }
                 }
                 else
                 {

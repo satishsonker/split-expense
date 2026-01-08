@@ -21,6 +21,9 @@ import GroupDetails from './pages/GroupDetails';
 import GroupSettings from './pages/GroupSettings';
 import AddExpense from './pages/AddExpense';
 import Expenses from './pages/Expenses';
+import ExpenseBreakdown from './pages/ExpenseBreakdown';
+import Settlements from './pages/Settlements';
+import ExpenseSummary from './pages/ExpenseSummary';
 
 const AppContent = () => {
   const { trackError } = usePerformance();
@@ -39,10 +42,13 @@ const AppContent = () => {
             <Route path="profile" element={<UserProfile />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="expenses" element={<Expenses />} />
+            <Route path="expenses/summary" element={<ExpenseSummary />} />
+            <Route path="settlements" element={<Settlements />} />
             <Route path="groups/:id" element={<GroupDetails />} />
             <Route path="groups/:id/settings" element={<GroupSettings />} />
             <Route path="expenses/new" element={<AddExpense />} />
             <Route path="groups/:groupId/expenses/new" element={<AddExpense />} />
+            <Route path="dashboard/breakdown/:type" element={<ExpenseBreakdown />} />
             {/* Add more protected routes here */}
           </Route>
         </Routes>

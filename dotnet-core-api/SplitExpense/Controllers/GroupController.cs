@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SplitExpense.Data.Services;
 using SplitExpense.Logic;
 using SplitExpense.Models;
 using SplitExpense.Models.Common;
@@ -60,7 +61,7 @@ namespace SplitExpense.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
         [HttpPost(ApiPaths.GroupAddUser)]
         public async Task<bool> AddFriendInGroupAsync([FromBody] AddFriendInGroupRequest request)
-        {
+        {            
             return await _groupLogic.AddFriendInGroupAsync(request);
         }
 
@@ -154,6 +155,16 @@ namespace SplitExpense.Controllers
         public async Task<List<GroupResponse>> GetRecentGroups()
         {
             return await _groupLogic.GetRecentGroups();
+        }
+
+        [ProducesResponseType(typeof(GroupExpenseBreakdownResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status503ServiceUnavailable)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+        [HttpGet(ApiPaths.GroupGetExpenseBreakdown)]
+        public async Task<GroupExpenseBreakdownResponse> GetExpenseBreakdownAsync([FromRoute] int id)
+        {
+            return await _groupLogic.GetGroupExpenseBreakdownAsync(id);
         }
     }
 }

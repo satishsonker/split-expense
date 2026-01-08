@@ -12,6 +12,7 @@ export const GROUP_PATHS = {
     SEARCH: `${API_BASE_URL}/group/search`,
     MEMBERS: `${API_BASE_URL}/contacts/get/all?pageno=1&pageSize=500`,
     ADD_MEMBERS: `${API_BASE_URL}/group/add/friend`,
+    GET_EXPENSE_BREAKDOWN: `${API_BASE_URL}/group/get/`,
 };
 
 export const GROUP_TYPES_PATHS={
@@ -58,4 +59,13 @@ export const EXPENSE_PATHS = {
 
 export const SPLIT_TYPE_PATHS = {
     LIST: `${API_BASE_URL}/splittype/get/all`,
+};
+
+export const DASHBOARD_PATHS = {
+    GET_SUMMARY: `${API_BASE_URL}/dashboard/get/summary`,
+    GET_EXPENSES_YOU_OWE: `${API_BASE_URL}/dashboard/get/expenses/you-owe`,
+    GET_EXPENSES_YOU_ARE_OWED: `${API_BASE_URL}/dashboard/get/expenses/you-are-owed`,
+    GET_MEMBER_BALANCES: `${API_BASE_URL}/dashboard/get/member/balances`,
+    SETTLE_AMOUNT: `${API_BASE_URL}/dashboard/settle/amount`,
+    GET_MONTHLY_SUMMARY: `${API_BASE_URL}/dashboard/get/monthly/summary`,
 };

@@ -12,5 +12,6 @@ namespace SplitExpense.Models.DTO
         public UserResponse AddedUser { get; set; }
         public string AddedByUser { get; set; }
         public string GroupName { get; set; }
+        public decimal? Balance { get; set; } // Balance for this member in the group
     }
 }

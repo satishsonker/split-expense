@@ -403,12 +403,27 @@ const Groups = () => {
                                                 ))}
                                             </AvatarGroup>
                                         </Box>
-                                        <Typography variant="subtitle1" color="primary" sx={{ fontSize: { xs: '0.85rem', sm: '1rem' } }}>
-                                            <CurrencyIcon 
-                                                fontSize="small" 
-                                                amount={group.totalExpenses ?? 0.00}
-                                            />
-                                        </Typography>
+                                        <Box sx={{ textAlign: 'right' }}>
+                                            <Typography variant="subtitle2" color="textSecondary" sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
+                                                Total: <CurrencyIcon 
+                                                    fontSize="inherit" 
+                                                    amount={group.totalExpenses ?? 0.00}
+                                                />
+                                            </Typography>
+                                            {group.yourBalance !== undefined && group.yourBalance !== null && (
+                                                <Typography 
+                                                    variant="subtitle1" 
+                                                    color={group.yourBalance > 0 ? 'success.main' : group.yourBalance < 0 ? 'error.main' : 'text.primary'}
+                                                    sx={{ fontSize: { xs: '0.85rem', sm: '1rem' }, fontWeight: 600 }}
+                                                >
+                                                    {group.yourBalance > 0 ? '+' : ''}
+                                                    <CurrencyIcon 
+                                                        fontSize="inherit" 
+                                                        amount={group.yourBalance}
+                                                    />
+                                                </Typography>
+                                            )}
+                                        </Box>
                                     </Box>
                                 </CardContent>
                             </Card>
