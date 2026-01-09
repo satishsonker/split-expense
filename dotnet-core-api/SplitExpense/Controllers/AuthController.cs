@@ -81,7 +81,7 @@ namespace SplitExpense.Controllers
             return await _authLogic.UpdateUserAsync(request);
         }
 
-        [HttpPost("profile-picture")]
+        [HttpPost(ApiPaths.UpdateUserProfilePicture)]
         [Authorize]
         public async Task<ActionResult<UserResponse>> UpdateProfilePictureAsync(IFormFile file)
         {
@@ -89,7 +89,7 @@ namespace SplitExpense.Controllers
             return await _authLogic.UpdateProfilePictureAsync(userId, file);
         }
 
-        [HttpDelete("profile-picture")]
+        [HttpDelete(ApiPaths.DeleteUserProfilePicture)]
         [Authorize]
         public async Task<ActionResult<bool>> DeleteProfilePictureAsync()
         {
@@ -97,7 +97,7 @@ namespace SplitExpense.Controllers
             return await _authLogic.DeleteProfilePictureAsync(userId);
         }
 
-        [HttpDelete("delete")]
+        [HttpDelete(ApiPaths.DeleteUserProfile)]
         [Authorize]
         public async Task<ActionResult<bool>> DeleteUserAsync()
         {

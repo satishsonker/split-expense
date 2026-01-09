@@ -26,7 +26,10 @@ export const GROUP_TYPES_PATHS={
 
 export const AUTH_PATHS = {
     LOGIN: `${API_BASE_URL}/auth/login`,
-    UPDATE_PROFILE: `${API_BASE_URL}/auth/update`,
+    UPDATE_PROFILE: `${API_BASE_URL}/auth/update/profile`,
+    UPDATE_PROFILE_PICTURE: `${API_BASE_URL}/auth/profile-picture`,
+    DELETE_PROFILE_PICTURE: `${API_BASE_URL}/auth/profile-picture`,
+    DELETE_ACCOUNT: `${API_BASE_URL}/auth/delete`,
     LOGOUT: `${API_BASE_URL}/auth/logout`,
     REGISTER: `${API_BASE_URL}/auth/register`,
     GOOGLE_LOGIN: `${API_BASE_URL}/auth/google`,

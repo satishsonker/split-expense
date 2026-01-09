@@ -4,7 +4,7 @@ module.exports = function(app) {
   app.use(
     '/api',
     createProxyMiddleware({
-      target: 'http://localhost:5008',
+      target: 'http://93.127.137.173/splitExpenseApi',
       changeOrigin: true,
       secure: false,
       pathRewrite: {

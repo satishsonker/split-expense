@@ -336,10 +336,10 @@ const ExpenseBreakdown = () => {
                                                                     }}>
                                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                                                             <Avatar {...stringAvatar(`User ${share.userId}`)} sx={{ width: 32, height: 32, fontSize: '0.75rem' }}>
-                                                                                {share.userId}
+                                                                                {share.userName}
                                                                             </Avatar>
                                                                             <Typography variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                                                                                User {share.userId}
+                                                                                {share.userName || share.userId}
                                                                             </Typography>
                                                                         </Box>
                                                                         <Typography variant="body2" fontWeight={600} sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>

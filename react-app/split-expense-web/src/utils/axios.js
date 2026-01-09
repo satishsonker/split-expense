@@ -31,6 +31,11 @@ class ApiService {
 
     // Request interceptor
     handleRequest = (config) => {
+        // Don't set Content-Type for FormData, let browser set it with boundary
+        if (config.data instanceof FormData) {
+            delete config.headers['Content-Type'];
+        }
+
         let excludedApiPathForAccessToken = [AUTH_PATHS.LOGIN]
         if (!excludedApiPathForAccessToken.includes(config.url)) {
             const user = JSON.parse(localStorage.getItem('user'));

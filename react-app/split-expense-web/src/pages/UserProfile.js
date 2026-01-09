@@ -33,6 +33,8 @@ import { getImageUrl } from '../utils/imageUtils';
 import { useAuth } from '../context/AuthContext';
 import DeleteConfirmationDialog from '../components/DeleteConfirmationDialog';
 import ImageSourceDialog from '../components/ImageSourceDialog';
+import { apiService } from '../utils/axios';
+import { AUTH_PATHS } from '../constants/apiPaths';
 
 const validationSchema = Yup.object({
     firstName: Yup.string().required('First name is required'),
@@ -63,7 +65,7 @@ const currencies = [
 const UserProfile = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const { user, logout } = useAuth();
+    const { user, logout, login } = useAuth();
     const [loading, setLoading] = useState(false);
     const [imageSourceDialogOpen, setImageSourceDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -83,24 +85,42 @@ const UserProfile = () => {
         onSubmit: async (values) => {
             try {
                 setLoading(true);
-                const formData = new FormData();
-                Object.keys(values).forEach(key => {
-                    if (values[key] !== null && key !== 'image') {
-                        formData.append(key, values[key]);
-                    }
-                });
+                
+                // Update profile information (excluding image)
+                const profileData = {
+                    firstName: values.firstName,
+                    lastName: values.lastName,
+                    email: values.email,
+                    phoneNumber: values.phoneNumber,
+                    timezone: values.timezone,
+                    currencyCode: values.currency
+                };
 
+                const updatedUser = await apiService.put(AUTH_PATHS.UPDATE_PROFILE, profileData);
+                
+                // Update profile picture separately if a new image was selected
                 if (values.image) {
-                    formData.append('image', values.image);
+                    const formData = new FormData();
+                    formData.append('file', values.image);
+                    const pictureResponse = await apiService.post(AUTH_PATHS.UPDATE_PROFILE_PICTURE, formData);
+                    // Merge the picture response with the profile response
+                    Object.assign(updatedUser, pictureResponse);
                 }
 
-                // Call your API to update profile
-                // await apiService.put('/user/profile', formData);
+                // Update user in localStorage and context
+                const userData = {
+                    ...user,
+                    ...updatedUser,
+                    name: `${updatedUser.firstName || ''} ${updatedUser.lastName || ''}`.trim(),
+                    currency: updatedUser.currencyCode || values.currency
+                };
+                localStorage.setItem('user', JSON.stringify(userData));
+                login(userData);
 
                 toast.success('Profile updated successfully');
             } catch (error) {
                 console.error('Error updating profile:', error);
-                toast.error('Failed to update profile');
+                toast.error(error?.response?.data?.message || 'Failed to update profile');
             } finally {
                 setLoading(false);
             }
@@ -108,24 +128,21 @@ const UserProfile = () => {
     });
 
     useEffect(() => {
-        debugger;
-        const userData = JSON.parse(localStorage.getItem('user'));
-        if (userData) {
+        if (user) {
             formik.setValues({
-                firstName: userData.firstName || '',
-                lastName: userData.lastName || '',
-                email: userData.email || '',
-                phoneNumber: userData.phone || '',
-                timezone: userData.timezone || 'UTC',
-                currency: userData.currency || 'USD',
+                firstName: user.firstName || '',
+                lastName: user.lastName || '',
+                email: user.email || '',
+                phoneNumber: user.phone || user.phoneNumber || '',
+                timezone: user.timezone || 'UTC',
+                currency: user.currencyCode || user.currency || 'USD',
                 image: null
             });
-            debugger;
-            if (userData.profilePicture || userData.thumbProfilePicture) {
-                setImagePreview(getImageUrl(userData.thumbProfilePicture ?? userData.profilePicture));
+            if (user.profilePicture || user.thumbProfilePicture) {
+                setImagePreview(getImageUrl(user.thumbProfilePicture ?? user.profilePicture));
             }
         }
-    }, []);
+    }, [user]);
 
     const handleImageSourceSelect = (source) => {
         setImageSourceDialogOpen(false);
@@ -152,14 +169,12 @@ const UserProfile = () => {
     const handleDeleteAccount = async () => {
         try {
             setLoading(true);
-            // Call your API to delete account
-            // await apiService.delete('/user/account');
-
+            await apiService.delete(AUTH_PATHS.DELETE_ACCOUNT);
             toast.success('Account deleted successfully');
             logout();
         } catch (error) {
             console.error('Error deleting account:', error);
-            toast.error('Failed to delete account');
+            toast.error(error?.response?.data?.message || 'Failed to delete account');
         } finally {
             setLoading(false);
             setDeleteDialogOpen(false);
@@ -214,6 +229,42 @@ const UserProfile = () => {
                             >
                                 <EditIcon />
                             </IconButton>
+                            {imagePreview && (
+                                <IconButton
+                                    sx={{
+                                        position: 'absolute',
+                                        bottom: 0,
+                                        left: 0,
+                                        bgcolor: 'error.main',
+                                        color: 'white',
+                                        boxShadow: 1,
+                                        '&:hover': {
+                                            bgcolor: 'error.dark'
+                                        }
+                                    }}
+                                    onClick={async () => {
+                                        try {
+                                            setLoading(true);
+                                            await apiService.delete(AUTH_PATHS.DELETE_PROFILE_PICTURE);
+                                            setImagePreview(null);
+                                            formik.setFieldValue('image', null);
+                                            // Update user in localStorage
+                                            const userData = { ...user, profilePicture: null, thumbProfilePicture: null };
+                                            localStorage.setItem('user', JSON.stringify(userData));
+                                            login(userData);
+                                            toast.success('Profile picture deleted successfully');
+                                        } catch (error) {
+                                            console.error('Error deleting profile picture:', error);
+                                            toast.error(error?.response?.data?.message || 'Failed to delete profile picture');
+                                        } finally {
+                                            setLoading(false);
+                                        }
+                                    }}
+                                    disabled={loading}
+                                >
+                                    <DeleteIcon />
+                                </IconButton>
+                            )}
                         </Box>
                     </Grid>
 

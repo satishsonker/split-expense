@@ -263,7 +263,8 @@ namespace SplitExpense.Logic
                     LanguageCode = request.LanguageCode,
                     CurrencyCode = request.CurrencyCode,
                     CountryCode = request.CountryCode,
-                    ISDCode = request.ISDCode
+                    ISDCode = request.ISDCode,
+                    Timezone = request.Timezone
                 };
 
                 var updatedUser = await _authFactory.UpdateUserAsync(user);

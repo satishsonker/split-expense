@@ -42,11 +42,19 @@ namespace SplitExpense.AutoMapperMapping
             #region Expense
                 CreateMap<ExpenseRequest, Expense>();
                 CreateMap<Expense, ExpenseResponse>();
-                CreateMap<PagingResponse<Expense>,PagingResponse<ExpenseResponse>>();
+                CreateMap<PagingResponse<Expense>, PagingResponse<ExpenseResponse>>()
+                    .ConvertUsing((src, dest, context) => new PagingResponse<ExpenseResponse>
+                    {
+                        PageNo = src.PageNo,
+                        PageSize = src.PageSize,
+                        RecordCounts = src.RecordCounts,
+                        Data = context.Mapper.Map<List<ExpenseResponse>>(src.Data ?? new List<Expense>())
+                    });
 
                 CreateMap<ExpenseShareRequest, ExpenseShare>();
                 CreateMap<ExpenseShare, ExpenseShareResponse>()
-                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"));
+                    .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? $"{src.User.FirstName} {src.User.LastName}" : null))
+                    .ForMember(dest => dest.ProfilePicture, opt => opt.MapFrom(src => src.User != null ? src.User.ProfilePicture : null));
             #endregion
 
             #region User
